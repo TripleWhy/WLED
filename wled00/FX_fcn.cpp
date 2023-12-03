@@ -27,6 +27,8 @@
 #include "FX.h"
 #include "palettes.h"
 
+#include <iostream>
+
 /*
   Custom per-LED mapping has moved!
 
@@ -1018,19 +1020,22 @@ void Segment::blur(uint8_t blur_amount) {
 /*
  * Put a value 0 to 255 in to get a color value.
  * The colours are a transition r -> g -> b -> back to r
- * Inspired by the Adafruit examples.
+ * Rotates the color in HSV space, where pos is H. (0=0deg, 256=360deg)
  */
 uint32_t Segment::color_wheel(uint8_t pos) {
   if (palette) return color_from_palette(pos, false, true, 0);
-  pos = 255 - pos;
-  if (pos < 85) {
-    return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
-  } else if(pos < 170) {
-    pos -= 85;
-    return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
-  } else {
-    pos -= 170;
-    return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
+  // These h and f values are the same h and f you have in the regular HSV to RGB conversion.
+  // The whole funciton really is just a HSV conversion, but assuming H=pos, S=1 and V=1.
+  const uint32_t h = (pos * 3) / 128;
+  const uint32_t f = (pos * 6) % 256;
+  switch (h) {
+    case 0: return ((uint32_t)(255)     << 16) | ((uint32_t)(f)       << 8) | (uint32_t)(0);
+    case 1: return ((uint32_t)(255 - f) << 16) | ((uint32_t)(255)     << 8) | (uint32_t)(0);
+    case 2: return ((uint32_t)(0)       << 16) | ((uint32_t)(255)     << 8) | (uint32_t)(f);
+    case 3: return ((uint32_t)(0)       << 16) | ((uint32_t)(255 - f) << 8) | (uint32_t)(255);
+    case 4: return ((uint32_t)(f)       << 16) | ((uint32_t)(0)       << 8) | (uint32_t)(255);
+    case 5: return ((uint32_t)(255)     << 16) | ((uint32_t)(0)       << 8) | (uint32_t)(255 - f);
+    default: return 0;
   }
 }
 
