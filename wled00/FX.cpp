@@ -28,6 +28,8 @@
 #include "FX.h"
 #include "fcn_declare.h"
 
+#include <iostream>
+
 #define IBN 5100
 
 // paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
@@ -1927,24 +1929,92 @@ uint16_t mode_juggle(void) {
 }
 static const char _data_FX_MODE_JUGGLE[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
 
+#include <cmath>
+using rotateIndex = float;
+static inline constexpr rotateIndex deg_to_ri(int deg) {
+    return (deg * 256) / rotateIndex(360);
+}
+static inline constexpr rotateIndex computeTheta(uint32_t now, uint8_t speed) {
+  return (((now * ((speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
+}
+static inline constexpr rotateIndex multiply(rotateIndex a, rotateIndex b) {
+  return a * b;
+    // return (a * b) >> 8;
+}
+static inline constexpr rotateIndex rotCos(rotateIndex a) {
+  return std::cos(a);
+}
+static inline constexpr rotateIndex rotSin(rotateIndex a) {
+    return std::sin(a);
+}
+
+// static void rotate(int theta_deg) {
+//     int n = matrix.width();
+//     int m = matrix.height();
+//     int center_x = n / 2;
+//     int center_y = m / 2;
+//     WLEDMatrix new_matrix(n, m);
+    
+//     fixed theta = deg_to_fixed(theta_deg);
+    
+//     for (int x = 0; x < n; ++x) {
+//         for (int y = 0; y < m; ++y) {
+//             fixed x_fixed = x - center_x;
+//             fixed y_fixed = y - center_y;
+//             int old_x = multiply(x_fixed, cos_fixed(theta)) + multiply(y_fixed, sin_fixed(theta)) + center_x;
+//             int old_y = -multiply(x_fixed, sin_fixed(theta)) + multiply(y_fixed, cos_fixed(theta)) + center_y;
+//             if (0 <= old_x && old_x < n && 0 <= old_y && old_y < m) {
+//                 new_matrix.setPixel(x, y, palette.getColor(matrix.getPixel(old_x, old_y)));
+//             }
+//         }
+//     }
+// }
 
 uint16_t mode_palette() {
-  uint16_t counter = 0;
-  if (SEGMENT.speed != 0)
-  {
-    counter = (strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF;
-    counter = counter >> 8;
-  }
+  uint16_t paletteOffset = 0;
+  // if (SEGMENT.speed != 0)
+  // {
+  //   paletteOffset = (strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF;
+  //   paletteOffset = paletteOffset >> 8;
+  // }
 
-  for (int i = 0; i < SEGLEN; i++)
-  {
-    uint8_t colorIndex = (i * 255 / SEGLEN) - counter;
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, PALETTE_MOVING_WRAP, 255));
+  // These appear to be switched?
+  const uint16_t rows = SEGMENT.virtualWidth();
+  const uint16_t cols = SEGMENT.virtualHeight();
+
+  // const rotateIndex theta = (((strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
+  const rotateIndex theta = computeTheta(strip.now, SEGMENT.speed);
+  const rotateIndex sinTheta = rotSin(theta);
+  const rotateIndex cosTheta = rotCos(theta);
+
+  // std::cout << "cols=" << cols << ", rows=" << rows << ", now=" << strip.now << ", theta=" << theta << ", sin=" << sinTheta << ", cos=" << cosTheta << std::endl;
+
+  const rotateIndex centerX = (cols-1) / rotateIndex(2);
+  const rotateIndex centerY = (rows-1) / rotateIndex(2);
+  for (int y = 0; y < rows; y++) {
+    for (int x = 0; x < cols; x++) {
+      const rotateIndex xt = x - centerX;
+      const rotateIndex yt = y - centerY;
+      const rotateIndex sourceX = multiply(xt, cosTheta) + multiply(yt, sinTheta) + centerX;
+      const rotateIndex sourceY = multiply(yt, cosTheta) - multiply(xt, sinTheta) + centerY;
+      // if (0 <= old_x && old_x < n && 0 <= old_y && old_y < m) {
+      //     new_matrix.setPixel(x, y, palette.getColor(matrix.getPixel(old_x, old_y)));
+      // }
+      // std::cout << "theta=" << theta << ", center=" << centerX << "/" << centerY << ", t=" << xt << "/" << yt << ", " << x << "/" << y << " <= " << sourceX << "/" << sourceY << std::endl;
+      // SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
+      uint8_t colorIndex = (std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(cols-1))) * 255 / rotateIndex(cols-1);// - paletteOffset;
+      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(colorIndex, false, false, 255));
+    }
   }
+  // for (int i = 0; i < SEGLEN; i++)
+  // {
+  //   uint8_t colorIndex = (i * 255 / SEGLEN) - paletteOffset;
+  //   SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, PALETTE_MOVING_WRAP, 255));
+  // }
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Cycle speed;;!;;c3=0,o2=0";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Cycle speed;;!;12";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
