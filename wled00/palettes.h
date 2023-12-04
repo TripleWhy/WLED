@@ -844,69 +844,101 @@ const byte candy2_gp[] PROGMEM = {
   211,  39, 33, 34,
   255,   1,  1,  1};
 
+// Walk along the hue axis.
+// Assuming 256=360deg=0deg, that means that 255=385.6deg, which leads to the 2 in the last place.
+const byte RainbowColors_gp[] PROGMEM = {
+    0, 255,  0,  0,
+   43, 255,255,  0,
+   85,   0,255,  0,
+  128,   0,255,255,
+  171,   0,  0,255,
+  213, 255,  0,255,
+  255, 255,  0,  2};
+
+const byte RainbowStripeColors_gp[] PROGMEM = {
+    0,   0,  0,  0,
+   15, 255,  0,  0,
+   32,   0,  0,  0,
+   48, 255,128,  0,
+   64,   0,  0,  0,
+   80, 255,255,  0,
+   96,   0,  0,  0,
+  112,   0,255,  0,
+  128,   0,  0,  0,
+  144,   0,255,255,
+  160,   0,  0,  0,
+  176,   0,  0,255,
+  192,   0,  0,  0,
+  208, 128,  0,255,
+  224,   0,  0,  0,
+  240, 255,  0,255,
+  255,   0,  0,  0};
+
 // Single array of defined cpt-city color palettes.
 // This will let us programmatically choose one based on
 // a number, rather than having to activate each explicitly
 // by name every time.
 const byte* const gGradientPalettes[] PROGMEM = {
-  Sunset_Real_gp,               //13-00 Sunset
-  es_rivendell_15_gp,           //14-01 Rivendell
-  es_ocean_breeze_036_gp,       //15-02 Breeze
-  rgi_15_gp,                    //16-03 Red & Blue
-  retro2_16_gp,                 //17-04 Yellowout
-  Analogous_1_gp,               //18-05 Analogous
-  es_pinksplash_08_gp,          //19-06 Splash
-  Sunset_Yellow_gp,             //20-07 Pastel
-  Another_Sunset_gp,            //21-08 Sunset2
-  Beech_gp,                     //22-09 Beech
-  es_vintage_01_gp,             //23-10 Vintage
-  departure_gp,                 //24-11 Departure
-  es_landscape_64_gp,           //25-12 Landscape
-  es_landscape_33_gp,           //26-13 Beach
-  rainbowsherbet_gp,            //27-14 Sherbet
-  gr65_hult_gp,                 //28-15 Hult
-  gr64_hult_gp,                 //29-16 Hult64
-  GMT_drywet_gp,                //30-17 Drywet
-  ib_jul01_gp,                  //31-18 Jul
-  es_vintage_57_gp,             //32-19 Grintage
-  ib15_gp,                      //33-20 Rewhi
-  Tertiary_01_gp,               //34-21 Tertiary
-  lava_gp,                      //35-22 Fire
-  fierce_ice_gp,                //36-23 Icefire
-  Colorfull_gp,                 //37-24 Cyane
-  Pink_Purple_gp,               //38-25 Light Pink
-  es_autumn_19_gp,              //39-26 Autumn
-  BlacK_Blue_Magenta_White_gp,  //40-27 Magenta
-  BlacK_Magenta_Red_gp,         //41-28 Magred
-  BlacK_Red_Magenta_Yellow_gp,  //42-29 Yelmag
-  Blue_Cyan_Yellow_gp,          //43-30 Yelblu
-  Orange_Teal_gp,               //44-31 Orange & Teal
-  Tiamat_gp,                    //45-32 Tiamat
-  April_Night_gp,               //46-33 April Night
-  Orangery_gp,                  //47-34 Orangery
-  C9_gp,                        //48-35 C9
-  Sakura_gp,                    //49-36 Sakura
-  Aurora_gp,                    //50-37 Aurora
-  Atlantica_gp,                 //51-38 Atlantica
-  C9_2_gp,                      //52-39 C9 2
-  C9_new_gp,                    //53-40 C9 New
-  temperature_gp,               //54-41 Temperature
-  Aurora2_gp,                   //55-42 Aurora 2
-  retro_clown_gp,               //56-43 Retro Clown
-  candy_gp,                     //57-44 Candy
-  toxy_reaf_gp,                 //58-45 Toxy Reaf
-  fairy_reaf_gp,                //59-46 Fairy Reaf
-  semi_blue_gp,                 //60-47 Semi Blue
-  pink_candy_gp,                //61-48 Pink Candy
-  red_reaf_gp,                  //62-49 Red Reaf
-  aqua_flash_gp,                //63-50 Aqua Flash
-  yelblu_hot_gp,                //64-51 Yelblu Hot
-  lite_light_gp,                //65-52 Lite Light
-  red_flash_gp,                 //66-53 Red Flash
-  blink_red_gp,                 //67-54 Blink Red
-  red_shift_gp,                 //68-55 Red Shift
-  red_tide_gp,                  //69-56 Red Tide
-  candy2_gp                     //70-57 Candy2
+  RainbowColors_gp,             //11-00 Rainbow
+  RainbowStripeColors_gp,       //12-01 Rainbow Bands
+  Sunset_Real_gp,               //13-02 Sunset
+  es_rivendell_15_gp,           //14-03 Rivendell
+  es_ocean_breeze_036_gp,       //15-04 Breeze
+  rgi_15_gp,                    //16-05 Red & Blue
+  retro2_16_gp,                 //17-06 Yellowout
+  Analogous_1_gp,               //18-07 Analogous
+  es_pinksplash_08_gp,          //19-08 Splash
+  Sunset_Yellow_gp,             //20-09 Pastel
+  Another_Sunset_gp,            //21-10 Sunset2
+  Beech_gp,                     //22-11 Beech
+  es_vintage_01_gp,             //23-12 Vintage
+  departure_gp,                 //24-13 Departure
+  es_landscape_64_gp,           //25-14 Landscape
+  es_landscape_33_gp,           //26-15 Beach
+  rainbowsherbet_gp,            //27-16 Sherbet
+  gr65_hult_gp,                 //28-17 Hult
+  gr64_hult_gp,                 //29-18 Hult64
+  GMT_drywet_gp,                //30-19 Drywet
+  ib_jul01_gp,                  //31-20 Jul
+  es_vintage_57_gp,             //32-21 Grintage
+  ib15_gp,                      //33-22 Rewhi
+  Tertiary_01_gp,               //34-23 Tertiary
+  lava_gp,                      //35-24 Fire
+  fierce_ice_gp,                //36-25 Icefire
+  Colorfull_gp,                 //37-26 Cyane
+  Pink_Purple_gp,               //38-27 Light Pink
+  es_autumn_19_gp,              //39-28 Autumn
+  BlacK_Blue_Magenta_White_gp,  //40-29 Magenta
+  BlacK_Magenta_Red_gp,         //41-30 Magred
+  BlacK_Red_Magenta_Yellow_gp,  //42-31 Yelmag
+  Blue_Cyan_Yellow_gp,          //43-32 Yelblu
+  Orange_Teal_gp,               //44-33 Orange & Teal
+  Tiamat_gp,                    //45-34 Tiamat
+  April_Night_gp,               //46-35 April Night
+  Orangery_gp,                  //47-36 Orangery
+  C9_gp,                        //48-37 C9
+  Sakura_gp,                    //49-38 Sakura
+  Aurora_gp,                    //50-39 Aurora
+  Atlantica_gp,                 //51-40 Atlantica
+  C9_2_gp,                      //52-41 C9 2
+  C9_new_gp,                    //53-42 C9 New
+  temperature_gp,               //54-43 Temperature
+  Aurora2_gp,                   //55-44 Aurora 2
+  retro_clown_gp,               //56-45 Retro Clown
+  candy_gp,                     //57-46 Candy
+  toxy_reaf_gp,                 //58-47 Toxy Reaf
+  fairy_reaf_gp,                //59-48 Fairy Reaf
+  semi_blue_gp,                 //60-49 Semi Blue
+  pink_candy_gp,                //61-50 Pink Candy
+  red_reaf_gp,                  //62-51 Red Reaf
+  aqua_flash_gp,                //63-52 Aqua Flash
+  yelblu_hot_gp,                //64-53 Yelblu Hot
+  lite_light_gp,                //65-54 Lite Light
+  red_flash_gp,                 //66-55 Red Flash
+  blink_red_gp,                 //67-56 Blink Red
+  red_shift_gp,                 //68-57 Red Shift
+  red_tide_gp,                  //69-58 Red Tide
+  candy2_gp                     //70-59 Candy2
 };
 
 #endif

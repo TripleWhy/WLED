@@ -910,18 +910,12 @@ void serializePalettes(JsonObject root, int page)
       case 10: //Forest colors
         setPaletteColors(curPalette, ForestColors_p);
         break;
-      case 11: //Rainbow colors
-        setPaletteColors(curPalette, RainbowColors_p);
-        break;
-      case 12: //Rainbow stripe colors
-        setPaletteColors(curPalette, RainbowStripeColors_p);
-        break;
       default:
         {
         if (i>=palettesCount) {
           setPaletteColors(curPalette, strip.customPalettes[i - palettesCount]);
         } else {
-          memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
+          memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 11])), 72);
           setPaletteColors(curPalette, tcp);
         }
         }
