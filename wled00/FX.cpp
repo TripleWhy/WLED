@@ -1953,35 +1953,13 @@ static inline constexpr rotateIndex rotSin(rotateIndex a) {
     return std::sin(a);
 }
 
-// static void rotate(int theta_deg) {
-//     int n = matrix.width();
-//     int m = matrix.height();
-//     int center_x = n / 2;
-//     int center_y = m / 2;
-//     WLEDMatrix new_matrix(n, m);
-    
-//     fixed theta = deg_to_fixed(theta_deg);
-    
-//     for (int x = 0; x < n; ++x) {
-//         for (int y = 0; y < m; ++y) {
-//             fixed x_fixed = x - center_x;
-//             fixed y_fixed = y - center_y;
-//             int old_x = multiply(x_fixed, cos_fixed(theta)) + multiply(y_fixed, sin_fixed(theta)) + center_x;
-//             int old_y = -multiply(x_fixed, sin_fixed(theta)) + multiply(y_fixed, cos_fixed(theta)) + center_y;
-//             if (0 <= old_x && old_x < n && 0 <= old_y && old_y < m) {
-//                 new_matrix.setPixel(x, y, palette.getColor(matrix.getPixel(old_x, old_y)));
-//             }
-//         }
-//     }
-// }
-
 uint16_t mode_palette() {
   uint16_t paletteOffset = 0;
-  // if (SEGMENT.speed != 0)
-  // {
-  //   paletteOffset = (strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF;
-  //   paletteOffset = paletteOffset >> 8;
-  // }
+  if (SEGMENT.speed != 0)
+  {
+    paletteOffset = (strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF;
+    paletteOffset = paletteOffset >> 8;
+  }
 
   const uint16_t cols = SEGMENT.virtualWidth();
   const uint16_t rows = SEGMENT.virtualHeight();
@@ -2008,15 +1986,10 @@ uint16_t mode_palette() {
       // }
       // std::cout << "theta=" << theta << ", center=" << centerX << "/" << centerY << ", t=" << xt << "/" << yt << ", " << x << "/" << y << " <= " << sourceX << "/" << sourceY << std::endl;
       // SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
-      uint8_t colorIndex = (std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(cols-1))) * 255 / rotateIndex(cols-1);// - paletteOffset;
+      uint8_t colorIndex = (std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(cols-1))) * 255 / rotateIndex(cols-1) - paletteOffset;
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(colorIndex, false, false, 255));
     }
   }
-  // for (int i = 0; i < SEGLEN; i++)
-  // {
-  //   uint8_t colorIndex = (i * 255 / SEGLEN) - paletteOffset;
-  //   SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, PALETTE_MOVING_WRAP, 255));
-  // }
 
   return FRAMETIME;
 }
