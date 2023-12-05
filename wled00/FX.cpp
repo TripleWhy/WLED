@@ -1934,8 +1934,13 @@ using rotateIndex = float;
 static inline constexpr rotateIndex deg_to_ri(int deg) {
     return (deg * 256) / rotateIndex(360);
 }
-static inline constexpr rotateIndex computeTheta(uint32_t now, uint8_t speed) {
-  return (((now * ((speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
+static inline rotateIndex computeTheta(uint32_t now, uint8_t speed, uint8_t offset) {
+  rotateIndex theta = offset * (rotateIndex(M_TWOPI) / rotateIndex(256));
+  if (speed == 0) {
+    return theta;
+  }
+  theta += (((now * ((speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
+  return theta;
 }
 static inline constexpr rotateIndex multiply(rotateIndex a, rotateIndex b) {
   return a * b;
@@ -1982,7 +1987,7 @@ uint16_t mode_palette() {
   const uint16_t rows = SEGMENT.virtualHeight();
 
   // const rotateIndex theta = (((strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
-  const rotateIndex theta = computeTheta(strip.now, SEGMENT.speed);
+  const rotateIndex theta = computeTheta(strip.now, SEGMENT.custom1, SEGMENT.custom2);
   const rotateIndex sinTheta = rotSin(theta);
   const rotateIndex cosTheta = rotCos(theta);
 
@@ -2015,7 +2020,7 @@ uint16_t mode_palette() {
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Cycle speed;;!;12";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Cycle speed,,Rotation speed,Rotation offset;;!;12";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
