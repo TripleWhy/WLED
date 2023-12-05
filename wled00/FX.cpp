@@ -1978,9 +1978,8 @@ uint16_t mode_palette() {
   //   paletteOffset = paletteOffset >> 8;
   // }
 
-  // These appear to be switched?
-  const uint16_t rows = SEGMENT.virtualWidth();
-  const uint16_t cols = SEGMENT.virtualHeight();
+  const uint16_t cols = SEGMENT.virtualWidth();
+  const uint16_t rows = SEGMENT.virtualHeight();
 
   // const rotateIndex theta = (((strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
   const rotateIndex theta = computeTheta(strip.now, SEGMENT.speed);
@@ -1988,15 +1987,17 @@ uint16_t mode_palette() {
   const rotateIndex cosTheta = rotCos(theta);
 
   // std::cout << "cols=" << cols << ", rows=" << rows << ", now=" << strip.now << ", theta=" << theta << ", sin=" << sinTheta << ", cos=" << cosTheta << std::endl;
+  // std::cout << "cols=" << cols << ", rows=" << rows << std::endl;
 
   const rotateIndex centerX = (cols-1) / rotateIndex(2);
   const rotateIndex centerY = (rows-1) / rotateIndex(2);
   for (int y = 0; y < rows; y++) {
+    const rotateIndex yt = y - centerY;
+    const rotateIndex ytSinTheta = multiply(yt, sinTheta);
     for (int x = 0; x < cols; x++) {
       const rotateIndex xt = x - centerX;
-      const rotateIndex yt = y - centerY;
-      const rotateIndex sourceX = multiply(xt, cosTheta) + multiply(yt, sinTheta) + centerX;
-      const rotateIndex sourceY = multiply(yt, cosTheta) - multiply(xt, sinTheta) + centerY;
+      const rotateIndex sourceX = multiply(xt, cosTheta) + ytSinTheta + centerX;
+      // const rotateIndex sourceY = multiply(yt, cosTheta) - multiply(xt, sinTheta) + centerY;
       // if (0 <= old_x && old_x < n && 0 <= old_y && old_y < m) {
       //     new_matrix.setPixel(x, y, palette.getColor(matrix.getPixel(old_x, old_y)));
       // }
