@@ -1964,7 +1964,6 @@ uint16_t mode_palette() {
   const uint16_t cols = SEGMENT.virtualWidth();
   const uint16_t rows = SEGMENT.virtualHeight();
 
-  // const rotateIndex theta = (((strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
   const rotateIndex theta = computeTheta(strip.now, SEGMENT.custom1, SEGMENT.custom2);
   const rotateIndex sinTheta = rotSin(theta);
   const rotateIndex cosTheta = rotCos(theta);
@@ -1972,21 +1971,15 @@ uint16_t mode_palette() {
   // std::cout << "cols=" << cols << ", rows=" << rows << ", now=" << strip.now << ", theta=" << theta << ", sin=" << sinTheta << ", cos=" << cosTheta << std::endl;
   // std::cout << "cols=" << cols << ", rows=" << rows << std::endl;
 
-  const rotateIndex centerX = (cols-1) / rotateIndex(2);
-  const rotateIndex centerY = (rows-1) / rotateIndex(2);
+  const rotateIndex centerX = rotateIndex(0.5);
+  const rotateIndex centerY = rotateIndex(0.5);
   for (int y = 0; y < rows; y++) {
-    const rotateIndex yt = y - centerY;
+    const rotateIndex yt = (y / rotateIndex(rows - 1)) - centerY;
     const rotateIndex ytSinTheta = multiply(yt, sinTheta);
     for (int x = 0; x < cols; x++) {
-      const rotateIndex xt = x - centerX;
+      const rotateIndex xt = (x / rotateIndex(cols - 1)) - centerX;
       const rotateIndex sourceX = multiply(xt, cosTheta) + ytSinTheta + centerX;
-      // const rotateIndex sourceY = multiply(yt, cosTheta) - multiply(xt, sinTheta) + centerY;
-      // if (0 <= old_x && old_x < n && 0 <= old_y && old_y < m) {
-      //     new_matrix.setPixel(x, y, palette.getColor(matrix.getPixel(old_x, old_y)));
-      // }
-      // std::cout << "theta=" << theta << ", center=" << centerX << "/" << centerY << ", t=" << xt << "/" << yt << ", " << x << "/" << y << " <= " << sourceX << "/" << sourceY << std::endl;
-      // SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
-      uint8_t colorIndex = (std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(cols-1))) * 255 / rotateIndex(cols-1) - paletteOffset;
+      uint8_t colorIndex = (uint16_t)((std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(1))) * 255) - paletteOffset;
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(colorIndex, false, false, 255));
     }
   }
