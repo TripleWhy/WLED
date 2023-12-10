@@ -1952,6 +1952,32 @@ static inline constexpr rotateIndex rotCos(rotateIndex a) {
 static inline constexpr rotateIndex rotSin(rotateIndex a) {
     return std::sin(a);
 }
+static inline rotateIndex calculateScaleFactor(rotateIndex width, rotateIndex height, rotateIndex theta, rotateIndex sinTheta, rotateIndex cosTheta) {
+  rotateIndex sinAdjustedAngle;
+  rotateIndex cosAdjustedAngle;
+  if(theta <= M_PI_2) {
+    // adjustedAngle = theta;
+    sinAdjustedAngle = sinTheta;
+    cosAdjustedAngle = cosTheta;
+  } else if(theta <= M_PI) {
+    // adjustedAngle = M_PI - theta;
+    sinAdjustedAngle = sinTheta;
+    cosAdjustedAngle = -cosTheta;
+  } else if(theta <= (3.0 * M_PI / 2.0)) {
+    // adjustedAngle = theta - M_PI;
+    sinAdjustedAngle = -sinTheta;
+    cosAdjustedAngle = -cosTheta;
+  } else {
+    // adjustedAngle = M_2_PI - theta;
+    sinAdjustedAngle = -sinTheta;
+    cosAdjustedAngle = cosTheta;
+  }
+  return cosAdjustedAngle + std::max(sinAdjustedAngle * width / height, sinAdjustedAngle * height / width);
+}
+
+static inline rotateIndex calculateSquareScaleFactor(rotateIndex sinTheta, rotateIndex cosTheta) {
+  return std::abs(sinTheta) + std::abs(cosTheta);
+}
 
 uint16_t mode_palette() {
   uint16_t paletteOffset = 0;
@@ -1973,14 +1999,15 @@ uint16_t mode_palette() {
 
   const rotateIndex centerX = rotateIndex(0.5);
   const rotateIndex centerY = rotateIndex(0.5);
+  const rotateIndex scale = 1.0 / calculateSquareScaleFactor(sinTheta, cosTheta);
   for (int y = 0; y < rows; y++) {
     const rotateIndex yt = (y / rotateIndex(rows - 1)) - centerY;
-    const rotateIndex ytSinTheta = multiply(yt, sinTheta);
+    const rotateIndex ytSinTheta = multiply(yt, sinTheta) * scale;
     for (int x = 0; x < cols; x++) {
       const rotateIndex xt = (x / rotateIndex(cols - 1)) - centerX;
-      const rotateIndex sourceX = multiply(xt, cosTheta) + ytSinTheta + centerX;
+      const rotateIndex sourceX = multiply(xt, cosTheta) * scale + ytSinTheta + centerX;
       uint8_t colorIndex = (uint16_t)((std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(1))) * 255) - paletteOffset;
-      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(colorIndex, false, false, 255));
+      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
     }
   }
 
