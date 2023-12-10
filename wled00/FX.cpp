@@ -1981,10 +1981,8 @@ static inline rotateIndex calculateSquareScaleFactor(rotateIndex sinTheta, rotat
 
 uint16_t mode_palette() {
   uint16_t paletteOffset = 0;
-  if (SEGMENT.speed != 0)
-  {
-    paletteOffset = (strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF;
-    paletteOffset = paletteOffset >> 8;
+  if (SEGMENT.speed != 0) {
+    paletteOffset = ((strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF) >> 8;
   }
 
   const uint16_t cols = SEGMENT.virtualWidth();
@@ -2007,13 +2005,20 @@ uint16_t mode_palette() {
       const rotateIndex xt = (x / rotateIndex(cols - 1)) - centerX;
       const rotateIndex sourceX = multiply(xt, cosTheta) * scale + ytSinTheta + centerX;
       uint8_t colorIndex = (uint16_t)((std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(1))) * 255) + paletteOffset;
+      if (SEGMENT.custom3 <= 16) {
+        // 0 - 16 => 1/8 - 1
+        colorIndex = (14 * SEGMENT.custom3 + 32) * colorIndex / 256;
+      } else {
+        // 16 - 31 => 1 - 8
+        colorIndex = ((1792 * SEGMENT.custom3 - 24832) * colorIndex) / (15 * 256);
+      }
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
     }
   }
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Cycle speed,,Rotation speed,Rotation offset;;!;12";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Palette speed,,Rotation speed,Rotation offset,Size;;!;12";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
