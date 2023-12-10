@@ -2006,7 +2006,7 @@ uint16_t mode_palette() {
     for (int x = 0; x < cols; x++) {
       const rotateIndex xt = (x / rotateIndex(cols - 1)) - centerX;
       const rotateIndex sourceX = multiply(xt, cosTheta) * scale + ytSinTheta + centerX;
-      uint8_t colorIndex = (uint16_t)((std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(1))) * 255) - paletteOffset;
+      uint8_t colorIndex = (uint16_t)((std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(1))) * 255) + paletteOffset;
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
     }
   }
