@@ -1929,32 +1929,17 @@ uint16_t mode_juggle(void) {
 }
 static const char _data_FX_MODE_JUGGLE[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
 
-#include <cmath>
-using rotateIndex = float;
-static inline constexpr rotateIndex deg_to_ri(int deg) {
-    return (deg * 256) / rotateIndex(360);
-}
-static inline rotateIndex computeTheta(uint32_t now, uint8_t speed, uint8_t offset) {
-  rotateIndex theta = offset * (rotateIndex(M_TWOPI) / rotateIndex(256));
+static inline float computeTheta(uint32_t now, int speed, int offset) {
+  float theta = offset * (float(M_TWOPI) / 256.0f);
   if (speed == 0) {
     return theta;
   }
-  theta += (((now * ((speed >> 3) +1)) & 0xFFFF)) * rotateIndex(M_TWOPI) / rotateIndex(0xFFFF);
+  theta += (((now * ((speed >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF);
   return theta;
 }
-static inline constexpr rotateIndex multiply(rotateIndex a, rotateIndex b) {
-  return a * b;
-    // return (a * b) >> 8;
-}
-static inline constexpr rotateIndex rotCos(rotateIndex a) {
-  return std::cos(a);
-}
-static inline constexpr rotateIndex rotSin(rotateIndex a) {
-    return std::sin(a);
-}
-static inline rotateIndex calculateScaleFactor(rotateIndex width, rotateIndex height, rotateIndex theta, rotateIndex sinTheta, rotateIndex cosTheta) {
-  rotateIndex sinAdjustedAngle;
-  rotateIndex cosAdjustedAngle;
+static inline float calculateScaleFactor(float width, float height, float theta, float sinTheta, float cosTheta) {
+  float sinAdjustedAngle;
+  float cosAdjustedAngle;
   if(theta <= M_PI_2) {
     // adjustedAngle = theta;
     sinAdjustedAngle = sinTheta;
@@ -1974,43 +1959,48 @@ static inline rotateIndex calculateScaleFactor(rotateIndex width, rotateIndex he
   }
   return cosAdjustedAngle + std::max(sinAdjustedAngle * width / height, sinAdjustedAngle * height / width);
 }
-
-static inline rotateIndex calculateSquareScaleFactor(rotateIndex sinTheta, rotateIndex cosTheta) {
+static inline float calculateSquareScaleFactor(float sinTheta, float cosTheta) {
   return std::abs(sinTheta) + std::abs(cosTheta);
 }
-
 uint16_t mode_palette() {
-  uint16_t paletteOffset = 0;
-  if (SEGMENT.speed != 0) {
-    paletteOffset = ((strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF) >> 8;
+  const int cols = SEGMENT.virtualWidth();
+  const int rows = SEGMENT.virtualHeight();
+  if (cols <= 1 || rows <= 1) {
+    return mode_rainbow_cycle();
   }
 
-  const uint16_t cols = SEGMENT.virtualWidth();
-  const uint16_t rows = SEGMENT.virtualHeight();
+  const int inputPaletteSpeed = SEGMENT.speed;
+  const int inputPaletteScale = SEGMENT.custom3;
+  const int inputRotationSpeed = SEGMENT.custom1;
+  const int inputRotationOffset = SEGMENT.custom2;
 
-  const rotateIndex theta = computeTheta(strip.now, SEGMENT.custom1, SEGMENT.custom2);
-  const rotateIndex sinTheta = rotSin(theta);
-  const rotateIndex cosTheta = rotCos(theta);
+  int paletteOffset = 0;
+  if (inputPaletteSpeed != 0) {
+    paletteOffset = ((strip.now * ((inputPaletteSpeed >> 3) +1)) & 0xFFFF) >> 8;
+  }
 
-  // std::cout << "cols=" << cols << ", rows=" << rows << ", now=" << strip.now << ", theta=" << theta << ", sin=" << sinTheta << ", cos=" << cosTheta << std::endl;
-  // std::cout << "cols=" << cols << ", rows=" << rows << std::endl;
+  const float theta = computeTheta(strip.now, inputRotationSpeed, inputRotationOffset);
+  const float sinTheta = std::sin(theta);
+  const float cosTheta = std::cos(theta);
 
-  const rotateIndex centerX = rotateIndex(0.5);
-  const rotateIndex centerY = rotateIndex(0.5);
-  const rotateIndex scale = 1.0 / calculateSquareScaleFactor(sinTheta, cosTheta);
+  const float maxX = cols-1;
+  const float maxY = rows-1;
+  constexpr float centerX = 0.5f;
+  constexpr float centerY = 0.5f;
+  const float scale = 1.0 / calculateSquareScaleFactor(sinTheta, cosTheta);
   for (int y = 0; y < rows; y++) {
-    const rotateIndex yt = (y / rotateIndex(rows - 1)) - centerY;
-    const rotateIndex ytSinTheta = multiply(yt, sinTheta) * scale;
+    const float yt = (y / maxY) - centerY;
+    const float ytSinTheta = scale * yt * sinTheta;
     for (int x = 0; x < cols; x++) {
-      const rotateIndex xt = (x / rotateIndex(cols - 1)) - centerX;
-      const rotateIndex sourceX = multiply(xt, cosTheta) * scale + ytSinTheta + centerX;
-      uint8_t colorIndex = (uint16_t)((std::min(std::max(sourceX, rotateIndex(0)), rotateIndex(1))) * 255) + paletteOffset;
-      if (SEGMENT.custom3 <= 16) {
+      const float xt = (x / maxX) - centerX;
+      const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
+      uint8_t colorIndex = (int)((std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f))) + paletteOffset;
+      if (inputPaletteScale <= 16) {
         // 0 - 16 => 1/8 - 1
-        colorIndex = (14 * SEGMENT.custom3 + 32) * colorIndex / 256;
+        colorIndex = (14 * inputPaletteScale + 32) * colorIndex / 256;
       } else {
         // 16 - 31 => 1 - 8
-        colorIndex = ((1792 * SEGMENT.custom3 - 24832) * colorIndex) / (15 * 256);
+        colorIndex = ((1792 * inputPaletteScale - 24832) * colorIndex) / (15 * 256);
       }
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
     }
