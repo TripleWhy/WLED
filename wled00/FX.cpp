@@ -1969,25 +1969,23 @@ uint16_t mode_palette() {
     return mode_rainbow_cycle();
   }
 
-  const int inputPaletteSpeed = SEGMENT.speed;
-  const int inputPaletteScale = SEGMENT.custom3;
-  const int inputRotationSpeed = SEGMENT.custom1;
-  const int inputRotationOffset = SEGMENT.custom2;
+  const int inputShift = SEGMENT.speed;
+  const int inputRotation = SEGMENT.intensity;
+  const int inputSize = SEGMENT.custom1;
+  const bool inputAnimateShift = SEGMENT.check1;
+  const bool inputAnimateRotation = SEGMENT.check2;
 
-  int paletteOffset = 0;
-  if (inputPaletteSpeed != 0) {
-    paletteOffset = ((strip.now * ((inputPaletteSpeed >> 3) +1)) & 0xFFFF) >> 8;
-  }
+  const int paletteOffset = (!inputAnimateShift) ? (inputShift) : (((strip.now * ((inputShift >> 3) +1)) & 0xFFFF) >> 8);
 
-  const float theta = computeTheta(strip.now, inputRotationSpeed, inputRotationOffset);
+  const float theta = (!inputAnimateRotation) ? (inputRotation * (float(M_TWOPI) / 256.0f)) : ((((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF));
   const float sinTheta = std::sin(theta);
   const float cosTheta = std::cos(theta);
+  const float scale = 1.0 / calculateSquareScaleFactor(sinTheta, cosTheta);
 
   const float maxX = cols-1;
   const float maxY = rows-1;
   constexpr float centerX = 0.5f;
   constexpr float centerY = 0.5f;
-  const float scale = 1.0 / calculateSquareScaleFactor(sinTheta, cosTheta);
   for (int y = 0; y < rows; y++) {
     const float yt = (y / maxY) - centerY;
     const float ytSinTheta = scale * yt * sinTheta;
@@ -1995,12 +1993,12 @@ uint16_t mode_palette() {
       const float xt = (x / maxX) - centerX;
       const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
       uint8_t colorIndex = (int)((std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f))) + paletteOffset;
-      if (inputPaletteScale <= 16) {
-        // 0 - 16 => 1/8 - 1
-        colorIndex = (14 * inputPaletteScale + 32) * colorIndex / 256;
+      if (inputSize <= 128) {
+        //TODO: fractional pallettes don't work correctly yet.
+        colorIndex = (colorIndex * inputSize) / 128;
       } else {
-        // 16 - 31 => 1 - 8
-        colorIndex = ((1792 * inputPaletteScale - 24832) * colorIndex) / (15 * 256);
+        // Linear function that maps 128=>1, 256=>9
+        colorIndex = ((inputSize - 112) * colorIndex) / 16;
       }
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
     }
@@ -2008,7 +2006,7 @@ uint16_t mode_palette() {
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Palette speed,,Rotation speed,Rotation offset,Size;;!;12";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Rotation,Size,,,Animate Shift,Animate Rotation,;;!;12;o1=1,o2=1";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
