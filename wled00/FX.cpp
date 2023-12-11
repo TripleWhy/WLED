@@ -1970,8 +1970,8 @@ uint16_t mode_palette() {
   }
 
   const int inputShift = SEGMENT.speed;
-  const int inputRotation = SEGMENT.intensity;
-  const int inputSize = SEGMENT.custom1;
+  const int inputSize = SEGMENT.intensity;
+  const int inputRotation = SEGMENT.custom1;
   const bool inputAnimateShift = SEGMENT.check1;
   const bool inputAnimateRotation = SEGMENT.check2;
 
@@ -2006,7 +2006,7 @@ uint16_t mode_palette() {
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Rotation,Size,,,Animate Shift,Animate Rotation,;;!;12;o1=1,o2=1";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,;;!;12;o1=1,o2=1";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
