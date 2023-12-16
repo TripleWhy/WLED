@@ -1938,26 +1938,7 @@ static inline float computeTheta(uint32_t now, int speed, int offset) {
   return theta;
 }
 static inline float calculateScaleFactor(float width, float height, float theta, float sinTheta, float cosTheta) {
-  float sinAdjustedAngle;
-  float cosAdjustedAngle;
-  if(theta <= M_PI_2) {
-    // adjustedAngle = theta;
-    sinAdjustedAngle = sinTheta;
-    cosAdjustedAngle = cosTheta;
-  } else if(theta <= M_PI) {
-    // adjustedAngle = M_PI - theta;
-    sinAdjustedAngle = sinTheta;
-    cosAdjustedAngle = -cosTheta;
-  } else if(theta <= (3.0 * M_PI / 2.0)) {
-    // adjustedAngle = theta - M_PI;
-    sinAdjustedAngle = -sinTheta;
-    cosAdjustedAngle = -cosTheta;
-  } else {
-    // adjustedAngle = M_2_PI - theta;
-    sinAdjustedAngle = -sinTheta;
-    cosAdjustedAngle = cosTheta;
-  }
-  return cosAdjustedAngle + std::max(sinAdjustedAngle * width / height, sinAdjustedAngle * height / width);
+  return std::abs(sinTheta) * height / width + std::abs(cosTheta);
 }
 static inline float calculateSquareScaleFactor(float sinTheta, float cosTheta) {
   return std::abs(sinTheta) + std::abs(cosTheta);
@@ -1974,39 +1955,65 @@ uint16_t mode_palette() {
   const int inputRotation = SEGMENT.custom1;
   const bool inputAnimateShift = SEGMENT.check1;
   const bool inputAnimateRotation = SEGMENT.check2;
+  const bool inputAssumeSquare = SEGMENT.check3;
 
   const int paletteOffset = (!inputAnimateShift) ? (inputShift) : (((strip.now * ((inputShift >> 3) +1)) & 0xFFFF) >> 8);
 
   const float theta = (!inputAnimateRotation) ? (inputRotation * (float(M_TWOPI) / 256.0f)) : ((((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF));
   const float sinTheta = std::sin(theta);
   const float cosTheta = std::cos(theta);
-  const float scale = 1.0 / calculateSquareScaleFactor(sinTheta, cosTheta);
 
-  const float maxX = cols-1;
-  const float maxY = rows-1;
-  constexpr float centerX = 0.5f;
-  constexpr float centerY = 0.5f;
-  for (int y = 0; y < rows; y++) {
-    const float yt = (y / maxY) - centerY;
-    const float ytSinTheta = scale * yt * sinTheta;
-    for (int x = 0; x < cols; x++) {
-      const float xt = (x / maxX) - centerX;
-      const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
-      uint8_t colorIndex = (int)((std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f))) + paletteOffset;
-      if (inputSize <= 128) {
-        //TODO: fractional pallettes don't work correctly yet.
-        colorIndex = (colorIndex * inputSize) / 128;
-      } else {
-        // Linear function that maps 128=>1, 256=>9
-        colorIndex = ((inputSize - 112) * colorIndex) / 16;
+  if (inputAssumeSquare) {
+    const float scale = 1.0f / calculateSquareScaleFactor(sinTheta, cosTheta);
+    const float maxX = cols-1;
+    const float maxY = rows-1;
+    constexpr float centerX = 0.5f;
+    constexpr float centerY = 0.5f;
+    for (int y = 0; y < rows; y++) {
+      const float yt = (y / maxY) - centerY;
+      const float ytSinTheta = scale * yt * sinTheta;
+      for (int x = 0; x < cols; x++) {
+        const float xt = (x / maxX) - centerX;
+        const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
+        uint8_t colorIndex = (int)(std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f)) + paletteOffset;
+        if (inputSize <= 128) {
+          //TODO: fractional pallettes don't work correctly yet.
+          colorIndex = (colorIndex * inputSize) / 128;
+        } else {
+          // Linear function that maps 128=>1, 256=>9
+          colorIndex = ((inputSize - 112) * colorIndex) / 16;
+        }
+        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
       }
-      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
+    }
+  } else {
+    const float maxX = cols-1;
+    const float maxY = rows-1;
+    const float centerX = maxX * 0.5f;
+    const float centerY = maxY * 0.5f;
+    const float scale = 1.0f / calculateScaleFactor(maxX, maxY, theta, sinTheta, cosTheta);
+    for (int y = 0; y < rows; y++) {
+      const float yt = y - centerY;
+      const float ytSinTheta = scale * yt * sinTheta;
+      for (int x = 0; x < cols; x++) {
+        const float xt = x - centerX;
+        const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
+        uint8_t colorIndex = (int)(std::min(std::max(sourceX, 0.0f), maxX) * 255.0f / maxX) + paletteOffset;
+        // if (inputSize <= 128) {
+        //   //TODO: fractional pallettes don't work correctly yet.
+        //   colorIndex = (colorIndex * inputSize) / 128;
+        // } else {
+        //   // Linear function that maps 128=>1, 256=>9
+        //   colorIndex = ((inputSize - 112) * colorIndex) / 16;
+        // }
+        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
+      }
     }
   }
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,;;!;12;o1=1,o2=1";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Physical Square;;!;12;o1=1,o2=1";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
