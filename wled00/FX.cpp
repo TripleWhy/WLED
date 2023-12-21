@@ -1929,14 +1929,6 @@ uint16_t mode_juggle(void) {
 }
 static const char _data_FX_MODE_JUGGLE[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
 
-static inline float computeTheta(uint32_t now, int speed, int offset) {
-  float theta = offset * (float(M_TWOPI) / 256.0f);
-  if (speed == 0) {
-    return theta;
-  }
-  theta += (((now * ((speed >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF);
-  return theta;
-}
 static inline float calculateScaleFactor(float width, float height, float theta, float sinTheta, float cosTheta) {
   return std::abs(sinTheta) * height / width + std::abs(cosTheta);
 }
