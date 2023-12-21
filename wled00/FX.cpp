@@ -1967,14 +1967,14 @@ uint16_t mode_palette() {
       for (int x = 0; x < cols; x++) {
         const float xt = (x / maxX) - centerX;
         const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
-        uint8_t colorIndex = (int)(std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f)) + paletteOffset;
+        uint8_t colorIndex = (int)(std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f));
         if (inputSize <= 128) {
-          //TODO: fractional pallettes don't work correctly yet.
           colorIndex = (colorIndex * inputSize) / 128;
         } else {
           // Linear function that maps 128=>1, 256=>9
           colorIndex = ((inputSize - 112) * colorIndex) / 16;
         }
+        colorIndex += paletteOffset;
         SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
       }
     }
@@ -1990,14 +1990,14 @@ uint16_t mode_palette() {
       for (int x = 0; x < cols; x++) {
         const float xt = x - centerX;
         const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
-        uint8_t colorIndex = (int)(std::min(std::max(sourceX, 0.0f), maxX) * 255.0f / maxX) + paletteOffset;
-        // if (inputSize <= 128) {
-        //   //TODO: fractional pallettes don't work correctly yet.
-        //   colorIndex = (colorIndex * inputSize) / 128;
-        // } else {
-        //   // Linear function that maps 128=>1, 256=>9
-        //   colorIndex = ((inputSize - 112) * colorIndex) / 16;
-        // }
+        uint8_t colorIndex = (int)(std::min(std::max(sourceX, 0.0f), maxX) * 255.0f / maxX);
+        if (inputSize <= 128) {
+          colorIndex = (colorIndex * inputSize) / 128;
+        } else {
+          // Linear function that maps 128=>1, 256=>9
+          colorIndex = ((inputSize - 112) * colorIndex) / 16;
+        }
+        colorIndex += paletteOffset;
         SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
       }
     }
