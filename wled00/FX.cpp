@@ -1949,21 +1949,12 @@ uint16_t mode_palette() {
   const float sinTheta = std::sin(theta);
   const float cosTheta = std::cos(theta);
 
-  float maxXIn;
-  float maxXOut;
-  float maxYIn;
-  float maxYOut;
-  if (inputAssumeSquare) {
-    maxXIn = cols-1;
-    maxYIn = rows-1;
-    maxXOut = 1.0f;
-    maxYOut = 1.0f;
-  } else {
-    maxXIn = 1.0f;
-    maxYIn = 1.0f;
-    maxXOut = cols-1;
-    maxYOut = rows-1;
-  }
+  const float maxX = cols-1;
+  const float maxY = rows-1;
+  const float maxXIn  =   inputAssumeSquare  * maxX + (!inputAssumeSquare) * 1.0;
+  const float maxYIn  =   inputAssumeSquare  * maxY + (!inputAssumeSquare) * 1.0;
+  const float maxXOut = (!inputAssumeSquare) * maxX +   inputAssumeSquare  * 1.0;
+  const float maxYOut = (!inputAssumeSquare) * maxY +   inputAssumeSquare  * 1.0;
   const float centerX = maxXOut * 0.5f;
   const float centerY = maxYOut * 0.5f;
   const float scale   = 1.0f / fmaf((std::abs(sinTheta) / maxXOut), maxYOut, std::abs(cosTheta));
