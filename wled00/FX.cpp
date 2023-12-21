@@ -1929,12 +1929,6 @@ uint16_t mode_juggle(void) {
 }
 static const char _data_FX_MODE_JUGGLE[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
 
-static inline float calculateScaleFactor(float width, float height, float sinTheta, float cosTheta) {
-  return std::abs(sinTheta) * height / width + std::abs(cosTheta);
-}
-static inline float calculateSquareScaleFactor(float sinTheta, float cosTheta) {
-  return std::abs(sinTheta) + std::abs(cosTheta);
-}
 uint16_t mode_palette() {
   const int cols = SEGMENT.virtualWidth();
   const int rows = SEGMENT.virtualHeight();
@@ -1972,7 +1966,7 @@ uint16_t mode_palette() {
   }
   const float centerX = maxXOut * 0.5f;
   const float centerY = maxYOut * 0.5f;
-  const float scale = 1.0f / calculateScaleFactor(maxXOut, maxYOut, sinTheta, cosTheta);
+  const float scale   = 1.0f / fmaf((std::abs(sinTheta) / maxXOut), maxYOut, std::abs(cosTheta));
   for (int y = 0; y < rows; y++) {
     const float yt = (y / maxYIn) - centerY;
     const float ytSinTheta = scale * yt * sinTheta;
