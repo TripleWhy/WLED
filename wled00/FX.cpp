@@ -1958,10 +1958,10 @@ uint16_t mode_palette() {
   const float centerX = maxXOut * 0.5f;
   const float centerY = maxYOut * 0.5f;
   const float scale   = 1.0f / fmaf((std::abs(sinTheta) / maxXOut), maxYOut, std::abs(cosTheta));
-  for (int y = 0; y < rows; y++) {
+  for (int y = 0; y < rows; ++y) {
     const float yt = (y / maxYIn) - centerY;
     const float ytSinTheta = scale * yt * sinTheta;
-    for (int x = 0; x < cols; x++) {
+    for (int x = 0; x < cols; ++x) {
       const float xt = (x / maxXIn) - centerX;
       const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
       int colorIndex = (int)(255.0f * (std::min(std::max(sourceX, 0.0f), maxXOut) / maxXOut));
