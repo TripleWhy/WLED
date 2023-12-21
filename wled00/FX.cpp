@@ -1955,54 +1955,41 @@ uint16_t mode_palette() {
   const float sinTheta = std::sin(theta);
   const float cosTheta = std::cos(theta);
 
+  float maxXIn;
+  float maxXOut;
+  float maxYIn;
+  float maxYOut;
   if (inputAssumeSquare) {
-    const float scale = 1.0f / calculateSquareScaleFactor(sinTheta, cosTheta);
-    const float maxX = cols-1;
-    const float maxY = rows-1;
-    constexpr float centerX = 0.5f;
-    constexpr float centerY = 0.5f;
-    for (int y = 0; y < rows; y++) {
-      const float yt = (y / maxY) - centerY;
-      const float ytSinTheta = scale * yt * sinTheta;
-      for (int x = 0; x < cols; x++) {
-        const float xt = (x / maxX) - centerX;
-        const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
-        uint8_t colorIndex = (int)(std::min(std::max(sourceX * 255.0f, 0.0f), 255.0f));
-        if (inputSize <= 128) {
-          colorIndex = (colorIndex * inputSize) / 128;
-        } else {
-          // Linear function that maps 128=>1, 256=>9
-          colorIndex = ((inputSize - 112) * colorIndex) / 16;
-        }
-        colorIndex += paletteOffset;
-        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
-      }
-    }
+    maxXIn = cols-1;
+    maxYIn = rows-1;
+    maxXOut = 1.0f;
+    maxYOut = 1.0f;
   } else {
-    const float maxX = cols-1;
-    const float maxY = rows-1;
-    const float centerX = maxX * 0.5f;
-    const float centerY = maxY * 0.5f;
-    const float scale = 1.0f / calculateScaleFactor(maxX, maxY, sinTheta, cosTheta);
-    for (int y = 0; y < rows; y++) {
-      const float yt = y - centerY;
-      const float ytSinTheta = scale * yt * sinTheta;
-      for (int x = 0; x < cols; x++) {
-        const float xt = x - centerX;
-        const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
-        uint8_t colorIndex = (int)(std::min(std::max(sourceX, 0.0f), maxX) * 255.0f / maxX);
-        if (inputSize <= 128) {
-          colorIndex = (colorIndex * inputSize) / 128;
-        } else {
-          // Linear function that maps 128=>1, 256=>9
-          colorIndex = ((inputSize - 112) * colorIndex) / 16;
-        }
-        colorIndex += paletteOffset;
-        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel(colorIndex));
+    maxXIn = 1.0f;
+    maxYIn = 1.0f;
+    maxXOut = cols-1;
+    maxYOut = rows-1;
+  }
+  const float centerX = maxXOut * 0.5f;
+  const float centerY = maxYOut * 0.5f;
+  const float scale = 1.0f / calculateScaleFactor(maxXOut, maxYOut, sinTheta, cosTheta);
+  for (int y = 0; y < rows; y++) {
+    const float yt = (y / maxYIn) - centerY;
+    const float ytSinTheta = scale * yt * sinTheta;
+    for (int x = 0; x < cols; x++) {
+      const float xt = (x / maxXIn) - centerX;
+      const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
+      int colorIndex = (int)(255.0f * (std::min(std::max(sourceX, 0.0f), maxXOut) / maxXOut));
+      if (inputSize <= 128) {
+        colorIndex = (colorIndex * inputSize) / 128;
+      } else {
+        // Linear function that maps colorIndex 128=>1, 256=>9
+        colorIndex = ((inputSize - 112) * colorIndex) / 16;
       }
+      colorIndex += paletteOffset;
+      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel((uint8_t)colorIndex));
     }
   }
-
   return FRAMETIME;
 }
 static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Physical Square;;!;12;o1=1,o2=1";
