@@ -1951,10 +1951,10 @@ uint16_t mode_palette() {
 
   const float maxX = cols-1;
   const float maxY = rows-1;
-  const float maxXIn  =   inputAssumeSquare  * maxX + (!inputAssumeSquare) * 1.0;
-  const float maxYIn  =   inputAssumeSquare  * maxY + (!inputAssumeSquare) * 1.0;
-  const float maxXOut = (!inputAssumeSquare) * maxX +   inputAssumeSquare  * 1.0;
-  const float maxYOut = (!inputAssumeSquare) * maxY +   inputAssumeSquare  * 1.0;
+  const float maxXIn  =  inputAssumeSquare ? maxX : 1.0f;
+  const float maxYIn  =  inputAssumeSquare ? maxY : 1.0f;
+  const float maxXOut = !inputAssumeSquare ? maxX : 1.0f;
+  const float maxYOut = !inputAssumeSquare ? maxY : 1.0f;
   const float centerX = maxXOut * 0.5f;
   const float centerY = maxYOut * 0.5f;
   const float scale   = 1.0f / fmaf((std::abs(sinTheta) / maxXOut), maxYOut, std::abs(cosTheta));
