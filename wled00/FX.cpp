@@ -1930,11 +1930,9 @@ uint16_t mode_juggle(void) {
 static const char _data_FX_MODE_JUGGLE[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
 
 uint16_t mode_palette() {
+  const bool isMatrix = strip.isMatrix;
   const int cols = SEGMENT.virtualWidth();
-  const int rows = SEGMENT.virtualHeight();
-  if (cols <= 1 || rows <= 1) {
-    return mode_rainbow_cycle();
-  }
+  const int rows = isMatrix ? SEGMENT.virtualHeight() : strip.getSegmentsNum();
 
   const int inputShift = SEGMENT.speed;
   const int inputSize = SEGMENT.intensity;
@@ -1945,9 +1943,19 @@ uint16_t mode_palette() {
 
   const int paletteOffset = (!inputAnimateShift) ? (inputShift) : (((strip.now * ((inputShift >> 3) +1)) & 0xFFFF) >> 8);
 
-  const float theta = (!inputAnimateRotation) ? (inputRotation * (float(M_TWOPI) / 256.0f)) : ((((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF));
-  const float sinTheta = std::sin(theta);
-  const float cosTheta = std::cos(theta);
+  float sinTheta;
+  float cosTheta;
+  if (rows <= 1) {
+    sinTheta = 0.0f;
+    cosTheta = 1.0f;
+  } else if (cols <= 1) {
+    sinTheta = 1.0f;
+    cosTheta = 0.0f;
+  } else {
+    const float theta = (!inputAnimateRotation) ? (inputRotation * (float(M_TWOPI) / 256.0f)) : ((((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF));
+    sinTheta = std::sin(theta);
+    cosTheta = std::cos(theta);
+  }
 
   const float maxX = cols-1;
   const float maxY = rows-1;
@@ -1958,12 +1966,15 @@ uint16_t mode_palette() {
   const float centerX = maxXOut * 0.5f;
   const float centerY = maxYOut * 0.5f;
   const float scale   = 1.0f / fmaf((std::abs(sinTheta) / maxXOut), maxYOut, std::abs(cosTheta));
-  for (int y = 0; y < rows; ++y) {
+  const int yFrom = isMatrix ? 0 : strip.getCurrSegmentId();
+  const int yTo = isMatrix ? rows : yFrom+1;
+  for (int y = yFrom; y < yTo; ++y) {
     const float yt = (y / maxYIn) - centerY;
     const float ytSinTheta = scale * yt * sinTheta;
     for (int x = 0; x < cols; ++x) {
       const float xt = (x / maxXIn) - centerX;
-      const float sourceX = scale * xt * cosTheta + ytSinTheta + centerX;
+      const float xtCosTheta = scale * xt * cosTheta;
+      const float sourceX = xtCosTheta + ytSinTheta + centerX;
       int colorIndex = (int)(255.0f * (std::min(std::max(sourceX, 0.0f), maxXOut) / maxXOut));
       if (inputSize <= 128) {
         colorIndex = (colorIndex * inputSize) / 128;
@@ -1972,7 +1983,12 @@ uint16_t mode_palette() {
         colorIndex = ((inputSize - 112) * colorIndex) / 16;
       }
       colorIndex += paletteOffset;
-      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_wheel((uint8_t)colorIndex));
+      const uint32_t color = SEGMENT.color_wheel((uint8_t)colorIndex);
+      if (isMatrix) {
+        SEGMENT.setPixelColorXY(x, y, color);
+      } else {
+        SEGMENT.setPixelColor(x, color);
+      }
     }
   }
   return FRAMETIME;
