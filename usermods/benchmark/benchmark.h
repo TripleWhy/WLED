@@ -50,13 +50,13 @@ class Benchmark : public Usermod
 
       switch (index)
       {
-        case 0: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&std::sin)); break;
-        case 1: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&sinf)); break;
-        case 2: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&sin_t)); break;
-        case 3: measure(NAMED_FUNCTION(&sin8)); break;
-        case 4: measure(NAMED_FUNCTION(&sin16)); break;
-        case 5: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&sin66868438)); break;
-        case 6: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&cos28050328<float>)); break;
+        case 0: measure(NAMED_FUNCTION(&sin8)); break;
+        case 1: measure(NAMED_FUNCTION(&sin16)); break;
+        case 2: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&sin66868438)); break;
+        case 3: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&cos28050328<float>)); break;
+        case 4: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&std::sin)); break;
+        case 5: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&sinf)); break;
+        case 6: measure(&Benchmark::benchFloatTrig, NAMED_FUNCTION(&sin_t)); break;
         default:
           index = 0;
           return;
@@ -72,12 +72,17 @@ class Benchmark : public Usermod
         const unsigned long t1 = millis();
         Serial.print(name);
         Serial.print(": ");
-        Serial.print((t1 - t0) / (float)count);
-        Serial.print(" (");
+#ifdef ARDUINO_ARCH_ESP32
+        Serial.print(((t1 - t0) * 1000) / (float)count * 1000.0f, std::numeric_limits<float>::digits10);
+        Serial.print(" ns (");
+#else
+        Serial.print(((t1 - t0) * 1000) / (float)count, std::numeric_limits<float>::digits10);
+        Serial.print(" us (");
+#endif
         Serial.print(t1 - t0);
-        Serial.print(" / ");
+        Serial.print(" ms / ");
         Serial.print(count);
-        Serial.println(")");
+        Serial.println(" iterations)");
     }
 
     static void measure(uint8_t (*function)(uint8_t), const char * name)
@@ -95,28 +100,27 @@ class Benchmark : public Usermod
         measure(&Benchmark::benchUint16, function, name);
     }
 
-    int benchFloat(float (*fn)(float)) {
+    static int benchFloat(float (*fn)(float)) {
       static_assert(sizeof(float) == sizeof(uint32_t), "sizes don't match");
       union U
       {
         uint32_t i;
         float f;
       };
-      constexpr U uMin{.f = std::numeric_limits<float>::min()};
-      constexpr U uMax{.f = std::numeric_limits<float>::max()};
       constexpr uint32_t posMin = 0b00000000100000000000000000000000;
       constexpr uint32_t posMax = 0b01111111011111111111111111111111;
-      if (uMin.i == posMin && uMax.i == posMax) {
-        Serial.println("benchFloat: bounds are correct.");
-      } else {
-        Serial.println("benchFloat: bounds are incorrect.");
-      }
-      for (uint32_t i = posMin; i <= posMax; ++i) {
+      int counter = 0;
+      for (uint32_t i = posMin; i <= posMax; i += 10000u) {
+        if (++counter % 1000000 == 0) {
+          Serial.print(counter);
+          Serial.print("/");
+          Serial.println(posMax - posMin + 1);
+        }
         float f;
         memcpy(&f, &i, sizeof(i));
         (*fn)(f);
       }
-      return posMax - posMin + 1;
+      return counter;
     }
 
     static int benchFloatTrig(float (*fn)(float)) {
@@ -128,34 +132,48 @@ class Benchmark : public Usermod
       };
       constexpr U uMin{.f = std::numeric_limits<float>::min()};
       constexpr U uMax{.f = float(TWO_PI)};
-      for (U i = uMin; i.i <= uMax.i; ++i.i) {
+#ifdef ARDUINO_ARCH_ESP32
+      constexpr uint32_t increment = 1000u;
+#else
+      constexpr uint32_t increment = 50000u;
+#endif
+      for (U i = uMin; i.i <= uMax.i; i.i += increment) {
         (*fn)(i.f);
       }
-      return uMax.i - uMin.i + 1;
+      return (uMax.i - uMin.i + 1) / increment + 1;
     }
 
     static int benchUint8(uint8_t (*fn)(uint8_t)) {
-      uint8_t i = 0;
-      do {
-        (*fn)(i);
-      } while (++i != 0);
-      return ((int)std::numeric_limits<uint8_t>::max()) + 1;
+      constexpr int repetitionCount = 35 * 256;
+      for (int repetitions = 0; repetitions < repetitionCount; ++repetitions) {
+        uint8_t i = 0;
+        do {
+          (*fn)(i);
+        } while (++i != 0);
+      }
+      return (((int)std::numeric_limits<uint8_t>::max()) + 1) * repetitionCount;
     }
 
     static int benchUint16(uint16_t (*fn)(uint16_t)) {
-      uint16_t i = 0;
-      do {
-        (*fn)(i);
-      } while (++i != 0);
-      return ((int)std::numeric_limits<uint16_t>::max()) + 1;
+      constexpr int repetitionCount = 35;
+      for (int repetitions = 0; repetitions < repetitionCount; ++repetitions) {
+        uint16_t i = 0;
+        do {
+          (*fn)(i);
+        } while (++i != 0);
+      }
+      return (((int)std::numeric_limits<uint16_t>::max()) + 1) * repetitionCount;
     }
 
     static int benchUint16(int16_t (*fn)(uint16_t)) {
-      uint16_t i = 0;
-      do {
-        (*fn)(i);
-      } while (++i != 0);
-      return ((int)std::numeric_limits<uint16_t>::max()) + 1;
+      constexpr int repetitionCount = 35;
+      for (int repetitions = 0; repetitions < repetitionCount; ++repetitions) {
+        uint16_t i = 0;
+        do {
+          (*fn)(i);
+        } while (++i != 0);
+      }
+      return (((int)std::numeric_limits<uint16_t>::max()) + 1) * repetitionCount;
     }
 
     // https://stackoverflow.com/a/66868438
