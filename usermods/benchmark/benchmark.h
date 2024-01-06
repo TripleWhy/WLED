@@ -76,6 +76,10 @@ class Benchmark : public Usermod {
         case 30: measure(NAMED_FUNCTION(&Benchmark::subtractInt)); break;
         case 31: measure(NAMED_FUNCTION(&Benchmark::multiplyInt)); break;
         case 32: measure(NAMED_FUNCTION(&Benchmark::divideInt)); break;
+        case 33: measure(NAMED_FUNCTION(&Benchmark::addInt64)); break;
+        case 34: measure(NAMED_FUNCTION(&Benchmark::subtractInt64)); break;
+        case 35: measure(NAMED_FUNCTION(&Benchmark::multiplyInt64)); break;
+        case 36: measure(NAMED_FUNCTION(&Benchmark::divideInt64)); break;
         default:
           index = 0;
           return;
@@ -133,6 +137,10 @@ class Benchmark : public Usermod {
 
     static void measure(int (*function)(int), const char * name) {
         measure(&Benchmark::benchInt, function, name);
+    }
+
+    static void measure(int64_t (*function)(int64_t), const char * name) {
+        measure(&Benchmark::benchInt64, function, name);
     }
 
     static int benchFloat(float (*fn)(float)) {
@@ -244,6 +252,20 @@ class Benchmark : public Usermod {
       return std::numeric_limits<int>::max() / increment + 1;
     }
 
+    static int benchInt64(int64_t (*fn)(int64_t)) {
+      constexpr int64_t increment = (int64_t)(std::numeric_limits<int32_t>::max()) * int64_t(4000L);
+      constexpr int64_t limit = std::numeric_limits<int64_t>::max() - increment;
+      for (int64_t i = 0; ; i += increment) {
+        (*fn)(i);
+        if (limit < i) {
+          break;
+        }
+      }
+      constexpr int64_t count = std::numeric_limits<int64_t>::max() / increment + int64_t(1);
+      static_assert(count < (int64_t)std::numeric_limits<int>::max(), "?");
+      return count;
+    }
+
     static uint16_t identityUint16(uint16_t x) {
       return x;
     }
@@ -349,6 +371,19 @@ class Benchmark : public Usermod {
     }
     static int divideInt(int i) {
       return i / int(2u);
+    }
+
+    static int64_t addInt64(int64_t i) {
+      return i + int64_t(2u);
+    }
+    static int64_t subtractInt64(int64_t i) {
+      return i - int64_t(2u);
+    }
+    static int64_t multiplyInt64(int64_t i) {
+      return i * int64_t(2u);
+    }
+    static int64_t divideInt64(int64_t i) {
+      return i / int64_t(2u);
     }
 };
 
