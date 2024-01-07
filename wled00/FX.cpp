@@ -1957,8 +1957,8 @@ uint16_t mode_palette() {
     cosTheta = std::cos(theta);
   }
 
-  const float maxX = cols-1;
-  const float maxY = rows-1;
+  const float maxX = std::max(1, cols-1);
+  const float maxY = std::max(1, rows-1);
   const float maxXIn  =  inputAssumeSquare ? maxX : 1.0f;
   const float maxYIn  =  inputAssumeSquare ? maxY : 1.0f;
   const float maxXOut = !inputAssumeSquare ? maxX : 1.0f;
