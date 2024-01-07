@@ -145,24 +145,28 @@ Segment& Segment::operator= (Segment &&orig) noexcept {
   return *this;
 }
 
+// allocates effect data buffer on heap and initialises (erases) it
 bool IRAM_ATTR Segment::allocateData(size_t len) {
-  if (data && _dataLen == len) return true; //already allocated
+  if (len == 0) return false; // nothing to do
+  if (data && _dataLen >= len) {          // already allocated enough (reduce fragmentation)
+    if (call == 0) memset(data, 0, len);  // erase buffer if called during effect initialisation
+    return true;
+  }
   //DEBUG_PRINTF("--   Allocating data (%d): %p\n", len, this);
-  deallocateData();
-  if (len == 0) return(false); // nothing to do
+  deallocateData(); // if the old buffer was smaller release it first
   if (Segment::getUsedSegmentData() + len > MAX_SEGMENT_DATA) {
     // not enough memory
     DEBUG_PRINT(F("!!! Effect RAM depleted: "));
     DEBUG_PRINTF("%d/%d !!!\n", len, Segment::getUsedSegmentData());
+    errorFlag = ERR_NORAM;
     return false;
   }
   // do not use SPI RAM on ESP32 since it is slow
-  data = (byte*) malloc(len);
-  if (!data) { DEBUG_PRINTLN(F("!!! Allocation failed. !!!")); return false; } //allocation failed
+  data = (byte*)calloc(len, sizeof(byte));
+  if (!data) { DEBUG_PRINTLN(F("!!! Allocation failed. !!!")); return false; } // allocation failed
   Segment::addUsedSegmentData(len);
   //DEBUG_PRINTF("---  Allocated data (%p): %d/%d -> %p\n", this, len, Segment::getUsedSegmentData(), data);
   _dataLen = len;
-  memset(data, 0, len);
   return true;
 }
 
@@ -193,7 +197,7 @@ void IRAM_ATTR Segment::deallocateData() {
 void Segment::resetIfRequired() {
   if (!reset) return;
   //DEBUG_PRINTF("-- Segment reset: %p\n", this);
-  deallocateData();
+  if (data && _dataLen > 0) memset(data, 0, _dataLen);  // prevent heap fragmentation (just erase buffer instead of deallocateData())
   next_time = 0; step = 0; call = 0; aux0 = 0; aux1 = 0;
   reset = false;
 }
@@ -556,35 +560,36 @@ void Segment::setOption(uint8_t n, bool val) {
 }
 
 void Segment::setMode(uint8_t fx, bool loadDefaults) {
+  // skip reserved
+  while (fx < strip.getModeCount() && strncmp_P("RSVD", strip.getModeData(fx), 4) == 0) fx++;
+  if (fx >= strip.getModeCount()) fx = 0; // set solid mode
   // if we have a valid mode & is not reserved
-  if (fx < strip.getModeCount() && strncmp_P("RSVD", strip.getModeData(fx), 4)) {
-    if (fx != mode) {
+  if (fx != mode) {
 #ifndef WLED_DISABLE_MODE_BLEND
-      if (modeBlending) startTransition(strip.getTransition()); // set effect transitions
+    if (modeBlending) startTransition(strip.getTransition()); // set effect transitions
 #endif
-      mode = fx;
-      // load default values from effect string
-      if (loadDefaults) {
-        int16_t sOpt;
-        sOpt = extractModeDefaults(fx, "sx");   speed     = (sOpt >= 0) ? sOpt : DEFAULT_SPEED;
-        sOpt = extractModeDefaults(fx, "ix");   intensity = (sOpt >= 0) ? sOpt : DEFAULT_INTENSITY;
-        sOpt = extractModeDefaults(fx, "c1");   custom1   = (sOpt >= 0) ? sOpt : DEFAULT_C1;
-        sOpt = extractModeDefaults(fx, "c2");   custom2   = (sOpt >= 0) ? sOpt : DEFAULT_C2;
-        sOpt = extractModeDefaults(fx, "c3");   custom3   = (sOpt >= 0) ? sOpt : DEFAULT_C3;
-        sOpt = extractModeDefaults(fx, "o1");   check1    = (sOpt >= 0) ? (bool)sOpt : false;
-        sOpt = extractModeDefaults(fx, "o2");   check2    = (sOpt >= 0) ? (bool)sOpt : false;
-        sOpt = extractModeDefaults(fx, "o3");   check3    = (sOpt >= 0) ? (bool)sOpt : false;
-        sOpt = extractModeDefaults(fx, "m12");  if (sOpt >= 0) map1D2D   = constrain(sOpt, 0, 7); else map1D2D = M12_Pixels;  // reset mapping if not defined (2D FX may not work)
-        sOpt = extractModeDefaults(fx, "si");   if (sOpt >= 0) soundSim  = constrain(sOpt, 0, 3);
-        sOpt = extractModeDefaults(fx, "rev");  if (sOpt >= 0) reverse   = (bool)sOpt;
-        sOpt = extractModeDefaults(fx, "mi");   if (sOpt >= 0) mirror    = (bool)sOpt; // NOTE: setting this option is a risky business
-        sOpt = extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
-        sOpt = extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
-        sOpt = extractModeDefaults(fx, "pal");  if (sOpt >= 0) setPalette(sOpt); //else setPalette(0);
-      }
-      markForReset();
-      stateChanged = true; // send UDP/WS broadcast
+    mode = fx;
+    // load default values from effect string
+    if (loadDefaults) {
+      int16_t sOpt;
+      sOpt = extractModeDefaults(fx, "sx");  speed     = (sOpt >= 0) ? sOpt : DEFAULT_SPEED;
+      sOpt = extractModeDefaults(fx, "ix");  intensity = (sOpt >= 0) ? sOpt : DEFAULT_INTENSITY;
+      sOpt = extractModeDefaults(fx, "c1");  custom1   = (sOpt >= 0) ? sOpt : DEFAULT_C1;
+      sOpt = extractModeDefaults(fx, "c2");  custom2   = (sOpt >= 0) ? sOpt : DEFAULT_C2;
+      sOpt = extractModeDefaults(fx, "c3");  custom3   = (sOpt >= 0) ? sOpt : DEFAULT_C3;
+      sOpt = extractModeDefaults(fx, "o1");  check1    = (sOpt >= 0) ? (bool)sOpt : false;
+      sOpt = extractModeDefaults(fx, "o2");  check2    = (sOpt >= 0) ? (bool)sOpt : false;
+      sOpt = extractModeDefaults(fx, "o3");  check3    = (sOpt >= 0) ? (bool)sOpt : false;
+      sOpt = extractModeDefaults(fx, "m12"); if (sOpt >= 0) map1D2D   = constrain(sOpt, 0, 7); else map1D2D = M12_Pixels;  // reset mapping if not defined (2D FX may not work)
+      sOpt = extractModeDefaults(fx, "si");  if (sOpt >= 0) soundSim  = constrain(sOpt, 0, 3);
+      sOpt = extractModeDefaults(fx, "rev"); if (sOpt >= 0) reverse   = (bool)sOpt;
+      sOpt = extractModeDefaults(fx, "mi");  if (sOpt >= 0) mirror    = (bool)sOpt; // NOTE: setting this option is a risky business
+      sOpt = extractModeDefaults(fx, "rY");  if (sOpt >= 0) reverse_y = (bool)sOpt;
+      sOpt = extractModeDefaults(fx, "mY");  if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
+      sOpt = extractModeDefaults(fx, "pal"); if (sOpt >= 0) setPalette(sOpt); //else setPalette(0);
     }
+    markForReset();
+    stateChanged = true; // send UDP/WS broadcast
   }
 }
 
@@ -746,10 +751,10 @@ void IRAM_ATTR Segment::setPixelColor(int i, uint32_t col)
   uint32_t tmpCol = col;
   // set all the pixels in the group
   for (int j = 0; j < grouping; j++) {
-    uint16_t indexSet = i + ((reverse) ? -j : j);
+    unsigned indexSet = i + ((reverse) ? -j : j);
     if (indexSet >= start && indexSet < stop) {
       if (mirror) { //set the corresponding mirrored pixel
-        uint16_t indexMir = stop - indexSet + start - 1;
+        unsigned indexMir = stop - indexSet + start - 1;
         indexMir += offset; // offset/phase
         if (indexMir >= stop) indexMir -= len; // wrap
 #ifndef WLED_DISABLE_MODE_BLEND
@@ -893,8 +898,8 @@ void Segment::refreshLightCapabilities() {
     segStopIdx  = stop;
   }
 
-  for (unsigned b = 0; b < busses.getNumBusses(); b++) {
-    Bus *bus = busses.getBus(b);
+  for (unsigned b = 0; b < BusManager::getNumBusses(); b++) {
+    Bus *bus = BusManager::getBus(b);
     if (bus == nullptr || bus->getLength()==0) break;
     if (!bus->isOk()) continue;
     if (bus->getStart() >= segStopIdx) continue;
@@ -1020,17 +1025,18 @@ void Segment::blur(uint8_t blur_amount) {
  */
 uint32_t Segment::color_wheel(uint8_t pos) {
   if (palette) return color_from_palette(pos, false, true, 0);
+  uint8_t w = W(currentColor(0));
   // These h and f values are the same h and f you have in the regular HSV to RGB conversion.
   // The whole funciton really is just a HSV conversion, but assuming H=pos, S=1 and V=1.
   const uint32_t h = (pos * 3) / 128;
   const uint32_t f = (pos * 6) % 256;
   switch (h) {
-    case 0: return ((uint32_t)(255)     << 16) | ((uint32_t)(f)       << 8) | (uint32_t)(0);
-    case 1: return ((uint32_t)(255 - f) << 16) | ((uint32_t)(255)     << 8) | (uint32_t)(0);
-    case 2: return ((uint32_t)(0)       << 16) | ((uint32_t)(255)     << 8) | (uint32_t)(f);
-    case 3: return ((uint32_t)(0)       << 16) | ((uint32_t)(255 - f) << 8) | (uint32_t)(255);
-    case 4: return ((uint32_t)(f)       << 16) | ((uint32_t)(0)       << 8) | (uint32_t)(255);
-    case 5: return ((uint32_t)(255)     << 16) | ((uint32_t)(0)       << 8) | (uint32_t)(255 - f);
+    case 0: return RGBW32(255    , f      , 0      , w);
+    case 1: return RGBW32(255 - f, 255    , 0      , w);
+    case 2: return RGBW32(0      , 255    , f      , w);
+    case 3: return RGBW32(0      , 255 - f, 255    , w);
+    case 4: return RGBW32(f      , 0      , 255    , w);
+    case 5: return RGBW32(255    , 0      , 255 - f, w);
     default: return 0;
   }
 }
@@ -1045,13 +1051,10 @@ uint32_t Segment::color_wheel(uint8_t pos) {
  * @returns Single color from palette
  */
 uint32_t Segment::color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri) {
+  uint32_t color = gamma32(currentColor(mcol));
+
   // default palette or no RGB support on segment
-  if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) {
-    uint32_t color = currentColor(mcol);
-    color = gamma32(color);
-    if (pbri == 255) return color;
-    return color_fade(color, pbri, true);
-  }
+  if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) return (pbri == 255) ? color : color_fade(color, pbri, true);
 
   uint8_t paletteIndex = i;
   if (mapping && virtualLength() > 1) paletteIndex = (i*255)/(virtualLength() -1);
@@ -1060,7 +1063,7 @@ uint32_t Segment::color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_
   curPal = currentPalette(curPal, palette);
   CRGB fastled_col = ColorFromPalette(curPal, paletteIndex, pbri, (strip.paletteBlend == 3)? NOBLEND:LINEARBLEND); // NOTE: paletteBlend should be global
 
-  return RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
+  return RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, W(color));
 }
 
 
@@ -1084,7 +1087,7 @@ void WS2812FX::finalizeInit(void) {
   _hasWhiteChannel = _isOffRefreshRequired = false;
 
   //if busses failed to load, add default (fresh install, FS issue, ...)
-  if (busses.getNumBusses() == 0) {
+  if (BusManager::getNumBusses() == 0) {
     DEBUG_PRINTLN(F("No busses, init default"));
     const uint8_t defDataPins[] = {DATA_PINS};
     const uint16_t defCounts[] = {PIXEL_COUNTS};
@@ -1097,13 +1100,13 @@ void WS2812FX::finalizeInit(void) {
       uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
       prevLen += count;
       BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-      if (busses.add(defCfg) == -1) break;
+      if (BusManager::add(defCfg) == -1) break;
     }
   }
 
   _length = 0;
-  for (int i=0; i<busses.getNumBusses(); i++) {
-    Bus *bus = busses.getBus(i);
+  for (int i=0; i<BusManager::getNumBusses(); i++) {
+    Bus *bus = BusManager::getBus(i);
     if (bus == nullptr) continue;
     if (bus->getStart() + bus->getLength() > MAX_LEDS) break;
     //RGBW mode is enabled if at least one of the strips is RGBW
@@ -1121,17 +1124,14 @@ void WS2812FX::finalizeInit(void) {
     #endif
   }
 
-  if (isMatrix) setUpMatrix();
-  else {
-    Segment::maxWidth  = _length;
-    Segment::maxHeight = 1;
-  }
+  Segment::maxWidth  = _length;
+  Segment::maxHeight = 1;
 
   //segments are created in makeAutoSegments();
   DEBUG_PRINTLN(F("Loading custom palettes"));
   loadCustomPalettes(); // (re)load all custom palettes
   DEBUG_PRINTLN(F("Loading custom ledmaps"));
-  deserializeMap();     // (re)load default ledmap
+  deserializeMap();     // (re)load default ledmap (will also setUpMatrix() if ledmap does not exist)
 }
 
 void WS2812FX::service() {
@@ -1163,7 +1163,7 @@ void WS2812FX::service() {
         _colors_t[1] = gamma32(seg.currentColor(1));
         _colors_t[2] = gamma32(seg.currentColor(2));
         seg.currentPalette(_currentPalette, seg.palette); // we need to pass reference
-        if (!cctFromRgb || correctWB) busses.setSegmentCCT(seg.currentBri(true), correctWB);
+        if (!cctFromRgb || correctWB) BusManager::setSegmentCCT(seg.currentBri(true), correctWB);
         // Effect blending
         // When two effects are being blended, each may have different segment data, this
         // data needs to be saved first and then restored before running previous mode.
@@ -1194,7 +1194,7 @@ void WS2812FX::service() {
     _segment_index++;
   }
   _virtualSegmentLength = 0;
-  busses.setSegmentCCT(-1);
+  BusManager::setSegmentCCT(-1);
   _isServicing = false;
   _triggered = false;
 
@@ -1210,16 +1210,16 @@ void WS2812FX::service() {
   #endif
 }
 
-void IRAM_ATTR WS2812FX::setPixelColor(int i, uint32_t col) {
+void IRAM_ATTR WS2812FX::setPixelColor(unsigned i, uint32_t col) {
   if (i < customMappingSize) i = customMappingTable[i];
   if (i >= _length) return;
-  busses.setPixelColor(i, col);
+  BusManager::setPixelColor(i, col);
 }
 
 uint32_t IRAM_ATTR WS2812FX::getPixelColor(uint16_t i) {
   if (i < customMappingSize) i = customMappingTable[i];
   if (i >= _length) return 0;
-  return busses.getPixelColor(i);
+  return BusManager::getPixelColor(i);
 }
 
 void WS2812FX::show(void) {
@@ -1230,7 +1230,7 @@ void WS2812FX::show(void) {
   // some buses send asynchronously and this method will return before
   // all of the data has been sent.
   // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
-  busses.show();
+  BusManager::show();
 
   unsigned long showNow = millis();
   size_t diff = showNow - _lastShow;
@@ -1245,7 +1245,7 @@ void WS2812FX::show(void) {
  * On some hardware (ESP32), strip updates are done asynchronously.
  */
 bool WS2812FX::isUpdating() {
-  return !busses.canAllShow();
+  return !BusManager::canAllShow();
 }
 
 /**
@@ -1304,7 +1304,7 @@ void WS2812FX::setBrightness(uint8_t b, bool direct) {
   }
   // setting brightness with NeoPixelBusLg has no effect on already painted pixels,
   // so we need to force an update to existing buffer
-  busses.setBrightness(b);
+  BusManager::setBrightness(b);
   if (!direct) {
     unsigned long t = millis();
     if (_segments[0].next_time > t + 22 && t - _lastShow > MIN_SHOW_DELAY) trigger(); //apply brightness change immediately if no refresh soon
@@ -1360,8 +1360,8 @@ uint16_t WS2812FX::getLengthTotal(void) {
 
 uint16_t WS2812FX::getLengthPhysical(void) {
   uint16_t len = 0;
-  for (size_t b = 0; b < busses.getNumBusses(); b++) {
-    Bus *bus = busses.getBus(b);
+  for (size_t b = 0; b < BusManager::getNumBusses(); b++) {
+    Bus *bus = BusManager::getBus(b);
     if (bus->getType() >= TYPE_NET_DDP_RGB) continue; //exclude non-physical network busses
     len += bus->getLength();
   }
@@ -1372,8 +1372,8 @@ uint16_t WS2812FX::getLengthPhysical(void) {
 //returns if there is an RGBW bus (supports RGB and White, not only white)
 //not influenced by auto-white mode, also true if white slider does not affect output white channel
 bool WS2812FX::hasRGBWBus(void) {
-  for (size_t b = 0; b < busses.getNumBusses(); b++) {
-    Bus *bus = busses.getBus(b);
+  for (size_t b = 0; b < BusManager::getNumBusses(); b++) {
+    Bus *bus = BusManager::getBus(b);
     if (bus == nullptr || bus->getLength()==0) break;
     if (bus->hasRGB() && bus->hasWhite()) return true;
   }
@@ -1382,8 +1382,8 @@ bool WS2812FX::hasRGBWBus(void) {
 
 bool WS2812FX::hasCCTBus(void) {
   if (cctFromRgb && !correctWB) return false;
-  for (size_t b = 0; b < busses.getNumBusses(); b++) {
-    Bus *bus = busses.getBus(b);
+  for (size_t b = 0; b < BusManager::getNumBusses(); b++) {
+    Bus *bus = BusManager::getBus(b);
     if (bus == nullptr || bus->getLength()==0) break;
     switch (bus->getType()) {
       case TYPE_ANALOG_5CH:
@@ -1469,8 +1469,8 @@ void WS2812FX::makeAutoSegments(bool forceReset) {
     }
     #endif
 
-    for (size_t i = s; i < busses.getNumBusses(); i++) {
-      Bus* b = busses.getBus(i);
+    for (size_t i = s; i < BusManager::getNumBusses(); i++) {
+      Bus* b = BusManager::getBus(i);
 
       segStarts[s] = b->getStart();
       segStops[s]  = segStarts[s] + b->getLength();
@@ -1559,8 +1559,8 @@ void WS2812FX::fixInvalidSegments() {
 bool WS2812FX::checkSegmentAlignment() {
   bool aligned = false;
   for (segment &seg : _segments) {
-    for (unsigned b = 0; b<busses.getNumBusses(); b++) {
-      Bus *bus = busses.getBus(b);
+    for (unsigned b = 0; b<BusManager::getNumBusses(); b++) {
+      Bus *bus = BusManager::getBus(b);
       if (seg.start == bus->getStart() && seg.stop == bus->getStart() + bus->getLength()) aligned = true;
     }
     if (seg.start == 0 && seg.stop == _length) aligned = true;
@@ -1658,40 +1658,30 @@ bool WS2812FX::deserializeMap(uint8_t n) {
   strcat_P(fileName, PSTR(".json"));
   bool isFile = WLED_FS.exists(fileName);
 
-  if (!isFile) {
-    // erase custom mapping if selecting nonexistent ledmap.json (n==0)
-    if (!isMatrix && !n && customMappingTable != nullptr) {
-      customMappingSize = 0;
-      delete[] customMappingTable;
-      customMappingTable = nullptr;
-    }
+  customMappingSize = 0; // prevent use of mapping if anything goes wrong
+
+  if (!isFile && n==0 && isMatrix) {
+    setUpMatrix();
     return false;
   }
 
-  if (!requestJSONBufferLock(7)) return false;
+  if (!isFile || !requestJSONBufferLock(7)) return false; // this will trigger setUpMatrix() when called from wled.cpp
 
-  if (!readObjectFromFile(fileName, nullptr, &doc)) {
+  if (!readObjectFromFile(fileName, nullptr, pDoc)) {
+    DEBUG_PRINT(F("ERROR Invalid ledmap in ")); DEBUG_PRINTLN(fileName);
     releaseJSONBufferLock();
-    return false; //if file does not exist just exit
+    return false; // if file does not load properly then exit
   }
 
-  DEBUG_PRINT(F("Reading LED map from "));
-  DEBUG_PRINTLN(fileName);
+  DEBUG_PRINT(F("Reading LED map from ")); DEBUG_PRINTLN(fileName);
 
-  // erase old custom ledmap
-  if (customMappingTable != nullptr) {
-    customMappingSize = 0;
-    delete[] customMappingTable;
-    customMappingTable = nullptr;
-  }
+  if (customMappingTable == nullptr) customMappingTable = new uint16_t[getLengthTotal()];
 
-  JsonArray map = doc[F("map")];
+  JsonObject root = pDoc->as<JsonObject>();
+  JsonArray map = root[F("map")];
   if (!map.isNull() && map.size()) {  // not an empty map
-    customMappingSize  = map.size();
-    customMappingTable = new uint16_t[customMappingSize];
-    for (unsigned i=0; i<customMappingSize; i++) {
-      customMappingTable[i] = (uint16_t) (map[i]<0 ? 0xFFFFU : map[i]);
-    }
+    customMappingSize = min((unsigned)map.size(), (unsigned)getLengthTotal());
+    for (unsigned i=0; i<customMappingSize; i++) customMappingTable[i] = (uint16_t) (map[i]<0 ? 0xFFFFU : map[i]);
   }
 
   releaseJSONBufferLock();

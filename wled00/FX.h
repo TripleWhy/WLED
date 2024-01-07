@@ -62,10 +62,10 @@
 //#define FRAMETIME        _frametime
 #define FRAMETIME        strip.getFrameTime()
 
-/* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
+/* each segment uses 82 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
 #ifdef ESP8266
-  #define MAX_NUM_SEGMENTS    16
+  #define MAX_NUM_SEGMENTS    12
   /* How much data bytes all segments combined may allocate */
   #define MAX_SEGMENT_DATA  5120
 #else
@@ -73,9 +73,13 @@
     #define MAX_NUM_SEGMENTS  32
   #endif
   #if defined(ARDUINO_ARCH_ESP32S2)
-    #define MAX_SEGMENT_DATA  24576
+    #if defined(BOARD_HAS_PSRAM) && defined(WLED_USE_PSRAM)
+      #define MAX_SEGMENT_DATA  MAX_NUM_SEGMENTS*1024 // 32k by default
+    #else
+      #define MAX_SEGMENT_DATA  MAX_NUM_SEGMENTS*768  // 24k by default
+    #endif
   #else
-    #define MAX_SEGMENT_DATA  32767
+    #define MAX_SEGMENT_DATA  MAX_NUM_SEGMENTS*1280 // 40k by default
   #endif
 #endif
 
@@ -278,7 +282,7 @@
 #define FX_MODE_RIPPLEPEAK             148
 #define FX_MODE_2DFIRENOISE            149
 #define FX_MODE_2DSQUAREDSWIRL         150
-#define FX_MODE_2DFIRE2012             151
+// #define FX_MODE_2DFIRE2012             151
 #define FX_MODE_2DDNA                  152
 #define FX_MODE_2DMATRIX               153
 #define FX_MODE_2DMETABALLS            154
@@ -288,7 +292,7 @@
 #define FX_MODE_GRAVFREQ               158
 #define FX_MODE_DJLIGHT                159
 #define FX_MODE_2DFUNKYPLANK           160
-#define FX_MODE_2DCENTERBARS           161
+//#define FX_MODE_2DCENTERBARS           161
 #define FX_MODE_2DPULSER               162
 #define FX_MODE_BLURZ                  163
 #define FX_MODE_2DDRIFT                164
@@ -543,9 +547,9 @@ typedef struct Segment {
 
     // runtime data functions
     inline uint16_t dataSize(void) const { return _dataLen; }
-    bool allocateData(size_t len);
-    void deallocateData(void);
-    void resetIfRequired(void);
+    bool allocateData(size_t len);  // allocates effect data buffer in heap and clears it
+    void deallocateData(void);      // deallocates (frees) effect data buffer from heap
+    void resetIfRequired(void);     // sets all SEGENV variables to 0 and clears data buffer
     /**
       * Flags that before the next effect is calculated,
       * the internal segment state should be reset.
@@ -559,10 +563,10 @@ typedef struct Segment {
     void     stopTransition(void);
     void     handleTransition(void);
     #ifndef WLED_DISABLE_MODE_BLEND
-    void     swapSegenv(tmpsegd_t &tmpSegD);
-    void     restoreSegenv(tmpsegd_t &tmpSegD);
+    void     swapSegenv(tmpsegd_t &tmpSegD);    // copies segment data into specifed buffer, if buffer is not a transition buffer, segment data is overwritten from transition buffer
+    void     restoreSegenv(tmpsegd_t &tmpSegD); // restores segment data from buffer, if buffer is not transition buffer, changed values are copied to transition buffer
     #endif
-    uint16_t progress(void); //transition progression between 0-65535
+    uint16_t progress(void); // transition progression between 0-65535
     uint8_t  currentBri(bool useCct = false);
     uint8_t  currentMode(void);
     uint32_t currentColor(uint8_t slot);
@@ -682,10 +686,7 @@ class WS2812FX {  // 96 bytes
     WS2812FX() :
       paletteFade(0),
       paletteBlend(0),
-      milliampsPerLed(55),
       cctBlending(0),
-      ablMilliampsMax(ABL_MILLIAMPS_DEFAULT),
-      currentMilliamps(0),
       now(millis()),
       timebase(0),
       isMatrix(false),
@@ -760,7 +761,7 @@ class WS2812FX {  // 96 bytes
       resetSegments(),
       makeAutoSegments(bool forceReset = false),
       fixInvalidSegments(),
-      setPixelColor(int n, uint32_t c),
+      setPixelColor(unsigned n, uint32_t c),
       show(void),
       setTargetFps(uint8_t fps),
       addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name), // add effect to the list; defined in FX.cpp
@@ -769,10 +770,10 @@ class WS2812FX {  // 96 bytes
     inline void restartRuntime() { for (Segment &seg : _segments) seg.markForReset(); }
     inline void setTransitionMode(bool t) { for (Segment &seg : _segments) seg.startTransition(t ? _transitionDur : 0); }
     inline void setColor(uint8_t slot, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) { setColor(slot, RGBW32(r,g,b,w)); }
-    inline void fill(uint32_t c) { for (int i = 0; i < getLengthTotal(); i++) setPixelColor(i, c); } // fill whole strip with color (inline)
+    inline void fill(uint32_t c) { for (unsigned i = 0; i < getLengthTotal(); i++) setPixelColor(i, c); } // fill whole strip with color (inline)
     // outsmart the compiler :) by correctly overloading
-    inline void setPixelColor(int n, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) { setPixelColor(n, RGBW32(r,g,b,w)); }
-    inline void setPixelColor(int n, CRGB c) { setPixelColor(n, c.red, c.green, c.blue); }
+    inline void setPixelColor(unsigned n, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) { setPixelColor(n, RGBW32(r,g,b,w)); }
+    inline void setPixelColor(unsigned n, CRGB c) { setPixelColor(n, c.red, c.green, c.blue); }
     inline void trigger(void) { _triggered = true; } // Forces the next frame to be computed on all active segments.
     inline void setShowCallback(show_callback cb) { _callback = cb; }
     inline void setTransition(uint16_t t) { _transitionDur = t; }
@@ -793,7 +794,6 @@ class WS2812FX {  // 96 bytes
 
     uint8_t
       paletteBlend,
-      milliampsPerLed,
       cctBlending,
       getActiveSegmentsNum(void),
       getFirstSelectedSegId(void),
@@ -811,8 +811,6 @@ class WS2812FX {  // 96 bytes
     inline uint8_t getModeCount() { return _modeCount; }
 
     uint16_t
-      ablMilliampsMax,
-      currentMilliamps,
       getLengthPhysical(void),
       getLengthTotal(void), // will include virtual/nonexistent pixels in matrix
       getFps();
@@ -878,7 +876,7 @@ class WS2812FX {  // 96 bytes
     void setUpMatrix();
 
     // outsmart the compiler :) by correctly overloading
-    inline void setPixelColorXY(int x, int y, uint32_t c)   { setPixelColor(y * Segment::maxWidth + x, c); }
+    inline void setPixelColorXY(int x, int y, uint32_t c)   { setPixelColor((unsigned)(y * Segment::maxWidth + x), c); }
     inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); }
     inline void setPixelColorXY(int x, int y, CRGB c)       { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
 

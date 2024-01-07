@@ -605,9 +605,9 @@ void serializeInfo(JsonObject root)
 
   JsonObject leds = root.createNestedObject("leds");
   leds[F("count")] = strip.getLengthTotal();
-  leds[F("pwr")] = strip.currentMilliamps;
+  leds[F("pwr")] = BusManager::currentMilliamps();
   leds["fps"] = strip.getFps();
-  leds[F("maxpwr")] = (strip.currentMilliamps)? strip.ablMilliampsMax : 0;
+  leds[F("maxpwr")] = BusManager::currentMilliamps()>0 ? BusManager::ablMilliampsMax() : 0;
   leds[F("maxseg")] = strip.getMaxSegments();
   //leds[F("actseg")] = strip.getActiveSegmentsNum();
   //leds[F("seglock")] = false; //might be used in the future to prevent modifications to segment config
@@ -650,6 +650,7 @@ void serializeInfo(JsonObject root)
 
   root[F("name")] = serverDescription;
   root[F("udpport")] = udpPort;
+  root[F("simplifiedui")] = simplifiedUI;
   root["live"] = (bool)realtimeMode;
   root[F("liveseg")] = useMainSegmentOnly ? strip.getMainSegmentId() : -1;  // if using main segment only for live
 
@@ -939,11 +940,11 @@ void serializeNetworks(JsonObject root)
 
   for (int i = 0; i < status; i++) {
     JsonObject node = networks.createNestedObject();
-    node["ssid"]    = WiFi.SSID(i);
-    node["rssi"]    = WiFi.RSSI(i);
-    node["bssid"]   = WiFi.BSSIDstr(i);
-    node["channel"] = WiFi.channel(i);
-    node["enc"]     = WiFi.encryptionType(i);
+    node[F("ssid")]    = WiFi.SSID(i);
+    node[F("rssi")]    = WiFi.RSSI(i);
+    node[F("bssid")]   = WiFi.BSSIDstr(i);
+    node[F("channel")] = WiFi.channel(i);
+    node[F("enc")]     = WiFi.encryptionType(i);
   }
 
   WiFi.scanDelete();
@@ -1002,15 +1003,19 @@ void serializeModeNames(JsonArray arr)
   }
 }
 
-static volatile bool servingClient = false;
+
+// Global buffer locking response helper class
+class GlobalBufferAsyncJsonResponse: public JSONBufferGuard, public AsyncJsonResponse {
+  public:
+  inline GlobalBufferAsyncJsonResponse(bool isArray) : JSONBufferGuard(17), AsyncJsonResponse(pDoc, isArray) {};
+  virtual ~GlobalBufferAsyncJsonResponse() {};
+
+  // Other members are inherited
+};
+
+
 void serveJson(AsyncWebServerRequest* request)
 {
-  if (servingClient) {
-    request->send(503, "application/json", F("{\"error\":2}")); // ERR_CONCURENCY
-    return;
-  }
-  servingClient = true;
-
   byte subJson = 0;
   const String& url = request->url();
   if      (url.indexOf("state") > 0) subJson = JSON_PATH_STATE;
@@ -1024,31 +1029,27 @@ void serveJson(AsyncWebServerRequest* request)
   #ifdef WLED_ENABLE_JSONLIVE
   else if (url.indexOf("live")  > 0) {
     serveLiveLeds(request);
-    servingClient = false;
     return;
   }
   #endif
   else if (url.indexOf("pal") > 0) {
     request->send_P(200, "application/json", JSON_palette_names);
-    servingClient = false;
     return;
   }
   else if (url.indexOf("cfg") > 0 && handleFileRead(request, "/cfg.json")) {
-    servingClient = false;
     return;
   }
   else if (url.length() > 6) { //not just /json
-    request->send(501, "application/json", F("{\"error\":\"Not implemented\"}"));
-    servingClient = false;
+    serveJsonError(request, 501, ERR_NOT_IMPL);
     return;
   }
 
-  if (!requestJSONBufferLock(17)) {
-    request->send(503, "application/json", F("{\"error\":3}"));
-    servingClient = false;
+  GlobalBufferAsyncJsonResponse *response = new GlobalBufferAsyncJsonResponse(subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  if (!response->owns_lock()) {
+    serveJsonError(request, 503, ERR_NOBUF);
+    delete response;
     return;
   }
-  AsyncJsonResponse *response = new AsyncJsonResponse(&doc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
   JsonVariant lDoc = response->getRoot();
 
@@ -1091,8 +1092,6 @@ void serveJson(AsyncWebServerRequest* request)
   DEBUG_PRINT(F("JSON content length: ")); DEBUG_PRINTLN(len);
 
   request->send(response);
-  releaseJSONBufferLock();
-  servingClient = false;
 }
 
 #ifdef WLED_ENABLE_JSONLIVE

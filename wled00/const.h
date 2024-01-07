@@ -342,8 +342,10 @@
 // WLED Error modes
 #define ERR_NONE         0  // All good :)
 #define ERR_DENIED       1  // Permission denied
-#define ERR_EEP_COMMIT   2  // Could not commit to EEPROM (wrong flash layout?) OBSOLETE
+#define ERR_CONCURRENCY  2  // Conurrency (client active)
 #define ERR_NOBUF        3  // JSON buffer was not released in time, request cannot be handled at this time
+#define ERR_NOT_IMPL     4  // Not implemented
+#define ERR_NORAM        8  // effect RAM depleted
 #define ERR_JSON         9  // JSON parsing failed (input too large?)
 #define ERR_FS_BEGIN    10  // Could not init filesystem (no partition?)
 #define ERR_FS_QUOTA    11  // The FS is full or the maximum file size is reached
@@ -448,7 +450,11 @@
 #ifdef ESP8266
   #define JSON_BUFFER_SIZE 10240
 #else
-  #define JSON_BUFFER_SIZE 24576
+  #if defined(ARDUINO_ARCH_ESP32S2)
+    #define JSON_BUFFER_SIZE 24576
+  #else
+    #define JSON_BUFFER_SIZE 32767
+  #endif
 #endif
 
 //#define MIN_HEAP_SIZE (8k for AsyncWebServer)

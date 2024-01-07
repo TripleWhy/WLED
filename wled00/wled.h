@@ -8,7 +8,7 @@
  */
 
 // version code in format yymmddb (b = daily build)
-#define VERSION 2312010
+#define VERSION 2401060
 
 //uncomment this if you have a "my_config.h" file you'd like to use
 //#define WLED_USE_MY_CONFIG
@@ -319,6 +319,7 @@ WLED_GLOBAL bool noWifiSleep _INIT(true);                          // disabling 
 #else
 WLED_GLOBAL bool noWifiSleep _INIT(false);
 #endif
+WLED_GLOBAL bool force802_3g _INIT(false);
 
 #ifdef WLED_USE_ETHERNET
   #ifdef WLED_ETH_DEFAULT                                          // default ethernet board type if specified
@@ -365,7 +366,7 @@ WLED_GLOBAL char serverDescription[33] _INIT(SERVERNAME);  // use predefined nam
 #endif
 //WLED_GLOBAL bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
 WLED_GLOBAL bool simplifiedUI          _INIT(false);   // enable simplified UI
-WLED_GLOBAL byte cacheInvalidate       _INIT(0);       // used to invalidate browser cache when switching from regular to simplified UI
+WLED_GLOBAL byte cacheInvalidate       _INIT(0);       // used to invalidate browser cache
 
 // Sync CONFIG
 WLED_GLOBAL NodesMap Nodes;
@@ -758,7 +759,12 @@ WLED_GLOBAL int8_t spi_sclk  _INIT(SPISCLKPIN);
 #endif
 
 // global ArduinoJson buffer
-WLED_GLOBAL StaticJsonDocument<JSON_BUFFER_SIZE> doc;
+#if defined(ARDUINO_ARCH_ESP32) && defined(BOARD_HAS_PSRAM) && defined(WLED_USE_PSRAM)
+WLED_GLOBAL JsonDocument *pDoc _INIT(nullptr);
+#else
+WLED_GLOBAL StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
+WLED_GLOBAL JsonDocument *pDoc _INIT(&gDoc);
+#endif
 WLED_GLOBAL volatile uint8_t jsonBufferLock _INIT(0);
 
 // enable additional debug output
