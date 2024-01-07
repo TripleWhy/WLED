@@ -1967,8 +1967,8 @@ uint16_t mode_palette() {
   const float centerY = maxYOut * 0.5f;
   const float scale   = 1.0f / (std::abs(cosTheta) + (std::abs(sinTheta) * (maxYOut / maxXOut)));
   const int yFrom = isMatrix ? 0 : strip.getCurrSegmentId();
-  const int yTo = isMatrix ? rows : yFrom+1;
-  for (int y = yFrom; y < yTo; ++y) {
+  const int yTo = isMatrix ? maxY : yFrom;
+  for (int y = yFrom; y <= yTo; ++y) {
     const float yt = (y / maxYIn) - centerY;
     const float ytSinTheta = scale * yt * sinTheta;
     for (int x = 0; x < cols; ++x) {
