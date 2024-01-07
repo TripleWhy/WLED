@@ -1965,7 +1965,7 @@ uint16_t mode_palette() {
   const float maxYOut = !inputAssumeSquare ? maxY : 1.0f;
   const float centerX = maxXOut * 0.5f;
   const float centerY = maxYOut * 0.5f;
-  const float scale   = 1.0f / fmaf((std::abs(sinTheta) / maxXOut), maxYOut, std::abs(cosTheta));
+  const float scale   = 1.0f / (std::abs(cosTheta) + (std::abs(sinTheta) * (maxYOut / maxXOut)));
   const int yFrom = isMatrix ? 0 : strip.getCurrSegmentId();
   const int yTo = isMatrix ? rows : yFrom+1;
   for (int y = yFrom; y < yTo; ++y) {
