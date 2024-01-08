@@ -1927,7 +1927,7 @@ uint16_t mode_juggle(void) {
 }
 static const char _data_FX_MODE_JUGGLE[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
 
-uint16_t mode_palette() {
+uint16_t mode_palette_float() {
   const bool isMatrix = strip.isMatrix;
   const int cols = SEGMENT.virtualWidth();
   const int rows = isMatrix ? SEGMENT.virtualHeight() : strip.getSegmentsNum();
@@ -1989,6 +1989,83 @@ uint16_t mode_palette() {
       }
     }
   }
+  return FRAMETIME;
+}
+uint16_t mode_palette_int() {
+  const bool isMatrix = strip.isMatrix;
+  const int cols = SEGMENT.virtualWidth();
+  const int rows = isMatrix ? SEGMENT.virtualHeight() : strip.getSegmentsNum();
+
+  const int inputShift = SEGMENT.speed;
+  const int inputSize = SEGMENT.intensity;
+  const int inputRotation = SEGMENT.custom1;
+  const bool inputAnimateShift = SEGMENT.check1;
+  const bool inputAnimateRotation = SEGMENT.check2;
+  const bool inputAssumeSquare = SEGMENT.check3;
+
+  const int paletteOffset = (!inputAnimateShift) ? (inputShift) : (((strip.now * ((inputShift >> 3) +1)) & 0xFFFF) >> 8);
+
+  constexpr int sInt16Scale = 0x7FFF;
+  int sinTheta;
+  int cosTheta;
+  if (rows <= 1) {
+    sinTheta = 0;
+    cosTheta = sInt16Scale;
+  } else if (cols <= 1) {
+    sinTheta = sInt16Scale;
+    cosTheta = 0;
+  } else {
+    const uint16_t theta = (!inputAnimateRotation) ? (inputRotation * 0xFFFF / 256) : ((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF);
+    sinTheta = sin16(theta);
+    cosTheta = cos16(theta);
+  }
+
+  const int maxX = std::max(1, cols-1);
+  const int maxY = std::max(1, rows-1);
+  const int maxXIn  =  inputAssumeSquare ? maxX : 1;
+  const int maxYIn  =  inputAssumeSquare ? maxY : 1;
+  const int maxXOut = !inputAssumeSquare ? maxX : 1;
+  const int maxYOut = !inputAssumeSquare ? maxY : 1;
+  const int centerX = sInt16Scale * maxXOut / 2;
+  const int centerY = sInt16Scale * maxYOut / 2;
+  const int scale   = std::abs(cosTheta) + (std::abs(sinTheta) * maxYOut / maxXOut);
+  const int yFrom = isMatrix ? 0 : strip.getCurrSegmentId();
+  const int yTo = isMatrix ? maxY : yFrom;
+  for (int y = yFrom; y <= yTo; ++y) {
+    const int ytSinTheta = int((int64_t(sinTheta) * int64_t(y * sInt16Scale - centerY * maxYIn))/int64_t(maxYIn * scale));
+    for (int x = 0; x < cols; ++x) {
+      const int xtCosTheta = int((int64_t(cosTheta) * int64_t(x * sInt16Scale - centerX * maxXIn))/int64_t(maxXIn * scale));
+      const int sourceX = xtCosTheta + ytSinTheta + centerX;
+      int colorIndex = (std::min(std::max(sourceX, 0), maxXOut * sInt16Scale) * 255) / (sInt16Scale * maxXOut);
+      if (inputSize <= 128) {
+        colorIndex = (colorIndex * inputSize) / 128;
+      } else {
+        // Linear function that maps colorIndex 128=>1, 256=>9
+        colorIndex = ((inputSize - 112) * colorIndex) / 16;
+      }
+      colorIndex += paletteOffset;
+      const uint32_t color = SEGMENT.color_wheel((uint8_t)colorIndex);
+      if (isMatrix) {
+        SEGMENT.setPixelColorXY(x, y, color);
+      } else {
+        SEGMENT.setPixelColor(x, color);
+      }
+    }
+  }
+  return FRAMETIME;
+}
+uint16_t mode_palette() {
+  const unsigned long t0 = millis();
+  mode_palette_float();
+  const unsigned long t1 = millis();
+  mode_palette_int();
+  const unsigned long t2 = millis();
+  Serial.print("float: ");
+  Serial.print(t1-t0);
+  Serial.println(" ms.");
+  Serial.print("int:   ");
+  Serial.print(t2-t1);
+  Serial.println(" ms.");
   return FRAMETIME;
 }
 static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Physical Square;;!;12;o1=1,o2=1";
