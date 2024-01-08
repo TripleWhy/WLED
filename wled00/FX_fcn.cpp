@@ -27,8 +27,6 @@
 #include "FX.h"
 #include "palettes.h"
 
-#include <iostream>
-
 /*
   Custom per-LED mapping has moved!
 

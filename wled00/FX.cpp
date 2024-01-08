@@ -28,8 +28,6 @@
 #include "FX.h"
 #include "fcn_declare.h"
 
-#include <iostream>
-
 #define IBN 5100
 
 // paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
