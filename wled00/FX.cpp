@@ -1951,8 +1951,8 @@ uint16_t mode_palette_float() {
     cosTheta = 0.0f;
   } else {
     const float theta = (!inputAnimateRotation) ? (inputRotation * (float(M_TWOPI) / 256.0f)) : ((((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF)) * float(M_TWOPI) / float(0xFFFF));
-    sinTheta = std::sin(theta);
-    cosTheta = std::cos(theta);
+    sinTheta = sin_t(theta);
+    cosTheta = cos_t(theta);
   }
 
   const float maxX = std::max(1, cols-1);
