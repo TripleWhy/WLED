@@ -266,16 +266,12 @@ CRGBPalette16 IRAM_ATTR &Segment::loadPalette(CRGBPalette16 &targetPalette, uint
       targetPalette = OceanColors_p; break;
     case 10: //Forest colors
       targetPalette = ForestColors_p; break;
-    case 11: //Rainbow colors
-      targetPalette = RainbowColors_p; break;
-    case 12: //Rainbow stripe colors
-      targetPalette = RainbowStripeColors_p; break;
     default: //progmem palettes
       if (pal>245) {
         targetPalette = strip.customPalettes[255-pal]; // we checked bounds above
       } else {
         byte tcp[72];
-        memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[pal-13])), 72);
+        memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[pal-11])), 72);
         targetPalette.loadDynamicGradientPalette(tcp);
       }
       break;
