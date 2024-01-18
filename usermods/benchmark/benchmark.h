@@ -80,6 +80,8 @@ class Benchmark : public Usermod {
         case 34: measure(NAMED_FUNCTION(&Benchmark::subtractInt64)); break;
         case 35: measure(NAMED_FUNCTION(&Benchmark::multiplyInt64)); break;
         case 36: measure(NAMED_FUNCTION(&Benchmark::divideInt64)); break;
+        case 37: measure(NAMED_FUNCTION(&Benchmark::color_wheel_original)); break;
+        case 38: measure(NAMED_FUNCTION(&Benchmark::color_wheel_hsv)); break;
         default:
           index = 0;
           return;
@@ -119,15 +121,13 @@ class Benchmark : public Usermod {
         printMeasurementResults(t0, t1, count, name);
     }
 
-    static void measure(uint8_t (*function)(uint8_t), const char * name) {
+    template<typename OutType>
+    static void measure(OutType (*function)(uint8_t), const char * name) {
         measure(&Benchmark::benchUint8, function, name);
     }
 
-    static void measure(uint16_t (*function)(uint16_t), const char * name) {
-        measure(&Benchmark::benchUint16, function, name);
-    }
-
-    static void measure(int16_t (*function)(uint16_t), const char * name) {
+    template<typename OutType>
+    static void measure(OutType (*function)(uint16_t), const char * name) {
         measure(&Benchmark::benchUint16, function, name);
     }
 
@@ -195,7 +195,8 @@ class Benchmark : public Usermod {
       return (((int)std::numeric_limits<uint16_t>::max()) + 1) * repetitionCount;
     }
 
-    static int benchUint8(uint8_t (*fn)(uint8_t)) {
+    template<typename OutType>
+    static int benchUint8(OutType (*fn)(uint8_t)) {
       constexpr int repetitionCount = 35 * 256;
       for (int repetitions = 0; repetitions < repetitionCount; ++repetitions) {
         uint8_t i = 0;
@@ -384,6 +385,37 @@ class Benchmark : public Usermod {
     }
     static int64_t divideInt64(int64_t i) {
       return i / int64_t(2u);
+    }
+
+    static uint32_t color_wheel_original(uint8_t pos) {
+      uint8_t w = 0;
+      pos = 255 - pos;
+      if (pos < 85) {
+        return RGBW32((255 - pos * 3), 0, (pos * 3), w);
+      } else if(pos < 170) {
+        pos -= 85;
+        return RGBW32(0, (pos * 3), (255 - pos * 3), w);
+      } else {
+        pos -= 170;
+        return RGBW32((pos * 3), (255 - pos * 3), 0, w);
+      }
+    }
+
+    static uint32_t color_wheel_hsv(uint8_t pos) {
+      uint8_t w = 0;
+      // These h and f values are the same h and f you have in the regular HSV to RGB conversion.
+      // The whole funciton really is just a HSV conversion, but assuming H=pos, S=1 and V=1.
+      const uint32_t h = (pos * 3) / 128;
+      const uint32_t f = (pos * 6) % 256;
+      switch (h) {
+        case 0: return RGBW32(255    , f      , 0      , w);
+        case 1: return RGBW32(255 - f, 255    , 0      , w);
+        case 2: return RGBW32(0      , 255    , f      , w);
+        case 3: return RGBW32(0      , 255 - f, 255    , w);
+        case 4: return RGBW32(f      , 0      , 255    , w);
+        case 5: return RGBW32(255    , 0      , 255 - f, w);
+        default: return 0;
+      }
     }
 };
 
