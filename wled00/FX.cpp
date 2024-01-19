@@ -1933,52 +1933,41 @@ uint16_t mode_palette() {
   using mathType = int32_t;
   using wideMathType = int64_t;
   using angleType = uint16_t;
-  constexpr mathType sInt16Scale = 0x7FFF;
-  constexpr mathType maxAngle = 0xFFFF;
-  constexpr mathType staticRotationScale = 256;
-  constexpr mathType animatedRotationScale = 1;
+  constexpr mathType sInt16Scale             = 0x7FFF;
+  constexpr mathType maxAngle                = 0xFFFF;
+  constexpr mathType staticRotationScale     = 256;
+  constexpr mathType animatedRotationScale   = 1;
   constexpr int16_t (*sinFunction)(uint16_t) = &sin16;
   constexpr int16_t (*cosFunction)(uint16_t) = &cos16;
 #else
   using mathType = float;
   using wideMathType = float;
   using angleType = float;
-  constexpr mathType sInt16Scale = 1.0f;
-  constexpr mathType maxAngle = M_TWOPI / 256.0;
-  constexpr mathType staticRotationScale = 1.0f;
+  constexpr mathType sInt16Scale           = 1.0f;
+  constexpr mathType maxAngle              = M_TWOPI / 256.0;
+  constexpr mathType staticRotationScale   = 1.0f;
   constexpr mathType animatedRotationScale = M_TWOPI / double(0xFFFF);
-  constexpr float (*sinFunction)(float) = &sin_t;
-  constexpr float (*cosFunction)(float) = &cos_t;
+  constexpr float (*sinFunction)(float)    = &sin_t;
+  constexpr float (*cosFunction)(float)    = &cos_t;
 #endif
-  const bool isMatrix = strip.isMatrix;
-  const int cols = SEGMENT.virtualWidth();
-  const int rows = isMatrix ? SEGMENT.virtualHeight() : strip.getSegmentsNum();
+  const unsigned cols = SEGMENT.is2D() ? SEGMENT.virtualWidth() : 1;
+  const unsigned rows = SEGMENT.is2D() ? SEGMENT.virtualHeight() : SEGMENT.virtualLength();
 
-  const int inputShift = SEGMENT.speed;
-  const int inputSize = SEGMENT.intensity;
-  const int inputRotation = SEGMENT.custom1;
-  const bool inputAnimateShift = SEGMENT.check1;
+  const int  inputShift           = SEGMENT.speed;
+  const int  inputSize            = SEGMENT.intensity;
+  const int  inputRotation        = SEGMENT.custom1;
+  const bool inputAnimateShift    = SEGMENT.check1;
   const bool inputAnimateRotation = SEGMENT.check2;
-  const bool inputAssumeSquare = SEGMENT.check3;
+  const bool inputAssumeSquare    = SEGMENT.check3;
 
   const int paletteOffset = (!inputAnimateShift) ? (inputShift) : (((strip.now * ((inputShift >> 3) +1)) & 0xFFFF) >> 8);
 
-  mathType sinTheta;
-  mathType cosTheta;
-  if (rows <= 1) {
-    sinTheta = 0;
-    cosTheta = sInt16Scale;
-  } else if (cols <= 1) {
-    sinTheta = sInt16Scale;
-    cosTheta = 0;
-  } else {
-    const angleType theta = (!inputAnimateRotation) ? (inputRotation * maxAngle / staticRotationScale) : (((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF) * animatedRotationScale);
-    sinTheta = sinFunction(theta);
-    cosTheta = cosFunction(theta);
-  }
+  const angleType theta = (!inputAnimateRotation) ? (inputRotation * maxAngle / staticRotationScale) : (((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF) * animatedRotationScale);
+  const mathType sinTheta = sinFunction(theta);
+  const mathType cosTheta = cosFunction(theta);
 
-  const mathType maxX = std::max(1, cols-1);
-  const mathType maxY = std::max(1, rows-1);
+  const mathType maxX = cols;
+  const mathType maxY = rows;
   const mathType maxXIn  =  inputAssumeSquare ? maxX : mathType(1);
   const mathType maxYIn  =  inputAssumeSquare ? maxY : mathType(1);
   const mathType maxXOut = !inputAssumeSquare ? maxX : mathType(1);
@@ -1986,9 +1975,7 @@ uint16_t mode_palette() {
   const mathType centerX = sInt16Scale * maxXOut / mathType(2);
   const mathType centerY = sInt16Scale * maxYOut / mathType(2);
   const mathType scale   = std::abs(cosTheta) + (std::abs(sinTheta) * maxYOut / maxXOut);
-  const int yFrom = isMatrix ? 0 : strip.getCurrSegmentId();
-  const int yTo = isMatrix ? maxY : yFrom;
-  for (int y = yFrom; y <= yTo; ++y) {
+  for (int y = 0; y < rows; ++y) {
     const mathType ytSinTheta = mathType((wideMathType(sinTheta) * wideMathType(y * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
     for (int x = 0; x < cols; ++x) {
       const mathType xtCosTheta = mathType((wideMathType(cosTheta) * wideMathType(x * sInt16Scale - centerX * maxXIn))/wideMathType(maxXIn * scale));
@@ -2002,16 +1989,13 @@ uint16_t mode_palette() {
       }
       colorIndex += paletteOffset;
       const uint32_t color = SEGMENT.color_wheel((uint8_t)colorIndex);
-      if (isMatrix) {
-        SEGMENT.setPixelColorXY(x, y, color);
-      } else {
-        SEGMENT.setPixelColor(x, color);
-      }
+      if (SEGMENT.is2D()) SEGMENT.setPixelColorXY(x, y, color);
+      else                SEGMENT.setPixelColor(y, color);
     }
   }
   return FRAMETIME;
 }
-static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Physical Square;;!;12;o1=1,o2=1";
+static const char _data_FX_MODE_PALETTE[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Physical Square;;!;12;c1=64,o1=1,o2=1,o3=0";
 
 
 // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
