@@ -13,7 +13,7 @@
 typedef struct PartialEspNowPacket {
   uint8_t magic;
   uint8_t packet;
-  uint8_t segs;
+  uint8_t noOfPackets;
   uint8_t data[247];
 } partial_packet_t;
 
@@ -56,7 +56,7 @@ void notify(byte callMode, bool followUp)
   //3: supports FX intensity, 24 byte packet 4: supports transitionDelay 5: sup palette
   //6: supports timebase syncing, 29 byte packet 7: supports tertiary color 8: supports sys time sync, 36 byte packet
   //9: supports sync groups, 37 byte packet 10: supports CCT, 39 byte packet 11: per segment options, variable packet length (40+MAX_NUM_SEGMENTS*3)
-  //12: enhanced effct sliders, 2D & mapping options
+  //12: enhanced effect sliders, 2D & mapping options
   udpOut[11] = 12;
   col = mainseg.colors[1];
   udpOut[12] = R(col);
@@ -106,7 +106,7 @@ void notify(byte callMode, bool followUp)
   for (size_t i = 0; i < nsegs; i++) {
     Segment &selseg = strip.getSegment(i);
     if (!selseg.isActive()) continue;
-    uint16_t ofs = 41 + s*UDP_SEG_SIZE; //start of segment offset byte
+    unsigned ofs = 41 + s*UDP_SEG_SIZE; //start of segment offset byte
     udpOut[0 +ofs] = s;
     udpOut[1 +ofs] = selseg.start >> 8;
     udpOut[2 +ofs] = selseg.start & 0xFF;
@@ -151,33 +151,45 @@ void notify(byte callMode, bool followUp)
 
 #ifndef WLED_DISABLE_ESPNOW
   if (enableESPNow && useESPNowSync && statusESPNow == ESP_NOW_STATE_ON) {
-    partial_packet_t buffer = {'W', 0, (uint8_t)s, {0}};
+    partial_packet_t buffer = {'W', 0, 1, {0}};
     // send global data
-    DEBUG_PRINTLN(F("ESP-NOW sending first packet.")); 
-    memcpy(buffer.data, udpOut, 41);
-    auto err = quickEspNow.send(ESPNOW_BROADCAST_ADDRESS, reinterpret_cast<const uint8_t*>(&buffer), 41+3);
-    if (!err) {
-      // send segment data
+    DEBUG_PRINTLN(F("ESP-NOW sending first packet."));
+    const size_t bufferSize = sizeof(buffer.data)/sizeof(uint8_t);
+    size_t packetSize = 41;
+    size_t s0 = 0;
+    memcpy(buffer.data, udpOut, packetSize);
+    // stuff as many segments in first packet as possible (normally up to 5)
+    for (size_t i = 0; packetSize < bufferSize && i < s; i++) {
+      memcpy(buffer.data + packetSize, &udpOut[41+i*UDP_SEG_SIZE], UDP_SEG_SIZE);
+      packetSize += UDP_SEG_SIZE;
+      s0++;
+    }
+    if (s > s0) buffer.noOfPackets += 1 + ((s - s0) * UDP_SEG_SIZE) / bufferSize; // set number of packets
+    auto err = quickEspNow.send(ESPNOW_BROADCAST_ADDRESS, reinterpret_cast<const uint8_t*>(&buffer), packetSize+3);
+    if (!err && s0 < s) {
+      // send rest of the segments
       buffer.packet++;
-      size_t packetSize = 0;
-      int32_t err = 0;
-      for (size_t i = 0; i < s; i++) {
+      packetSize = 0;
+      // WARNING: this will only work for up to 3 messages (~17 segments) as QuickESPNOW only has a ring buffer capable of holding 3 queued messages
+      // to work around that limitation it is mandatory to utilize onDataSent() callback which should reduce number queued messages
+      // and wait until at least one space is available in the buffer
+      for (size_t i = s0; i < s; i++) {
         memcpy(buffer.data + packetSize, &udpOut[41+i*UDP_SEG_SIZE], UDP_SEG_SIZE);
         packetSize += UDP_SEG_SIZE;
-        if (packetSize + UDP_SEG_SIZE < sizeof(buffer.data)/sizeof(uint8_t)) continue;
-        DEBUG_PRINTF("ESP-NOW sending packet: %d (%d)\n", (int)buffer.packet, packetSize+3);
+        if (packetSize + UDP_SEG_SIZE < bufferSize) continue;
+        DEBUG_PRINTF_P(PSTR("ESP-NOW sending packet: %d (%d)\n"), (int)buffer.packet, packetSize+3);
         err = quickEspNow.send(ESPNOW_BROADCAST_ADDRESS, reinterpret_cast<const uint8_t*>(&buffer), packetSize+3);
         buffer.packet++;
         packetSize = 0;
         if (err) break;
       }
       if (!err && packetSize > 0) {
-        DEBUG_PRINTF("ESP-NOW sending last packet: %d (%d)\n", (int)buffer.packet, packetSize+3);
+        DEBUG_PRINTF_P(PSTR("ESP-NOW sending last packet: %d (%d)\n"), (int)buffer.packet, packetSize+3);
         err = quickEspNow.send(ESPNOW_BROADCAST_ADDRESS, reinterpret_cast<const uint8_t*>(&buffer), packetSize+3);
       }
-      if (err) {
-        DEBUG_PRINTLN(F("ESP-NOW sending packet failed."));
-      }
+    }
+    if (err) {
+      DEBUG_PRINTLN(F("ESP-NOW sending packet failed."));
     }
   }
   if (udpConnected) 
@@ -201,7 +213,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
 
   //compatibilityVersionByte:
   byte version = udpIn[11];
-  DEBUG_PRINT(F("UDP packet version: ")); DEBUG_PRINTLN(version);
+  DEBUG_PRINTF_P(PSTR("UDP packet version: %d\n"), (int)version);
 
   // if we are not part of any sync group ignore message
   if (version < 9) {
@@ -209,7 +221,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
     if (!(receiveGroups & 0x01)) return;
   } else if (!(receiveGroups & udpIn[36])) return;
 
-  bool someSel = (receiveNotificationBrightness || receiveNotificationColor || receiveNotificationEffects);
+  bool someSel = (receiveNotificationBrightness || receiveNotificationColor || receiveNotificationEffects || receiveNotificationPalette);
 
   // set transition time before making any segment changes
   if (version > 3) {
@@ -229,7 +241,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
     if (version > 6) {
       strip.setColor(2, RGBW32(udpIn[20], udpIn[21], udpIn[22], udpIn[23])); // tertiary color
       if (version > 9 && udpIn[37] < 255) { // valid CCT/Kelvin value
-        uint16_t cct = udpIn[38];
+        unsigned cct = udpIn[38];
         if (udpIn[37] > 0) { //Kelvin
           cct |= (udpIn[37] << 8);
         }
@@ -243,8 +255,8 @@ void parseNotifyPacket(uint8_t *udpIn) {
   bool applyEffects = (receiveNotificationEffects || !someSel);
   if (applyEffects && currentPlaylist >= 0) unloadPlaylist();
   if (version > 10 && (receiveSegmentOptions || receiveSegmentBounds)) {
-    uint8_t numSrcSegs = udpIn[39];
-    DEBUG_PRINT(F("UDP segments: ")); DEBUG_PRINTLN(numSrcSegs);
+    unsigned numSrcSegs = udpIn[39];
+    DEBUG_PRINTF_P(PSTR("UDP segments: %d\n"), numSrcSegs);
     // are we syncing bounds and slave has more active segments than master?
     if (receiveSegmentBounds && numSrcSegs < strip.getActiveSegmentsNum()) {
       DEBUG_PRINTLN(F("Removing excessive segments."));
@@ -256,15 +268,15 @@ void parseNotifyPacket(uint8_t *udpIn) {
     }
     size_t inactiveSegs = 0;
     for (size_t i = 0; i < numSrcSegs && i < strip.getMaxSegments(); i++) {
-      uint16_t ofs = 41 + i*udpIn[40]; //start of segment offset byte
-      uint8_t id = udpIn[0 +ofs];
-      DEBUG_PRINT(F("UDP segment received: ")); DEBUG_PRINTLN(id);
+      unsigned ofs = 41 + i*udpIn[40]; //start of segment offset byte
+      unsigned id = udpIn[0 +ofs];
+      DEBUG_PRINTF_P(PSTR("UDP segment received: %u\n"), id);
       if      (id >  strip.getSegmentsNum()) break;
       else if (id == strip.getSegmentsNum()) {
         if (receiveSegmentBounds && id < strip.getMaxSegments()) strip.appendSegment();
         else break;
       }
-      DEBUG_PRINT(F("UDP segment check: ")); DEBUG_PRINTLN(id);
+      DEBUG_PRINTF_P(PSTR("UDP segment check: %u\n"), id);
       Segment& selseg = strip.getSegment(id);
       // if we are not syncing bounds skip unselected segments
       if (selseg.isActive() && !(selseg.isSelected() || receiveSegmentBounds)) continue;
@@ -278,7 +290,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
           id += inactiveSegs; // adjust id
         }
       }
-      DEBUG_PRINT(F("UDP segment processing: ")); DEBUG_PRINTLN(id);
+      DEBUG_PRINTF_P(PSTR("UDP segment processing: %u\n"), id);
 
       uint16_t start  = (udpIn[1+ofs] << 8 | udpIn[2+ofs]);
       uint16_t stop   = (udpIn[3+ofs] << 8 | udpIn[4+ofs]);
@@ -286,23 +298,26 @@ void parseNotifyPacket(uint8_t *udpIn) {
       uint16_t stopY  = version > 11 ? (udpIn[34+ofs] << 8 | udpIn[35+ofs]) : 1;
       uint16_t offset = (udpIn[7+ofs] << 8 | udpIn[8+ofs]);
       if (!receiveSegmentOptions) {
-        //selseg.setUp(start, stop, selseg.grouping, selseg.spacing, offset, startY, stopY);
-        // we have to use strip.setSegment() instead of selseg.setUp() to prevent crash if segment would change during drawing 
-        DEBUG_PRINTF("Set segment w/o options: %d [%d,%d;%d,%d]\n", id, (int)start, (int)stop, (int)startY, (int)stopY);
-        strip.setSegment(id, start, stop, selseg.grouping, selseg.spacing, offset, startY, stopY);
+        DEBUG_PRINTF_P(PSTR("Set segment w/o options: %d [%d,%d;%d,%d]\n"), id, (int)start, (int)stop, (int)startY, (int)stopY);
+        strip.suspend(); //should not be needed as UDP handling is not done in ISR callbacks but still added "just in case"
+        selseg.setUp(start, stop, selseg.grouping, selseg.spacing, offset, startY, stopY);
+        strip.resume();
         continue; // we do receive bounds, but not options
       }
       selseg.options = (selseg.options & 0x0071U) | (udpIn[9 +ofs] & 0x0E); // ignore selected, freeze, reset & transitional
       selseg.setOpacity(udpIn[10+ofs]);
       if (applyEffects) {
-        DEBUG_PRINT(F("Apply effect: ")); DEBUG_PRINTLN(id);
+        DEBUG_PRINTF_P(PSTR("Apply effect: %u\n"), id);
         selseg.setMode(udpIn[11+ofs]);
         selseg.speed     = udpIn[12+ofs];
         selseg.intensity = udpIn[13+ofs];
+      }
+      if (receiveNotificationPalette || !someSel) {
+        DEBUG_PRINTF_P(PSTR("Apply palette: %u\n"), id);
         selseg.palette   = udpIn[14+ofs];
       }
       if (receiveNotificationColor || !someSel) {
-        DEBUG_PRINT(F("Apply color: ")); DEBUG_PRINTLN(id);
+        DEBUG_PRINTF_P(PSTR("Apply color: %u\n"), id);
         selseg.setColor(0, RGBW32(udpIn[15+ofs],udpIn[16+ofs],udpIn[17+ofs],udpIn[18+ofs]));
         selseg.setColor(1, RGBW32(udpIn[19+ofs],udpIn[20+ofs],udpIn[21+ofs],udpIn[22+ofs]));
         selseg.setColor(2, RGBW32(udpIn[23+ofs],udpIn[24+ofs],udpIn[25+ofs],udpIn[26+ofs]));
@@ -312,10 +327,10 @@ void parseNotifyPacket(uint8_t *udpIn) {
         // when applying synced options ignore selected as it may be used as indicator of which segments to sync
         // freeze, reset should never be synced
         // LSB to MSB: select, reverse, on, mirror, freeze, reset, reverse_y, mirror_y, transpose, map1d2d (3), ssim (2), set (2)
-        DEBUG_PRINT(F("Apply options: ")); DEBUG_PRINTLN(id);
+        DEBUG_PRINTF_P(PSTR("Apply options: %u\n"), id);
         selseg.options = (selseg.options & 0b0000000000110001U) | (udpIn[28+ofs]<<8) | (udpIn[9 +ofs] & 0b11001110U); // ignore selected, freeze, reset
         if (applyEffects) {
-          DEBUG_PRINT(F("Apply sliders: ")); DEBUG_PRINTLN(id);
+          DEBUG_PRINTF_P(PSTR("Apply sliders: %u\n"), id);
           selseg.custom1 = udpIn[29+ofs];
           selseg.custom2 = udpIn[30+ofs];
           selseg.custom3 = udpIn[31+ofs] & 0x1F;
@@ -325,27 +340,31 @@ void parseNotifyPacket(uint8_t *udpIn) {
         }
       }
       if (receiveSegmentBounds) {
-        DEBUG_PRINTF("Set segment w/ options: %d [%d,%d;%d,%d]\n", id, (int)start, (int)stop, (int)startY, (int)stopY);
-        // we have to use strip.setSegment() instead of selseg.setUp() to prevent crash if segment would change during drawing 
-        strip.setSegment(id, start, stop, udpIn[5+ofs], udpIn[6+ofs], offset, startY, stopY);
+        DEBUG_PRINTF_P(PSTR("Set segment w/ options: %d [%d,%d;%d,%d]\n"), id, (int)start, (int)stop, (int)startY, (int)stopY);
+        strip.suspend(); //should not be needed as UDP handling is not done in ISR callbacks but still added "just in case"
+        selseg.setUp(start, stop, udpIn[5+ofs], udpIn[6+ofs], offset, startY, stopY);
+        strip.resume();
       } else {
-        // we have to use strip.setSegment() instead of selseg.setUp() to prevent crash if segment would change during drawing 
-        DEBUG_PRINTF("Set segment grouping: %d [%d,%d]\n", id, (int)udpIn[5+ofs], (int)udpIn[6+ofs]);
-        strip.setSegment(id, selseg.start, selseg.stop, udpIn[5+ofs], udpIn[6+ofs], selseg.offset, selseg.startY, selseg.stopY);
+        DEBUG_PRINTF_P(PSTR("Set segment grouping: %d [%d,%d]\n"), id, (int)udpIn[5+ofs], (int)udpIn[6+ofs]);
+        strip.suspend(); //should not be needed as UDP handling is not done in ISR callbacks but still added "just in case"
+        selseg.setUp(selseg.start, selseg.stop, udpIn[5+ofs], udpIn[6+ofs], selseg.offset, selseg.startY, selseg.stopY);
+        strip.resume();
       }
     }
     stateChanged = true;
   }
 
   // simple effect sync, applies to all selected segments
-  if (applyEffects && (version < 11 || !receiveSegmentOptions)) {
+  if ((applyEffects || receiveNotificationPalette) && (version < 11 || !receiveSegmentOptions)) {
     for (size_t i = 0; i < strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive() || !seg.isSelected()) continue;
-      seg.setMode(udpIn[8]);
-      seg.speed = udpIn[9];
-      if (version > 2) seg.intensity = udpIn[16];
-      if (version > 4) seg.setPalette(udpIn[19]);
+      if (applyEffects) {
+        seg.setMode(udpIn[8]);
+        seg.speed = udpIn[9];
+        if (version > 2) seg.intensity = udpIn[16];
+      }
+      if (version > 4 && receiveNotificationPalette) seg.setPalette(udpIn[19]);
     }
     stateChanged = true;
   }
@@ -391,7 +410,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
 void realtimeLock(uint32_t timeoutMs, byte md)
 {
   if (!realtimeMode && !realtimeOverride) {
-    uint16_t stop, start;
+    unsigned stop, start;
     if (useMainSegmentOnly) {
       Segment& mainseg = strip.getMainSegment();
       start = mainseg.start;
@@ -434,6 +453,8 @@ void exitRealtime() {
   realtimeIP[0] = 0;
   if (useMainSegmentOnly) { // unfreeze live segment again
     strip.getMainSegment().freeze = false;
+  } else {
+    strip.show(); // possible fix for #3589
   }
   updateInterfaces(CALL_MODE_WS_SEND);
 }
@@ -489,8 +510,8 @@ void handleNotifications()
       rgbUdp.read(lbuf, packetSize);
       realtimeLock(realtimeTimeoutMs, REALTIME_MODE_HYPERION);
       if (realtimeOverride && !(realtimeMode && useMainSegmentOnly)) return;
-      uint16_t id = 0;
-      uint16_t totalLen = strip.getLengthTotal();
+      unsigned id = 0;
+      unsigned totalLen = strip.getLengthTotal();
       for (size_t i = 0; i < packetSize -2; i += 3)
       {
         setRealtimePixel(id, lbuf[i], lbuf[i+1], lbuf[i+2], 0);
@@ -507,7 +528,7 @@ void handleNotifications()
   if (!isSupp && notifierUdp.remoteIP() == localIP) return; //don't process broadcasts we send ourselves
 
   uint8_t udpIn[packetSize +1];
-  uint16_t len;
+  unsigned len;
   if (isSupp) len = notifier2Udp.read(udpIn, packetSize);
   else        len =  notifierUdp.read(udpIn, packetSize);
 
@@ -515,7 +536,7 @@ void handleNotifications()
   if (isSupp && udpIn[0] == 255 && udpIn[1] == 1 && len >= 40) {
     if (!nodeListEnabled || notifier2Udp.remoteIP() == localIP) return;
 
-    uint8_t unit = udpIn[39];
+    unsigned unit = udpIn[39];
     NodesMap::iterator it = Nodes.find(unit);
     if (it == Nodes.end() && Nodes.size() < WLED_MAX_NODES) { // Create a new element when not present
       Nodes[unit].age = 0;
@@ -545,7 +566,7 @@ void handleNotifications()
   //wled notifier, ignore if realtime packets active
   if (udpIn[0] == 0 && !realtimeMode && receiveGroups)
   {
-    DEBUG_PRINT(F("UDP notification from: ")); DEBUG_PRINTLN(notifierUdp.remoteIP());
+    DEBUG_PRINTF_P(PSTR("UDP notification from: %d.%d.%d.%d\n"), notifierUdp.remoteIP()[0], notifierUdp.remoteIP()[1], notifierUdp.remoteIP()[2], notifierUdp.remoteIP()[3]);
     parseNotifyPacket(udpIn);
     return;
   }
@@ -572,8 +593,8 @@ void handleNotifications()
     byte packetNum = udpIn[4]; //starts with 1!
     byte numPackets = udpIn[5];
 
-    uint16_t id = (tpmPayloadFrameSize/3)*(packetNum-1); //start LED
-    uint16_t totalLen = strip.getLengthTotal();
+    unsigned id = (tpmPayloadFrameSize/3)*(packetNum-1); //start LED
+    unsigned totalLen = strip.getLengthTotal();
     for (size_t i = 6; i < tpmPayloadFrameSize + 4U; i += 3)
     {
       if (id < totalLen)
@@ -607,43 +628,43 @@ void handleNotifications()
     }
     if (realtimeOverride && !(realtimeMode && useMainSegmentOnly)) return;
 
-    uint16_t totalLen = strip.getLengthTotal();
-    if (udpIn[0] == 1) //warls
+    unsigned totalLen = strip.getLengthTotal();
+    if (udpIn[0] == 1 && packetSize > 5) //warls
     {
       for (size_t i = 2; i < packetSize -3; i += 4)
       {
         setRealtimePixel(udpIn[i], udpIn[i+1], udpIn[i+2], udpIn[i+3], 0);
       }
-    } else if (udpIn[0] == 2) //drgb
+    } else if (udpIn[0] == 2 && packetSize > 4) //drgb
     {
-      uint16_t id = 0;
+      unsigned id = 0;
       for (size_t i = 2; i < packetSize -2; i += 3)
       {
         setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], 0);
 
         id++; if (id >= totalLen) break;
       }
-    } else if (udpIn[0] == 3) //drgbw
+    } else if (udpIn[0] == 3 && packetSize > 6) //drgbw
     {
-      uint16_t id = 0;
+      unsigned id = 0;
       for (size_t i = 2; i < packetSize -3; i += 4)
       {
         setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], udpIn[i+3]);
 
         id++; if (id >= totalLen) break;
       }
-    } else if (udpIn[0] == 4) //dnrgb
+    } else if (udpIn[0] == 4 && packetSize > 7) //dnrgb
     {
-      uint16_t id = ((udpIn[3] << 0) & 0xFF) + ((udpIn[2] << 8) & 0xFF00);
+      unsigned id = ((udpIn[3] << 0) & 0xFF) + ((udpIn[2] << 8) & 0xFF00);
       for (size_t i = 4; i < packetSize -2; i += 3)
       {
         if (id >= totalLen) break;
         setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], 0);
         id++;
       }
-    } else if (udpIn[0] == 5) //dnrgbw
+    } else if (udpIn[0] == 5 && packetSize > 8) //dnrgbw
     {
-      uint16_t id = ((udpIn[3] << 0) & 0xFF) + ((udpIn[2] << 8) & 0xFF00);
+      unsigned id = ((udpIn[3] << 0) & 0xFF) + ((udpIn[2] << 8) & 0xFF00);
       for (size_t i = 4; i < packetSize -2; i += 4)
       {
         if (id >= totalLen) break;
@@ -664,8 +685,8 @@ void handleNotifications()
       apireq += (char*)udpIn;
       handleSet(nullptr, apireq);
     } else if (udpIn[0] == '{') { //JSON API
-      DeserializationError error = deserializeJson(doc, udpIn);
-      JsonObject root = doc.as<JsonObject>();
+      DeserializationError error = deserializeJson(*pDoc, udpIn);
+      JsonObject root = pDoc->as<JsonObject>();
       if (!error && !root.isNull()) deserializeState(root);
     }
     releaseJSONBufferLock();
@@ -675,7 +696,7 @@ void handleNotifications()
 
 void setRealtimePixel(uint16_t i, byte r, byte g, byte b, byte w)
 {
-  uint16_t pix = i + arlsOffset;
+  unsigned pix = i + arlsOffset;
   if (pix < strip.getLengthTotal()) {
     if (!arlsDisableGammaCorrection && gammaCorrectCol) {
       r = gamma8(r);
@@ -938,15 +959,23 @@ uint8_t realtimeBroadcast(uint8_t type, IPAddress client, uint16_t length, uint8
 }
 
 #ifndef WLED_DISABLE_ESPNOW
+// ESP-NOW message sent callback function
+void espNowSentCB(uint8_t* address, uint8_t status) {
+    DEBUG_PRINTF_P(PSTR("Message sent to " MACSTR ", status: %d\n"), MAC2STR(address), status);
+}
+
 // ESP-NOW message receive callback function
 void espNowReceiveCB(uint8_t* address, uint8_t* data, uint8_t len, signed int rssi, bool broadcast) {
   sprintf_P(last_signal_src, PSTR("%02x%02x%02x%02x%02x%02x"), address[0], address[1], address[2], address[3], address[4], address[5]);
 
   #ifdef WLED_DEBUG
     DEBUG_PRINT(F("ESP-NOW: ")); DEBUG_PRINT(last_signal_src); DEBUG_PRINT(F(" -> ")); DEBUG_PRINTLN(len);
-    for (int i=0; i<len; i++) DEBUG_PRINTF("%02x ", data[i]);
+    for (int i=0; i<len; i++) DEBUG_PRINTF_P(PSTR("%02x "), data[i]);
     DEBUG_PRINTLN();
   #endif
+
+  // usermods hook can override processing
+  if (UsermodManager::onEspNowMessage(address, data, len)) return;
 
   // handle WiZ Mote data
   if (data[0] == 0x91 || data[0] == 0x81 || data[0] == 0x80) {
@@ -966,19 +995,35 @@ void espNowReceiveCB(uint8_t* address, uint8_t* data, uint8_t len, signed int rs
   }
 
   static uint8_t *udpIn = nullptr;
-  static uint8_t packetsReceived = 0; // bitfield (max 5 packets ATM)
+  static uint8_t packetsReceived = 0;
   static uint8_t segsReceived = 0;
   static unsigned long lastProcessed = 0;
 
   if (buffer->packet == 0) {
-    if (udpIn == nullptr) udpIn = (uint8_t *)malloc(WLEDPACKETSIZE); // we cannot use stack as we are in callback
-    DEBUG_PRINTLN(F("ESP-NOW inited UDP buffer."));
-    memcpy(udpIn, buffer->data, len-3); // global data (41 bytes)
-    packetsReceived |= 0x01 << buffer->packet;
-    segsReceived = 0;
-    return;
-  } else if (((len-3)/UDP_SEG_SIZE)*UDP_SEG_SIZE != (len-3)) {
-    DEBUG_PRINTF("ESP-NOW incorrect packet size: %d (%d) [%d]\n", (int)buffer->packet, (int)len-3, (int)UDP_SEG_SIZE);
+    packetsReceived = 0; // it will increment later (this is to make sure we start counting packets correctly)
+    if (udpIn == nullptr) {
+      udpIn = (uint8_t *)malloc(WLEDPACKETSIZE); // we cannot use stack as we are in callback
+      if (!udpIn) return; // memory alocation failed
+      DEBUG_PRINTLN(F("ESP-NOW inited UDP buffer."));
+    }
+    memcpy(udpIn, buffer->data, len-3); // global data (41 bytes + up to 5 segments)
+    segsReceived = (len - 3 - 41) / UDP_SEG_SIZE;
+  } else if (buffer->packet == packetsReceived && udpIn && ((len - 3) / UDP_SEG_SIZE) * UDP_SEG_SIZE == (len-3)) {
+    // we received a packet full of segments
+    if (segsReceived >= MAX_NUM_SEGMENTS) {
+      // we are already past max segments, just ignore
+      DEBUG_PRINTLN(F("ESP-NOW received segments past maximum."));
+      len = 3;
+    } else if ((segsReceived + ((len - 3) / UDP_SEG_SIZE)) >= MAX_NUM_SEGMENTS) {
+      len = ((MAX_NUM_SEGMENTS - segsReceived) * UDP_SEG_SIZE) + 3; // we have reached max number of segments
+    }
+    if (len > 3) {
+      memcpy(udpIn + 41 + (segsReceived * UDP_SEG_SIZE), buffer->data, len-3);
+      segsReceived += (len - 3) / UDP_SEG_SIZE;
+    }
+  } else {
+    // any out of order packet or incorrectly sized packet or if we have no UDP buffer will abort
+    DEBUG_PRINTF_P(PSTR("ESP-NOW incorrect packet: %d (%d) [%d]\n"), (int)buffer->packet, (int)len-3, (int)UDP_SEG_SIZE);
     if (udpIn) free(udpIn);
     udpIn = nullptr;
     packetsReceived = 0;
@@ -987,15 +1032,9 @@ void espNowReceiveCB(uint8_t* address, uint8_t* data, uint8_t len, signed int rs
   }
   if (!udpIn) return;
 
-  // TODO add verification if segsReceived > MAX_NUM_SEGMENTS or WLEDPACKETSIZE
-
-  memcpy(udpIn+41+segsReceived, buffer->data, len-3);
-  packetsReceived |= 0x01 << buffer->packet;
-  segsReceived += (len-3)/UDP_SEG_SIZE;
-
-  DEBUG_PRINTF("ESP-NOW packet received: %d (%d) [%d]\n", (int)buffer->packet, (int)len-3, (int)segsReceived);
-
-  if (segsReceived == buffer->segs) {
+  packetsReceived++;
+  DEBUG_PRINTF_P(PSTR("ESP-NOW packet received: %d (%d/%d) s:[%d/%d]\n"), (int)buffer->packet, (int)packetsReceived, (int)buffer->noOfPackets, (int)segsReceived, MAX_NUM_SEGMENTS);
+  if (packetsReceived >= buffer->noOfPackets) {
     // last packet received
     if (millis() - lastProcessed > 250) {
       DEBUG_PRINTLN(F("ESP-NOW processing complete message."));
