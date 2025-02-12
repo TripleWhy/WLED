@@ -1,0 +1,57 @@
+return FRAMETIME
+do effects that rely on that even work properly when the frame rate is too low or when blending effects?
+current exceptions:
+mode_static: return strip.isOffRefreshRequired() ? FRAMETIME : 350;
+mode_android: return 3 + ((8 * (uint32_t)(255 - SEGMENT.speed)) / SEGLEN);
+mode_chase_flash: return delay; (computed)
+mode_chase_flash_random: return delay; (computed)
+mode_icu: return 200; / return 1000 + random16(2000); / return SPEED_FORMULA_L;
+mode_colortwinkle: return FRAMETIME_FIXED;
+candle: return FRAMETIME_FIXED;
+
+If we could figure out a way to map from physical LED to segments+indexes, we could avoid a lot of work.
+    - skip missing pixels
+    - only do the mapping once per pixel
+    - no data loss between overlay effects
+    - only one read + one write per pixel
+        * if there were only overlays that lay effects on top of eachother (instead of reading the current state), we could avoid reading and losses altogether.
+          Not sure if there are effects that need the old state though.
+    - this would allow non-uniformly placed (3D) setups/effects
+In the meantime: getPixelColorXY / setPixelColorXY do the mapping work twice. Can we avoid that by returning a pointer or something?
+We could get rid of a lot of setPixelColor-code with this.
+
+
+TODO
+check make_unique uses and handle failures
+Are immediate updates necessary? The target frame rate is at least 1FPS, so you have to wait at most 1s.
+    - setBrightness, 2x
+    - json setColor if static effect
+Shouldn't the analog clock be a regular effect?
+
+
+
+
+
+Certainly! To remove unused symbols during linking with **GCC**, follow these steps:
+
+1. **Compile with Separate Sections**:
+   - Compile your code using the following compiler flags:
+     ```
+     -fdata-sections -ffunction-sections
+     ```
+   - These flags will separate the code into distinct sections within the translation unit¹.
+
+2. **Link with Optimization**:
+   - When linking, use the following linker optimization flag:
+     ```
+     -Wl,--gc-sections
+     ```
+   - This instructs the linker to discard unreferenced sections, effectively removing unused functions and data¹.
+
+Remember that building a call graph to accurately identify unused symbols can be challenging, especially for global, accurate call graphs. However, these steps should help optimize your executable size by removing unnecessary symbols. 🚀👍¹³
+
+Source: Conversation with Copilot, 7/8/2024
+(1) How to remove unused C/C++ symbols with GCC and ld?. https://stackoverflow.com/questions/6687630/how-to-remove-unused-c-c-symbols-with-gcc-and-ld.
+(2) ld - Discard unused functions in GCC - Stack Overflow. https://stackoverflow.com/questions/36033595/discard-unused-functions-in-gcc.
+(3) c++ - Shared Lib: remove unused Symbol - Stack Overflow. https://stackoverflow.com/questions/35841452/shared-lib-remove-unused-symbol.
+(4) gcc - linker option to ignore unused dependencies - Stack Overflow. https://stackoverflow.com/questions/16040536/linker-option-to-ignore-unused-dependencies.
