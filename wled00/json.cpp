@@ -185,7 +185,7 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
         if (!colValid) continue;
 
         seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));
-        if (seg.mode == FX_MODE_STATIC) strip.trigger(); //instant refresh
+        if (seg.getEffectId() == FX_MODE_STATIC) strip.trigger(); //instant refresh
       }
     } else {
       // non RGB & non White segment (usually On/Off bus)
@@ -218,10 +218,10 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.transpose = transpose;
   #endif
 
-  byte fx = seg.mode;
+  byte fx = seg.getEffectId();
   if (getVal(elem["fx"], &fx, 0, strip.getModeCount())) {
     if (!presetId && currentPlaylist>=0) unloadPlaylist();
-    if (fx != seg.mode) seg.setMode(fx, elem[F("fxdef")]);
+    seg.setMode(fx, elem[F("fxdef")]);
   }
 
   getVal(elem["sx"], &seg.speed);
@@ -548,7 +548,7 @@ void serializeSegment(const JsonObject& root, const Segment& seg, byte id, bool 
   strcat(colstr, "]");
   root["col"] = serialized(colstr);
 
-  root["fx"]  = seg.mode;
+  root["fx"]  = seg.getEffectId();
   root["sx"]  = seg.speed;
   root["ix"]  = seg.intensity;
   root["pal"] = seg.palette;
