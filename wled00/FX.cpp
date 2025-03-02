@@ -13,8 +13,9 @@
 #include "wled.h"
 #include "FX.h"
 #include "fcn_declare.h"
-#include "effects/StaticEffect.h"
+#include "effects/BouncingBallsEffect.h"
 #include "effects/PaletteEffect.h"
+#include "effects/StaticEffect.h"
 #include <memory>
 
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
@@ -2835,89 +2836,6 @@ uint16_t mode_spots_fade()
   return spots_base(tr);
 }
 static const char _data_FX_MODE_SPOTS_FADE[] PROGMEM = "Spots Fade@Spread,Width,,,,,Overlay;!,!;!";
-
-//each needs 12 bytes
-typedef struct Ball {
-  unsigned long lastBounceTime;
-  float impactVelocity;
-  float height;
-} ball;
-
-/*
-*  Bouncing Balls Effect
-*/
-uint16_t mode_bouncing_balls(void) {
-  if (SEGLEN <= 1) return mode_static();
-  //allocate segment data
-  const unsigned strips = SEGMENT.nrOfVStrips(); // adapt for 2D
-  const size_t maxNumBalls = 16;
-  unsigned dataSize = sizeof(ball) * maxNumBalls;
-  if (!SEGENV.allocateData(dataSize * strips)) return mode_static(); //allocation failed
-
-  Ball* balls = reinterpret_cast<Ball*>(SEGENV.data);
-
-  if (!SEGMENT.check2) SEGMENT.fill(SEGCOLOR(2) ? BLACK : SEGCOLOR(1));
-
-  // virtualStrip idea by @ewowi (Ewoud Wijma)
-  // requires virtual strip # to be embedded into upper 16 bits of index in setPixelColor()
-  // the following functions will not work on virtual strips: fill(), fade_out(), fadeToBlack(), blur()
-  struct virtualStrip {
-    static void runStrip(size_t stripNr, Ball* balls) {
-      // number of balls based on intensity setting to max of 7 (cycles colors)
-      // non-chosen color is a random color
-      unsigned numBalls = (SEGMENT.intensity * (maxNumBalls - 1)) / 255 + 1; // minimum 1 ball
-      const float gravity = -9.81f; // standard value of gravity
-      const bool hasCol2 = SEGCOLOR(2);
-      const unsigned long time = strip.now;
-
-      if (SEGENV.call == 0) {
-        for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
-      }
-
-      for (size_t i = 0; i < numBalls; i++) {
-        float timeSinceLastBounce = (time - balls[i].lastBounceTime)/((255-SEGMENT.speed)/64 +1);
-        float timeSec = timeSinceLastBounce/1000.0f;
-        balls[i].height = (0.5f * gravity * timeSec + balls[i].impactVelocity) * timeSec; // avoid use pow(x, 2) - its extremely slow !
-
-        if (balls[i].height <= 0.0f) {
-          balls[i].height = 0.0f;
-          //damping for better effect using multiple balls
-          float dampening = 0.9f - float(i)/float(numBalls * numBalls); // avoid use pow(x, 2) - its extremely slow !
-          balls[i].impactVelocity = dampening * balls[i].impactVelocity;
-          balls[i].lastBounceTime = time;
-
-          if (balls[i].impactVelocity < 0.015f) {
-            float impactVelocityStart = sqrtf(-2.0f * gravity) * hw_random8(5,11)/10.0f; // randomize impact velocity
-            balls[i].impactVelocity = impactVelocityStart;
-          }
-        } else if (balls[i].height > 1.0f) {
-          continue; // do not draw OOB ball
-        }
-
-        uint32_t color = SEGCOLOR(0);
-        if (SEGMENT.palette) {
-          color = SEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
-        } else if (hasCol2) {
-          color = SEGCOLOR(i % NUM_COLORS);
-        }
-
-        int pos = roundf(balls[i].height * (SEGLEN - 1));
-        #ifdef WLED_USE_AA_PIXELS
-        if (SEGLEN<32) SEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-        else           SEGMENT.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
-        #else
-        SEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-        #endif
-      }
-    }
-  };
-
-  for (unsigned stripNr=0; stripNr<strips; stripNr++)
-    virtualStrip::runStrip(stripNr, &balls[stripNr * maxNumBalls]);
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_BOUNCINGBALLS[] PROGMEM = "Bouncing Balls@Gravity,# of balls,,,,,Overlay;!,!,!;!;1;m12=1"; //bar
 
 #ifdef WLED_PS_DONT_REPLACE_FX
 /*
@@ -10056,6 +9974,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   // Solid must be first! (assuming vector is empty upon call to setup)
   addEffect(std::make_unique<EffectFactory>(StaticEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(PaletteEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(BouncingBallsEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
