@@ -16,6 +16,7 @@
 #include "effects/BouncingBallsEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/StaticEffect.h"
+#include "effects/TetrixEffect.h"
 #include <memory>
 
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
@@ -3558,97 +3559,6 @@ uint16_t mode_drip(void)
   return FRAMETIME;
 }
 static const char _data_FX_MODE_DRIP[] PROGMEM = "Drip@Gravity,# of drips,,,,,Overlay;!,!;!;;m12=1"; //bar
-
-/*
- * Tetris or Stacking (falling bricks) Effect
- * by Blaz Kristan (AKA blazoncek) (https://github.com/blazoncek, https://blaz.at/home)
- */
-//20 bytes
-typedef struct Tetris {
-  float    pos;
-  float    speed;
-  uint8_t  col;   // color index
-  uint16_t brick; // brick size in pixels
-  uint16_t stack; // stack size in pixels
-  uint32_t step;  // 2D-fication of SEGENV.step (state)
-} tetris;
-
-uint16_t mode_tetrix(void) {
-  if (SEGLEN <= 1) return mode_static();
-  unsigned strips = SEGMENT.nrOfVStrips(); // allow running on virtual strips (columns in 2D segment)
-  unsigned dataSize = sizeof(tetris);
-  if (!SEGENV.allocateData(dataSize * strips)) return mode_static(); //allocation failed
-  Tetris* drops = reinterpret_cast<Tetris*>(SEGENV.data);
-
-  //if (SEGENV.call == 0) SEGMENT.fill(SEGCOLOR(1));  // will fill entire segment (1D or 2D), then use drop->step = 0 below
-
-  // virtualStrip idea by @ewowi (Ewoud Wijma)
-  // requires virtual strip # to be embedded into upper 16 bits of index in setPixelcolor()
-  // the following functions will not work on virtual strips: fill(), fade_out(), fadeToBlack(), blur()
-  struct virtualStrip {
-    static void runStrip(size_t stripNr, Tetris *drop) {
-      // initialize dropping on first call or segment full
-      if (SEGENV.call == 0) {
-        drop->stack = 0;                  // reset brick stack size
-        drop->step = strip.now + 2000;     // start by fading out strip
-        if (SEGMENT.check1) drop->col = 0;// use only one color from palette
-      }
-
-      if (drop->step == 0) {              // init brick
-        // speed calculation: a single brick should reach bottom of strip in X seconds
-        // if the speed is set to 1 this should take 5s and at 255 it should take 0.25s
-        // as this is dependant on SEGLEN it should be taken into account and the fact that effect runs every FRAMETIME s
-        int speed = SEGMENT.speed ? SEGMENT.speed : hw_random8(1,255);
-        speed = map(speed, 1, 255, 5000, 250); // time taken for full (SEGLEN) drop
-        drop->speed = float(SEGLEN * FRAMETIME) / float(speed); // set speed
-        drop->pos   = SEGLEN;             // start at end of segment (no need to subtract 1)
-        if (!SEGMENT.check1) drop->col = hw_random8(0,15)<<4;   // limit color choices so there is enough HUE gap
-        drop->step  = 1;                  // drop state (0 init, 1 forming, 2 falling)
-        drop->brick = (SEGMENT.intensity ? (SEGMENT.intensity>>5)+1 : hw_random8(1,5)) * (1+(SEGLEN>>6));  // size of brick
-      }
-
-      if (drop->step == 1) {              // forming
-        if (hw_random8()>>6) {               // random drop
-          drop->step = 2;                 // fall
-        }
-      }
-
-      if (drop->step == 2) {              // falling
-        if (drop->pos > drop->stack) {    // fall until top of stack
-          drop->pos -= drop->speed;       // may add gravity as: speed += gravity
-          if (int(drop->pos) < int(drop->stack)) drop->pos = drop->stack;
-          for (unsigned i = unsigned(drop->pos); i < SEGLEN; i++) {
-            uint32_t col = i < unsigned(drop->pos)+drop->brick ? SEGMENT.color_from_palette(drop->col, false, false, 0) : SEGCOLOR(1);
-            SEGMENT.setPixelColor(indexToVStrip(i, stripNr), col);
-          }
-        } else {                          // we hit bottom
-          drop->step = 0;                 // proceed with next brick, go back to init
-          drop->stack += drop->brick;     // increase the stack size
-          if (drop->stack >= SEGLEN) drop->step = strip.now + 2000; // fade out stack
-        }
-      }
-
-      if (drop->step > 2) {               // fade strip
-        drop->brick = 0;                  // reset brick size (no more growing)
-        if (drop->step > strip.now) {
-          // allow fading of virtual strip
-          for (unsigned i = 0; i < SEGLEN; i++) SEGMENT.blendPixelColor(indexToVStrip(i, stripNr), SEGCOLOR(1), 25); // 10% blend
-        } else {
-          drop->stack = 0;                // reset brick stack size
-          drop->step = 0;                 // proceed with next brick
-          if (SEGMENT.check1) drop->col += 8;   // gradually increase palette index
-        }
-      }
-    }
-  };
-
-  for (unsigned stripNr=0; stripNr<strips; stripNr++)
-    virtualStrip::runStrip(stripNr, &drops[stripNr]);
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_TETRIX[] PROGMEM = "Tetrix@!,Width,,,,One color;!,!;!;;sx=0,ix=0,pal=11,m12=1";
-
 
 /*
 / Plasma Effect
@@ -9974,6 +9884,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   // Solid must be first! (assuming vector is empty upon call to setup)
   addEffect(std::make_unique<EffectFactory>(StaticEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(PaletteEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(TetrixEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(BouncingBallsEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
