@@ -24,10 +24,10 @@ public:
     constexpr void nextFrameImpl() {
     }
 
-    constexpr void nextRowImpl(int y) {
+    constexpr void nextRowImpl(unsigned y) {
     }
 
-    uint32_t getPixelColorImpl(int x, int y, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
         return SEGCOLOR(0);
     }
 };

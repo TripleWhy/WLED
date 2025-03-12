@@ -8,30 +8,23 @@ protected:
     class PixelBuffer {
         friend class BufferedEffect;
     public:
-        uint32_t getPixelColor(int i) const {
-            if (i < 0) [[unlikely]] {
-                Serial.printf("BufferedEffect::PixelBuffer::getPixelColor: %d < 0\n", i);
-                std::terminate();
-            }
+        uint32_t getPixelColor(unsigned i) const {
             if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
                 Serial.printf("BufferedEffect::PixelBuffer::getPixelColor: %d >= %u\n", i, pixels.size());
                 std::terminate();
             }
             return pixels[static_cast<size_t>(i)];
         }
-        inline uint32_t getPixelColorXY(int x, int y) const {
+        inline uint32_t getPixelColorXY(unsigned x, unsigned y) const {
             return getPixelColor(y * SEG_W + x);
         }
-        void setPixelColor(int i, uint32_t c) {
-            if (i < 0) [[unlikely]] {
-                std::terminate();
-            }
+        void setPixelColor(unsigned i, uint32_t c) {
             if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
                 std::terminate();
             }
             pixels[static_cast<size_t>(i)] = c;
         }
-        void blendPixelColor(int n, uint32_t color, uint8_t blend) {
+        void blendPixelColor(unsigned n, uint32_t color, uint8_t blend) {
             setPixelColor(n, color_blend(getPixelColor(n), color, blend));
         }
 
@@ -80,10 +73,10 @@ public:
         }
     }
 
-    constexpr void nextRowImpl(int y) {
+    constexpr void nextRowImpl(unsigned y) {
     }
 
-    uint32_t getPixelColorImpl(int x, int y, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
         return buffer.getPixelColorXY(x, y);
     }
 

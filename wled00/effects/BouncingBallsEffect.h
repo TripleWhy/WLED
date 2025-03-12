@@ -51,11 +51,11 @@ public:
             runVirtualStrip(stripNr, &balls[stripNr * maxNumBalls]);
     }
 
-    void nextRowImpl(int y) {
+    void nextRowImpl(unsigned y) {
         stripIndex = (y * strips) / SEG_W;
     }
 
-    uint32_t getPixelColorImpl(int x, int y, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
         for (size_t ballIndex = 0; ballIndex < numBalls; ballIndex++) {
             const Ball& ball = balls[stripIndex * maxNumBalls + ballIndex];
             if (ball.pixelHeight - (ballSize / 2) <= x && x < ball.pixelHeight + ((ballSize + 1) / 2))
@@ -118,6 +118,6 @@ private:
     std::vector<Ball> balls;
     uint32_t backgroundColor;
     bool useBackgroundColor;
-    int stripIndex;
-    int ballSize;
+    unsigned stripIndex;
+    unsigned ballSize;
 };

@@ -9,8 +9,8 @@ class LazyColor;
 struct EffectInformation {
     using MakeEffectFunction    = std::unique_ptr<Effect> (*)();
     using NextFrameFunction     = void (*)(Effect* effect);
-    using NextRowFunction       = void (*)(Effect* effect, int y);
-    using GetPixelColorFunction = uint32_t (*)(Effect* effect, int x, int y, const LazyColor& currentColor);
+    using NextRowFunction       = void (*)(Effect* effect, unsigned y);
+    using GetPixelColorFunction = uint32_t (*)(Effect* effect, unsigned x, unsigned y, const LazyColor& currentColor);
 
     const char* metaData;
     const uint8_t effectId;
@@ -35,10 +35,10 @@ public:
     constexpr void nextFrame() {
         info.nextFrame(this);
     }
-    constexpr void nextRow(int y) {
+    constexpr void nextRow(unsigned y) {
         info.nextRow(this, y);
     }
-    constexpr uint32_t getPixelColor(int x, int y, const LazyColor& currentColor) {
+    constexpr uint32_t getPixelColor(unsigned x, unsigned y, const LazyColor& currentColor) {
         return info.getPixelColor(this, x, y, currentColor);
     }
 
@@ -59,11 +59,11 @@ public:
         static_cast<T*>(effect)->nextFrameImpl();
     }
 
-    static void nextRow(Effect* effect, int y) {
+    static void nextRow(Effect* effect, unsigned y) {
         static_cast<T*>(effect)->nextRowImpl(y);
     }
 
-    static uint32_t getPixelColor(Effect* effect, int x, int y, const LazyColor& currentColor) {
+    static uint32_t getPixelColor(Effect* effect, unsigned x, unsigned y, const LazyColor& currentColor) {
         return static_cast<T*>(effect)->getPixelColorImpl(x, y, currentColor);
     }
 };

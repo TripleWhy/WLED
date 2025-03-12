@@ -76,17 +76,17 @@ public:
         scale = std::abs(sinTheta) + (std::abs(cosTheta) * maxYOut / maxXOut);
     }
 
-    constexpr void nextRowImpl(int y) {
+    constexpr void nextRowImpl(unsigned y) {
         // translate, scale, rotate
-        ytCosTheta = mathType((wideMathType(cosTheta) * wideMathType(y * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
+        ytCosTheta = mathType((wideMathType(cosTheta) * wideMathType(mathType(y) * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
     }
 
-    uint32_t getPixelColorImpl(int x, int y, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
         const int  inputSize            = SEGMENT.intensity;
         const bool inputAnimateShift    = SEGMENT.check1;
         const int  inputShift           = SEGMENT.speed;
 
-        const mathType xtSinTheta = mathType((wideMathType(sinTheta) * wideMathType(x * sInt16Scale - centerX * maxXIn))/wideMathType(maxXIn * scale));
+        const mathType xtSinTheta = mathType((wideMathType(sinTheta) * wideMathType(mathType(x) * sInt16Scale - centerX * maxXIn))/wideMathType(maxXIn * scale));
         // Map the pixel coordinate to an imaginary-rectangle-coordinate.
         // The y coordinate doesn't actually matter, as our imaginary rectangle is filled with the palette from left to right,
         // so all points at a given x-coordinate have the same color.

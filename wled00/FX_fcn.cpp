@@ -1650,9 +1650,9 @@ void WS2812FX::service() {
 
           Effect* const effect = seg.getCurrentEffect(); // new/current effect
           effect->nextFrame();
-          for (int y = 0; y < h; y++) {
+          for (unsigned y = 0u; y < h; y++) {
             effect->nextRow(y);
-            for (int x = 0; x < w; x++) {
+            for (unsigned x = 0u; x < w; x++) {
               const LazyColor oldColor(seg, x, y);
               const uint32_t newColor = effect->getPixelColor(x, y, oldColor);
               seg.setPixelColorXY(x, y, newColor);
