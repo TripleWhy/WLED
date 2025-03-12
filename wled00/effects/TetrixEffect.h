@@ -54,11 +54,12 @@ private:
     // requires virtual strip # to be embedded into upper 16 bits of index in setPixelcolor()
     // the following functions will not work on virtual strips: fill(), fade_out(), fadeToBlack(), blur()
     void runStrip(size_t stripNr, Tetris *drop) {
+      const bool oneColor = SEGMENT.check1;
       // initialize dropping on first call or segment full
       if (SEGENV.call == 0) {
         drop->stack = 0;                  // reset brick stack size
-        drop->step = strip.now + 2000;     // start by fading out strip
-        if (SEGMENT.check1) drop->col = 0;// use only one color from palette
+        drop->step = strip.now + 2000;    // start by fading out strip
+        if (oneColor) drop->col = 0;      // use only one color from palette
       }
 
       if (drop->step == 0) {              // init brick
@@ -69,7 +70,7 @@ private:
         speed = map(speed, 1, 255, 5000, 250); // time taken for full (SEGLEN) drop
         drop->speed = float(SEGLEN * FRAMETIME) / float(speed); // set speed
         drop->pos   = SEGLEN;             // start at end of segment (no need to subtract 1)
-        if (!SEGMENT.check1) drop->col = hw_random8(0,15)<<4;   // limit color choices so there is enough HUE gap
+        if (!oneColor) drop->col = hw_random8(0,15)<<4;   // limit color choices so there is enough HUE gap
         drop->step  = 1;                  // drop state (0 init, 1 forming, 2 falling)
         drop->brick = (SEGMENT.intensity ? (SEGMENT.intensity>>5)+1 : hw_random8(1,5)) * (1+(SEGLEN>>6));  // size of brick
       }
@@ -79,6 +80,7 @@ private:
           drop->step = 2;                 // fall
         }
       }
+
       if (drop->step == 2) {              // falling
         if (drop->pos > drop->stack) {    // fall until top of stack
           drop->pos -= drop->speed;       // may add gravity as: speed += gravity
@@ -102,7 +104,7 @@ private:
         } else {
           drop->stack = 0;                // reset brick stack size
           drop->step = 0;                 // proceed with next brick
-          if (SEGMENT.check1) drop->col += 8;   // gradually increase palette index
+          if (oneColor) drop->col += 8;   // gradually increase palette index
         }
       }
     }
