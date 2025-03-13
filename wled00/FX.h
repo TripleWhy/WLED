@@ -54,7 +54,6 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 /* Not used in all effects yet */
 #define WLED_FPS         42
 #define FRAMETIME_FIXED  (1000/WLED_FPS)
-#define FRAMETIME        strip.getFrameTime()
 #if defined(ARDUINO_ARCH_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32S2)
   #define MIN_FRAME_DELAY  2                                              // minimum wait between repaints, to keep other functions like WiFi alive 
 #elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32C3)
@@ -87,13 +86,7 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
   #define MAX_SEGMENT_DATA  (MAX_NUM_SEGMENTS*1280) // 40k by default
 #endif
 
-/* How much data bytes each segment should max allocate to leave enough space for other segments,
-  assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
-#define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
-
 #define NUM_COLORS       3 /* number of colors per segment */
-#define SEGMENT          strip._segments[strip.getCurrSegmentId()]
-#define SEGENV           strip._segments[strip.getCurrSegmentId()]
 #define SEGCOLOR(x)      Segment::getCurrentColor(x)
 #define SEGPALETTE       Segment::getCurrentPalette()
 #define SEGLEN           Segment::vLength()
@@ -1062,6 +1055,5 @@ private:
     mutable bool loaded = false;
     mutable uint32_t color = 0;
 };
-
 
 #endif

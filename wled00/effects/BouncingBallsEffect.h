@@ -55,17 +55,17 @@ public:
         stripIndex = (y * strips) / SEG_W;
     }
 
-    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         for (size_t ballIndex = 0; ballIndex < numBalls; ballIndex++) {
             const Ball& ball = balls[stripIndex * maxNumBalls + ballIndex];
-            if (ball.pixelHeight - (ballSize / 2) <= x && x < ball.pixelHeight + ((ballSize + 1) / 2))
+            if (ball.pixelHeight - (ballSize / 2) <= coordinate.getXAbsolute() && coordinate.getXAbsolute() < ball.pixelHeight + ((ballSize + 1) / 2))
                 return ball.color;
         }
 
         if (useBackgroundColor)
             return backgroundColor;
         else
-            return currentColor.getColor(x, y);
+            return currentColor.getColor(coordinate.getXAbsolute(), coordinate.getYAbsolute());
     }
 
 private:

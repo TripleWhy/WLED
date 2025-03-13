@@ -76,8 +76,8 @@ public:
     constexpr void nextRowImpl(unsigned y) {
     }
 
-    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
-        return buffer.getPixelColorXY(x, y);
+    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        return buffer.getPixelColorXY(coordinate.getXAbsolute(), coordinate.getYAbsolute());
     }
 
 protected:

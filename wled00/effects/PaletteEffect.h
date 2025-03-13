@@ -81,12 +81,12 @@ public:
         ytCosTheta = mathType((wideMathType(cosTheta) * wideMathType(mathType(y) * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
     }
 
-    uint32_t getPixelColorImpl(unsigned x, unsigned y, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const int  inputSize            = SEGMENT.intensity;
         const bool inputAnimateShift    = SEGMENT.check1;
         const int  inputShift           = SEGMENT.speed;
 
-        const mathType xtSinTheta = mathType((wideMathType(sinTheta) * wideMathType(mathType(x) * sInt16Scale - centerX * maxXIn))/wideMathType(maxXIn * scale));
+        const mathType xtSinTheta = mathType((wideMathType(sinTheta) * wideMathType(mathType(coordinate.getXAbsolute()) * sInt16Scale - centerX * maxXIn))/wideMathType(maxXIn * scale));
         // Map the pixel coordinate to an imaginary-rectangle-coordinate.
         // The y coordinate doesn't actually matter, as our imaginary rectangle is filled with the palette from left to right,
         // so all points at a given x-coordinate have the same color.
