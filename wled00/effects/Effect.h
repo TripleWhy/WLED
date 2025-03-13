@@ -10,8 +10,8 @@ class EffectCoordinate;
 // Kinda emulates a v-table without needing an actual v-table.
 struct EffectInformation {
     using MakeEffectFunction    = std::unique_ptr<Effect> (*)();
-    using NextFrameFunction     = void (*)(Effect* effect);
-    using NextRowFunction       = void (*)(Effect* effect, unsigned y);
+    using NextFrameFunction     = void     (*)(Effect* effect);
+    using NextRowFunction       = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using GetPixelColorFunction = uint32_t (*)(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor);
 
     const char* metaData;
@@ -37,8 +37,8 @@ public:
     constexpr void nextFrame() {
         info.nextFrame(this);
     }
-    constexpr void nextRow(unsigned y) {
-        info.nextRow(this, y);
+    constexpr void nextRow(const EffectCoordinate& coordinate) {
+        info.nextRow(this, coordinate);
     }
     constexpr uint32_t getPixelColor(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return info.getPixelColor(this, coordinate, currentColor);
@@ -61,8 +61,8 @@ public:
         static_cast<T*>(effect)->nextFrameImpl();
     }
 
-    static void nextRow(Effect* effect, unsigned y) {
-        static_cast<T*>(effect)->nextRowImpl(y);
+    static void nextRow(Effect* effect, const EffectCoordinate& coordinate) {
+        static_cast<T*>(effect)->nextRowImpl(coordinate);
     }
 
     static uint32_t getPixelColor(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor) {

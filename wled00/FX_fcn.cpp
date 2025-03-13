@@ -1653,7 +1653,7 @@ void WS2812FX::service() {
           EffectCoordinate coordinate;
           for (unsigned y = 0u; y < h; y++) {
             coordinate.setYAbsolute(y);
-            effect->nextRow(y);
+            effect->nextRow(coordinate);
             for (unsigned x = 0u; x < w; x++) {
               coordinate.setXAbsolute(x);
               const LazyColor oldColor(seg, x, y);

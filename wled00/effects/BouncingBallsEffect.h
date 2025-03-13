@@ -51,8 +51,8 @@ public:
             runVirtualStrip(stripNr, &balls[stripNr * maxNumBalls]);
     }
 
-    void nextRowImpl(unsigned y) {
-        stripIndex = (y * strips) / SEG_W;
+    void nextRowImpl(const EffectCoordinate& coordinate) {
+        stripIndex = (coordinate.getYAbsolute() * strips) / SEG_W;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

@@ -76,9 +76,9 @@ public:
         scale = std::abs(sinTheta) + (std::abs(cosTheta) * maxYOut / maxXOut);
     }
 
-    constexpr void nextRowImpl(unsigned y) {
+    constexpr void nextRowImpl(const EffectCoordinate& coordinate) {
         // translate, scale, rotate
-        ytCosTheta = mathType((wideMathType(cosTheta) * wideMathType(mathType(y) * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
+        ytCosTheta = mathType((wideMathType(cosTheta) * wideMathType(mathType(coordinate.getYAbsolute()) * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
