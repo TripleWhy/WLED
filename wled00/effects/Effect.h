@@ -17,6 +17,7 @@ struct EffectInformation {
     const char* metaData;
     const uint8_t effectId;
     const uint8_t defaultPaletteId;
+    const uint8_t maxDimensions;
     const MakeEffectFunction makeEffect;
     const NextFrameFunction nextFrame;
     const NextRowFunction nextRow;
@@ -33,7 +34,9 @@ public:
     constexpr uint8_t getDefaultPaletteId() const {
         return info.defaultPaletteId;
     }
-
+    constexpr uint8_t getMaxDimensions() const {
+        return info.maxDimensions;
+    }
     constexpr void nextFrame() {
         info.nextFrame(this);
     }
@@ -98,25 +101,20 @@ public:
     constexpr EffectCoordinate& operator=(const EffectCoordinate&) = delete;
     constexpr EffectCoordinate& operator=(EffectCoordinate&&) = delete;
 
-    constexpr unsigned getLinearIndex() const {
-        return linearIndex;
-    }
     constexpr unsigned getXAbsolute() const {
         return x;
     }
     constexpr unsigned getYAbsolute() const {
         return y;
     }
-    constexpr void setXAbsolute(unsigned x, unsigned linearIndex) {
+    constexpr void setXAbsolute(unsigned x) {
         EffectCoordinate::x = x;
-        EffectCoordinate::linearIndex = linearIndex;
     }
     constexpr void setYAbsolute(unsigned y) {
         EffectCoordinate::y = y;
     }
 
 private:
-    unsigned linearIndex{0u};
     unsigned x{0u};
     unsigned y{0u};
 };

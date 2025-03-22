@@ -1476,6 +1476,33 @@ void WS2812FX::finalizeInit() {
 
 #pragma GCC push_options
 #pragma GCC optimize ("O3")
+
+namespace {
+template<uint8_t maxDimensions>
+inline void serviceLoop(Segment &seg, Effect* const effect) {
+  const unsigned h = (maxDimensions > 1) ? Segment::vHeight() : 1;
+  const unsigned w = (maxDimensions > 1) ? Segment::vWidth() : Segment::vLength();
+
+  effect->nextFrame();
+
+  EffectCoordinate coordinate{};
+  for (unsigned y = 0u; y < h; y++) {
+    coordinate.setYAbsolute(y);
+    effect->nextRow(coordinate);
+    for (unsigned x = 0u; x < w; x++) {
+      coordinate.setXAbsolute(x);
+      const LazyColor oldColor(seg, static_cast<int>(x), (maxDimensions > 1u) ? static_cast<int>(y) : -1);
+      const uint32_t newColor = effect->getPixelColor(coordinate, oldColor);
+      if constexpr (maxDimensions <= 1) {
+        seg.setPixelColor(x, newColor);
+      } else {
+        seg.setPixelColorXY(x, y, newColor);
+      }
+    }
+  }
+}
+}
+
 void WS2812FX::service() {
   unsigned long nowUp = millis(); // Be aware, millis() rolls over every 49 days
   now = nowUp + timebase;
@@ -1645,25 +1672,9 @@ void WS2812FX::service() {
 #endif
         // run effect mode (not in transition)
         {
-          const unsigned w = Segment::vWidth();
-          const unsigned h = Segment::vHeight();
-
+          constexpr void (*serviceLoops[3])(Segment &seg, Effect* const effect) = {nullptr, &serviceLoop<1u>, &serviceLoop<2u>};
           Effect* const effect = seg.getCurrentEffect();
-          effect->nextFrame();
-
-          EffectCoordinate coordinate{};
-          unsigned linearIndex = 0u;
-          for (unsigned y = 0u; y < h; y++) {
-            coordinate.setYAbsolute(y);
-            effect->nextRow(coordinate);
-            for (unsigned x = 0u; x < w; x++) {
-              coordinate.setXAbsolute(x, linearIndex);
-              ++linearIndex;
-              const LazyColor oldColor(seg, x, y);
-              const uint32_t newColor = effect->getPixelColor(coordinate, oldColor);
-              seg.setPixelColorXY(x, y, newColor);
-            }
-          }
+          serviceLoops[effect->getMaxDimensions()](seg, effect);
           frameDelay = 0;
         }
 

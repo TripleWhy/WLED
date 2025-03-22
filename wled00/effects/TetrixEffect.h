@@ -29,6 +29,7 @@ public:
         "Tetrix@!,Width,,,,One color;!,!;!;;sx=0,ix=0,pal=11,m12=1",
         FX_MODE_TETRIX,
         0u,
+        2u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,

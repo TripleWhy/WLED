@@ -21,6 +21,7 @@ public:
         "Blink Rainbow@Frequency,Blink duration;!,!;!;01",
         FX_MODE_BLINK_RAINBOW,
         0u,
+        1u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,

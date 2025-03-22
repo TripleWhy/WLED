@@ -15,6 +15,7 @@ public:
         "Solid",
         FX_MODE_STATIC,
         0u,
+        2u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,

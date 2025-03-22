@@ -24,6 +24,7 @@ public:
         "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1",
         FX_MODE_BOUNCINGBALLS,
         0u,
+        2u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,
@@ -65,7 +66,7 @@ public:
         if (useBackgroundColor)
             return backgroundColor;
         else
-            return currentColor.getColor(coordinate.getXAbsolute(), coordinate.getYAbsolute());
+            return currentColor.getColor();
     }
 
 private:

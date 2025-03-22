@@ -1040,9 +1040,13 @@ public:
     {
     }
 
-    uint32_t getColor(int x, int y) const {
+    uint32_t getColor() const {
         if (!loaded) {
-            color = seg.getPixelColorXY(x, y);
+            if (y < 0) {
+              color = seg.getPixelColor(x);
+            } else {
+              color = seg.getPixelColorXY(x, y);
+            }
             loaded = true;
         }
         return color;

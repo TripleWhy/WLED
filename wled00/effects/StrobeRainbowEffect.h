@@ -21,6 +21,7 @@ public:
         "Strobe Rainbow@!;,!;!;01",
         FX_MODE_STROBE_RAINBOW,
         0u,
+        1u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,

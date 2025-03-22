@@ -21,6 +21,7 @@ public:
         "Strobe@!;!,!;!;01",
         FX_MODE_STROBE,
         0u,
+        1u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,

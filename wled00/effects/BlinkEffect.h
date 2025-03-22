@@ -21,6 +21,7 @@ public:
         "Blink@!,Duty cycle;!,!;!;01",
         FX_MODE_BLINK,
         0u,
+        1u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,

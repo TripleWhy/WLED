@@ -39,6 +39,7 @@ public:
         "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic;;!;12;ix=112,c1=0,o1=1,o2=0,o3=1",
         FX_MODE_PALETTE,
         0u,
+        2u,
         &Self::makeEffect,
         &Self::nextFrame,
         &Self::nextRow,
