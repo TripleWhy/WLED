@@ -6,7 +6,7 @@
 class StaticEffect : public BaseEffect<StaticEffect> {
 private:
     using Self = StaticEffect;
-    using Base = BaseEffect<StaticEffect>;
+    using Base = BaseEffect<Self>;
 
 public:
     using Base::Base;

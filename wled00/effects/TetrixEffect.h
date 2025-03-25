@@ -20,7 +20,7 @@ private:
     };
 
     using Self = TetrixEffect;
-    using Base = BaseEffect<TetrixEffect, BufferedEffect>;
+    using Base = BaseEffect<Self, BufferedEffect>;
 
 public:
     explicit TetrixEffect(const EffectInformation& ei) : Base{ei, true} {}

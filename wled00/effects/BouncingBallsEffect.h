@@ -13,8 +13,8 @@ class BouncingBallsEffect : public BaseEffect<BouncingBallsEffect> {
     };
 
 private:
-    using Base = BaseEffect<BouncingBallsEffect>;
     using Self = BouncingBallsEffect;
+    using Base = BaseEffect<Self>;
     static constexpr unsigned maxNumBalls = 16;
 
 public:

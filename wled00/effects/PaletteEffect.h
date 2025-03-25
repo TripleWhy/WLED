@@ -7,7 +7,7 @@
 class PaletteEffect : public BaseEffect<PaletteEffect> {
 private:
     using Self = PaletteEffect;
-    using Base = BaseEffect<PaletteEffect>;
+    using Base = BaseEffect<Self>;
 
     // Set up some compile time constants so that we can handle integer and float based modes using the same code base.
     #ifdef ESP8266
