@@ -1645,17 +1645,20 @@ void WS2812FX::service() {
 #endif
         // run effect mode (not in transition)
         {
-          unsigned w = seg.is2D() ? Segment::vWidth() : Segment::vLength();
-          unsigned h = Segment::vHeight();
+          const unsigned w = Segment::vWidth();
+          const unsigned h = Segment::vHeight();
 
-          Effect* const effect = seg.getCurrentEffect(); // new/current effect
+          Effect* const effect = seg.getCurrentEffect();
           effect->nextFrame();
-          EffectCoordinate coordinate;
+
+          EffectCoordinate coordinate{};
+          unsigned linearIndex = 0u;
           for (unsigned y = 0u; y < h; y++) {
             coordinate.setYAbsolute(y);
             effect->nextRow(coordinate);
             for (unsigned x = 0u; x < w; x++) {
-              coordinate.setXAbsolute(x);
+              coordinate.setXAbsolute(x, linearIndex);
+              ++linearIndex;
               const LazyColor oldColor(seg, x, y);
               const uint32_t newColor = effect->getPixelColor(coordinate, oldColor);
               seg.setPixelColorXY(x, y, newColor);

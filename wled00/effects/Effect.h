@@ -89,48 +89,30 @@ private:
 class EffectCoordinate {
 public:
     constexpr EffectCoordinate() = default;
-    constexpr EffectCoordinate(unsigned x, unsigned y) : x(x), y(y) {}
     constexpr EffectCoordinate(const EffectCoordinate&) = delete;
     constexpr EffectCoordinate(EffectCoordinate&&) = delete;
     constexpr EffectCoordinate& operator=(const EffectCoordinate&) = delete;
     constexpr EffectCoordinate& operator=(EffectCoordinate&&) = delete;
 
+    constexpr unsigned getLinearIndex() const {
+        return linearIndex;
+    }
     constexpr unsigned getXAbsolute() const {
         return x;
     }
     constexpr unsigned getYAbsolute() const {
         return y;
     }
-    // constexpr uint8_t getXRelative8() const {
-    //     return scale<uint8_t>(x, SEGMENT.vWidth());
-    // }
-    // constexpr uint16_t getXRelative16() const {
-    //     return scale<uint16_t>(x, SEGMENT.vWidth());
-    // }
-    // constexpr uint8_t getYRelative8() const {
-    //     return scale<uint8_t>(y, SEGMENT.vHeight());
-    // }
-    // constexpr uint16_t getYRelative16() const {
-    //     return scale<uint16_t>(y, SEGMENT.vHeight());
-    // }
-
-    constexpr void setXAbsolute(unsigned x) {
+    constexpr void setXAbsolute(unsigned x, unsigned linearIndex) {
         EffectCoordinate::x = x;
+        EffectCoordinate::linearIndex = linearIndex;
     }
     constexpr void setYAbsolute(unsigned y) {
         EffectCoordinate::y = y;
     }
 
 private:
-    // This version requires calling vWidth/vHeight and computing with it every call. It would be faster not doing that.
-    template<typename T>
-    static constexpr inline T scale(unsigned input, unsigned inputBound) {
-        constexpr T outputMax = std::numeric_limits<T>::max();
-        return static_cast<T>((input * outputMax) / (std::max(2u, inputBound) - 1));
-    }
-
-private:
-    unsigned x{0};
-    unsigned y{0};
+    unsigned linearIndex{0u};
+    unsigned x{0u};
+    unsigned y{0u};
 };
-static_assert(sizeof(EffectCoordinate) == 2 * sizeof(unsigned));
