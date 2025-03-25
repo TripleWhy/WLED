@@ -13,9 +13,13 @@
 #include "wled.h"
 #include "FX.h"
 #include "fcn_declare.h"
+#include "effects/BlinkEffect.h"
+#include "effects/BlinkRainbowEffect.h"
 #include "effects/BouncingBallsEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/StaticEffect.h"
+#include "effects/StrobeEffect.h"
+#include "effects/StrobeRainbowEffect.h"
 #include "effects/TetrixEffect.h"
 #include <memory>
 
@@ -56,9 +60,6 @@
 */
 
 #define IBN 5100
-// paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
-#define PALETTE_SOLID_WRAP   (strip.paletteBlend == 1 || strip.paletteBlend == 3)
-#define PALETTE_MOVING_WRAP !(strip.paletteBlend == 2 || (strip.paletteBlend == 0 && SEGMENT.speed == 0))
 
 #define indexToVStrip(index, stripNr) ((index) | (int((stripNr)+1)<<16))
 
@@ -129,76 +130,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-
-/*
- * Blink/strobe function
- * Alternate between color1 and color2
- * if(strobe == true) then create a strobe effect
- */
-uint16_t blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
-  uint32_t cycleTime = (255 - SEGMENT.speed)*20;
-  uint32_t onTime = FRAMETIME;
-  if (!strobe) onTime += ((cycleTime * SEGMENT.intensity) >> 8);
-  cycleTime += FRAMETIME*2;
-  uint32_t it = strip.now / cycleTime;
-  uint32_t rem = strip.now % cycleTime;
-
-  bool on = false;
-  if (it != SEGENV.step //new iteration, force on state for one frame, even if set time is too brief
-      || rem <= onTime) {
-    on = true;
-  }
-
-  SEGENV.step = it; //save previous iteration
-
-  uint32_t color = on ? color1 : color2;
-  if (color == color1 && do_palette)
-  {
-    for (unsigned i = 0; i < SEGLEN; i++) {
-      SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-    }
-  } else SEGMENT.fill(color);
-
-  return FRAMETIME;
-}
-
-
-/*
- * Normal blinking. Intensity sets duty cycle.
- */
-uint16_t mode_blink(void) {
-  return blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
-}
-static const char _data_FX_MODE_BLINK[] PROGMEM = "Blink@!,Duty cycle;!,!;!;01";
-
-
-/*
- * Classic Blink effect. Cycling through the rainbow.
- */
-uint16_t mode_blink_rainbow(void) {
-  return blink(SEGMENT.color_wheel(SEGENV.call & 0xFF), SEGCOLOR(1), false, false);
-}
-static const char _data_FX_MODE_BLINK_RAINBOW[] PROGMEM = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
-
-
-/*
- * Classic Strobe effect.
- */
-uint16_t mode_strobe(void) {
-  return blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
-}
-static const char _data_FX_MODE_STROBE[] PROGMEM = "Strobe@!;!,!;!;01";
-
-
-/*
- * Classic Strobe effect. Cycling through the rainbow.
- */
-uint16_t mode_strobe_rainbow(void) {
-  return blink(SEGMENT.color_wheel(SEGENV.call & 0xFF), SEGCOLOR(1), true, false);
-}
-static const char _data_FX_MODE_STROBE_RAINBOW[] PROGMEM = "Strobe Rainbow@!;,!;!;01";
-
 
 /*
  * Color wipe function
@@ -9750,6 +9681,10 @@ uint8_t WS2812FX::addEffect(std::unique_ptr<EffectFactory>&& factory) {
 void WS2812FX::setupEffectData(size_t modeCount) {
   // Solid must be first! (assuming vector is empty upon call to setup)
   addEffect(std::make_unique<EffectFactory>(StaticEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(BlinkEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(BlinkRainbowEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(StrobeEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(StrobeRainbowEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(PaletteEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(TetrixEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(BouncingBallsEffect::effectInformation));

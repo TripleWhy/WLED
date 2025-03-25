@@ -928,6 +928,9 @@ WLED_GLOBAL uint16_t ledMaps _INIT(0); // bitfield representation of available l
 #define SEGMENT          strip._segments[strip.getCurrSegmentId()]
 #define SEGENV           strip._segments[strip.getCurrSegmentId()]
 
+// paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
+#define PALETTE_SOLID_WRAP   (strip.paletteBlend == 1 || strip.paletteBlend == 3)
+#define PALETTE_MOVING_WRAP !(strip.paletteBlend == 2 || (strip.paletteBlend == 0 && SEGMENT.speed == 0))
 
 // global I2C SDA pin (used for usermods)
 #ifndef I2CSDAPIN

@@ -68,6 +68,10 @@ public:
     static uint32_t getPixelColor(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return static_cast<T*>(effect)->getPixelColorImpl(coordinate, currentColor);
     }
+
+    // Hide by redefining this function in a sub class if needed.
+    constexpr void nextRowImpl(const EffectCoordinate& coordinate) {
+    }
 };
 
 class EffectFactory {

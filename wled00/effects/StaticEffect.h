@@ -24,9 +24,6 @@ public:
     constexpr void nextFrameImpl() {
     }
 
-    constexpr void nextRowImpl(const EffectCoordinate& coordinate) {
-    }
-
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return SEGCOLOR(0);
     }
