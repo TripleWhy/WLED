@@ -16,6 +16,10 @@
 #include "effects/BlinkEffect.h"
 #include "effects/BlinkRainbowEffect.h"
 #include "effects/BouncingBallsEffect.h"
+#include "effects/ColorSweepEffect.h"
+#include "effects/ColorSweepRandomEffect.h"
+#include "effects/ColorWipeEffect.h"
+#include "effects/ColorWipeRandomEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/StaticEffect.h"
 #include "effects/StrobeEffect.h"
@@ -130,101 +134,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Color wipe function
- * LEDs are turned on (color1) in sequence, then turned off (color2) in sequence.
- * if (bool rev == true) then LEDs are turned off in reverse order
- */
-uint16_t color_wipe(bool rev, bool useRandomColors) {
-  if (SEGLEN <= 1) return mode_static();
-  uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
-  uint32_t perc = strip.now % cycleTime;
-  unsigned prog = (perc * 65535) / cycleTime;
-  bool back = (prog > 32767);
-  if (back) {
-    prog -= 32767;
-    if (SEGENV.step == 0) SEGENV.step = 1;
-  } else {
-    if (SEGENV.step == 2) SEGENV.step = 3; //trigger color change
-  }
-
-  if (useRandomColors) {
-    if (SEGENV.call == 0) {
-      SEGENV.aux0 = hw_random8();
-      SEGENV.step = 3;
-    }
-    if (SEGENV.step == 1) { //if flag set, change to new random color
-      SEGENV.aux1 = get_random_wheel_index(SEGENV.aux0);
-      SEGENV.step = 2;
-    }
-    if (SEGENV.step == 3) {
-      SEGENV.aux0 = get_random_wheel_index(SEGENV.aux1);
-      SEGENV.step = 0;
-    }
-  }
-
-  unsigned ledIndex = (prog * SEGLEN) >> 15;
-  unsigned rem = 0;
-  rem = (prog * SEGLEN) * 2; //mod 0xFFFF
-  rem /= (SEGMENT.intensity +1);
-  if (rem > 255) rem = 255;
-
-  uint32_t col1 = useRandomColors? SEGMENT.color_wheel(SEGENV.aux1) : SEGCOLOR(1);
-  for (unsigned i = 0; i < SEGLEN; i++)
-  {
-    unsigned index = (rev && back)? SEGLEN -1 -i : i;
-    uint32_t col0 = useRandomColors? SEGMENT.color_wheel(SEGENV.aux0) : SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
-
-    if (i < ledIndex)
-    {
-      SEGMENT.setPixelColor(index, back? col1 : col0);
-    } else
-    {
-      SEGMENT.setPixelColor(index, back? col0 : col1);
-      if (i == ledIndex) SEGMENT.setPixelColor(index, color_blend(back? col0 : col1, back? col1 : col0, uint8_t(rem)));
-    }
-  }
-  return FRAMETIME;
-}
-
-
-/*
- * Lights all LEDs one after another.
- */
-uint16_t mode_color_wipe(void) {
-  return color_wipe(false, false);
-}
-static const char _data_FX_MODE_COLOR_WIPE[] PROGMEM = "Wipe@!,!;!,!;!";
-
-
-/*
- * Lights all LEDs one after another. Turns off opposite
- */
-uint16_t mode_color_sweep(void) {
-  return color_wipe(true, false);
-}
-static const char _data_FX_MODE_COLOR_SWEEP[] PROGMEM = "Sweep@!,!;!,!;!";
-
-
-/*
- * Turns all LEDs after each other to a random color.
- * Then starts over with another color.
- */
-uint16_t mode_color_wipe_random(void) {
-  return color_wipe(false, true);
-}
-static const char _data_FX_MODE_COLOR_WIPE_RANDOM[] PROGMEM = "Wipe Random@!;;!";
-
-
-/*
- * Random color introduced alternating from start and end of strip.
- */
-uint16_t mode_color_sweep_random(void) {
-  return color_wipe(true, true);
-}
-static const char _data_FX_MODE_COLOR_SWEEP_RANDOM[] PROGMEM = "Sweep Random@!;;!";
-
 
 /*
  * Lights all LEDs up in one random color. Then switches them
@@ -9688,6 +9597,10 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(PaletteEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(TetrixEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(BouncingBallsEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(ColorWipeEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(ColorWipeRandomEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(ColorSweepEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(ColorSweepRandomEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
