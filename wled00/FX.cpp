@@ -21,6 +21,7 @@
 #include "effects/ColorWipeEffect.h"
 #include "effects/ColorWipeRandomEffect.h"
 #include "effects/PaletteEffect.h"
+#include "effects/RandomColorEffect.h"
 #include "effects/StaticEffect.h"
 #include "effects/StrobeEffect.h"
 #include "effects/StrobeRainbowEffect.h"
@@ -134,39 +135,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Lights all LEDs up in one random color. Then switches them
- * to the next random color.
- */
-uint16_t mode_random_color(void) {
-  uint32_t cycleTime = 200 + (255 - SEGMENT.speed)*50;
-  uint32_t it = strip.now / cycleTime;
-  uint32_t rem = strip.now % cycleTime;
-  unsigned fadedur = (cycleTime * SEGMENT.intensity) >> 8;
-
-  uint32_t fade = 255;
-  if (fadedur) {
-    fade = (rem * 255) / fadedur;
-    if (fade > 255) fade = 255;
-  }
-
-  if (SEGENV.call == 0) {
-    SEGENV.aux0 = hw_random8();
-    SEGENV.step = 2;
-  }
-  if (it != SEGENV.step) //new color
-  {
-    SEGENV.aux1 = SEGENV.aux0;
-    SEGENV.aux0 = get_random_wheel_index(SEGENV.aux0); //aux0 will store our random color wheel index
-    SEGENV.step = it;
-  }
-
-  SEGMENT.fill(color_blend(SEGMENT.color_wheel(SEGENV.aux1), SEGMENT.color_wheel(SEGENV.aux0), uint8_t(fade)));
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_RANDOM_COLOR[] PROGMEM = "Random Colors@!,Fade time;;!;01";
-
 
 /*
  * Lights every LED in a random color. Changes all LED at the same time
@@ -9601,6 +9569,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(ColorWipeRandomEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(ColorSweepEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(ColorSweepRandomEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(RandomColorEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
