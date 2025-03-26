@@ -12,21 +12,13 @@ private:
     using Base = BaseEffect<Self, BlinkEffectBase>;
 
 public:
+    static constexpr const char* const metaData = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
+    static constexpr const uint8_t effectId = FX_MODE_BLINK_RAINBOW;
+
     explicit constexpr BlinkRainbowEffect(const EffectInformation& ei)
         : Base{ei, false, false}
     {
     }
-
-    static constexpr EffectInformation effectInformation {
-        "Blink Rainbow@Frequency,Blink duration;!,!;!;01",
-        FX_MODE_BLINK_RAINBOW,
-        0u,
-        1u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
 
     void nextFrameImpl() {
         Base::nextFrameImpl(SEGMENT.color_wheel(SEGENV.call & 0xFF), SEGCOLOR(1));

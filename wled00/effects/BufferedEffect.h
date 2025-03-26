@@ -36,6 +36,10 @@ private:
     using Self = BufferedEffect;
     using Base = Effect;
 
+public:
+    static constexpr const uint8_t defaultPaletteId = 0u;
+    static constexpr const uint8_t maxDimensions = 2u;
+
 protected:
     explicit BufferedEffect(const EffectInformation& ei, bool initBufferWithCurrentState)
         : Base{ei}

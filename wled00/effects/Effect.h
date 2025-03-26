@@ -56,6 +56,17 @@ class BaseEffect : public Base {
 public:
     using Base::Base;
 
+    static constexpr EffectInformation effectInformation {
+        T::metaData,
+        T::effectId,
+        T::defaultPaletteId,
+        T::maxDimensions,
+        &T::makeEffect,
+        &T::nextFrame,
+        &T::nextRow,
+        &T::getPixelColor,
+    };
+
     static std::unique_ptr<Effect> makeEffect() {
         return std::make_unique<T>(T::effectInformation);
     }

@@ -23,18 +23,10 @@ private:
     using Base = BaseEffect<Self, BufferedEffect>;
 
 public:
-    explicit TetrixEffect(const EffectInformation& ei) : Base{ei, true} {}
+    static constexpr const char* const metaData = "Tetrix@!,Width,,,,One color;!,!;!;;sx=0,ix=0,pal=11,m12=1";
+    static constexpr const uint8_t effectId = FX_MODE_TETRIX;
 
-    static constexpr EffectInformation effectInformation {
-        "Tetrix@!,Width,,,,One color;!,!;!;;sx=0,ix=0,pal=11,m12=1",
-        FX_MODE_TETRIX,
-        0u,
-        2u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
+    explicit TetrixEffect(const EffectInformation& ei) : Base{ei, true} {}
 
     void nextFrameImpl() {
       Base::nextFrameImpl();

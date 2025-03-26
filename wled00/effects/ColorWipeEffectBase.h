@@ -14,6 +14,9 @@ private:
     using Base = Effect;
 
 public:
+    static constexpr const uint8_t defaultPaletteId = 0u;
+    static constexpr const uint8_t maxDimensions = 1u;
+
     explicit constexpr ColorWipeEffectBase(const EffectInformation& ei, bool rev, bool useRandomColors)
         : Base{ei},
         rev{rev},

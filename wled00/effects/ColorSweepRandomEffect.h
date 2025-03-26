@@ -12,19 +12,11 @@ private:
     using Base = BaseEffect<Self, ColorWipeEffectBase>;
 
 public:
+    static constexpr const char* const metaData = "Sweep Random@!;;!";
+    static constexpr const uint8_t effectId = FX_MODE_COLOR_SWEEP_RANDOM;
+
     explicit constexpr ColorSweepRandomEffect(const EffectInformation& ei)
         : Base{ei, true, true}
     {
     }
-
-    static constexpr EffectInformation effectInformation {
-        "Sweep Random@!;;!",
-        FX_MODE_COLOR_SWEEP_RANDOM,
-        0u,
-        1u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
 };

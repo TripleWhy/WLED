@@ -9,18 +9,12 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    using Base::Base;
+    static constexpr const char* const metaData = "Solid";
+    static constexpr const uint8_t effectId = FX_MODE_STATIC;
+    static constexpr const uint8_t defaultPaletteId = 0u;
+    static constexpr const uint8_t maxDimensions = 2u;
 
-    static constexpr EffectInformation effectInformation {
-        "Solid",
-        FX_MODE_STATIC,
-        0u,
-        2u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
+    using Base::Base;
 
     constexpr void nextFrameImpl() {
     }

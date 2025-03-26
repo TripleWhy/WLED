@@ -33,18 +33,12 @@ private:
     #endif
 
 public:
-    using Base::Base;
+    static constexpr const char* const metaData = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic;;!;12;ix=112,c1=0,o1=1,o2=0,o3=1";
+    static constexpr const uint8_t effectId = FX_MODE_PALETTE;
+    static constexpr const uint8_t defaultPaletteId = 0u;
+    static constexpr const uint8_t maxDimensions = 2u;
 
-    static constexpr EffectInformation effectInformation {
-        "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic;;!;12;ix=112,c1=0,o1=1,o2=0,o3=1",
-        FX_MODE_PALETTE,
-        0u,
-        2u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
+    using Base::Base;
 
     void nextFrameImpl() {
         const bool isMatrix = strip.isMatrix;

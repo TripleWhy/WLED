@@ -12,19 +12,11 @@ private:
     using Base = BaseEffect<Self, ColorWipeEffectBase>;
 
 public:
+    static constexpr const char* const metaData = "Wipe@!,!;!,!;!";
+    static constexpr const uint8_t effectId = FX_MODE_COLOR_WIPE;
+
     explicit constexpr ColorWipeEffect(const EffectInformation& ei)
         : Base{ei, false, false}
     {
     }
-
-    static constexpr EffectInformation effectInformation {
-        "Wipe@!,!;!,!;!",
-        FX_MODE_COLOR_WIPE,
-        0u,
-        1u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
 };

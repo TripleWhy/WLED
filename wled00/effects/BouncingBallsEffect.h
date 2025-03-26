@@ -18,18 +18,12 @@ private:
     static constexpr unsigned maxNumBalls = 16;
 
 public:
-    using Base::Base;
+    static constexpr const char* const metaData = "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1";
+    static constexpr const uint8_t effectId = FX_MODE_BOUNCINGBALLS;
+    static constexpr const uint8_t defaultPaletteId = 0u;
+    static constexpr const uint8_t maxDimensions = 2u;
 
-    static constexpr EffectInformation effectInformation {
-        "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1",
-        FX_MODE_BOUNCINGBALLS,
-        0u,
-        2u,
-        &Self::makeEffect,
-        &Self::nextFrame,
-        &Self::nextRow,
-        &Self::getPixelColor,
-    };
+    using Base::Base;
 
     void nextFrameImpl() {
         numBalls = (SEGMENT.intensity * (maxNumBalls - 1)) / 255 + 1; // minimum 1 ball
