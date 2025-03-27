@@ -472,6 +472,7 @@ typedef struct Segment {
     static uint8_t  _segBri;                  // brightness of segment for current effect
     static unsigned _vLength;                 // 1D dimension used for current effect
     static unsigned _vWidth, _vHeight;        // 2D dimensions used for current effect
+    static unsigned _vStripCount;             // map1D2D dimension used for current effect
     static uint32_t _currentColors[NUM_COLORS]; // colors used for current effect
     static bool     _colorScaled;             // color has been scaled prior to setPixelColor() call
     static CRGBPalette16 _currentPalette;     // palette used for current effect (includes transition, used in color_from_palette())
@@ -607,6 +608,7 @@ typedef struct Segment {
     inline static unsigned vLength()                       { return Segment::_vLength; }
     inline static unsigned vWidth()                        { return Segment::_vWidth; }
     inline static unsigned vHeight()                       { return Segment::_vHeight; }
+    inline static unsigned vStripCount()                   { return Segment::_vStripCount; }
     inline static uint32_t getCurrentColor(unsigned i)     { return Segment::_currentColors[i]; } // { return i < 3 ? Segment::_currentColors[i] : 0; }
     inline static const CRGBPalette16 &getCurrentPalette() { return Segment::_currentPalette; }
     inline static uint8_t getCurrentBrightness()           { return Segment::_segBri; }

@@ -74,6 +74,7 @@ uint16_t      Segment::maxHeight          = 1;
 unsigned      Segment::_vLength           = 0;
 unsigned      Segment::_vWidth            = 0;
 unsigned      Segment::_vHeight           = 0;
+unsigned      Segment::_vStripCount       = 0;
 uint8_t       Segment::_segBri            = 0;
 uint32_t      Segment::_currentColors[NUM_COLORS] = {0,0,0};
 bool          Segment::_colorScaled       = false;
@@ -446,6 +447,7 @@ void Segment::beginDraw() {
   _vWidth  = virtualWidth();
   _vHeight = virtualHeight();
   _vLength = virtualLength();
+  _vStripCount = nrOfVStrips();
   _segBri  = currentBri();
   unsigned prog = isInTransition() ? progress() : 0xFFFFU;  // transition progress; 0xFFFFU = no transition active
   // adjust gamma for effects
@@ -1139,15 +1141,18 @@ void Segment::clear() {
     unsigned oldVW = _vWidth;
     unsigned oldVH = _vHeight;
     unsigned oldVL = _vLength;
+    unsigned oldVC = _vStripCount;
     unsigned oldSB = _segBri;
     _vWidth  = virtualWidth();
     _vHeight = virtualHeight();
     _vLength = virtualLength();
+    _vStripCount = nrOfVStrips();
     _segBri  = currentBri();
     fill(BLACK);
     _vWidth  = oldVW;
     _vHeight = oldVH;
     _vLength = oldVL;
+    _vStripCount = oldVC;
     _segBri  = oldSB;
 }
 
