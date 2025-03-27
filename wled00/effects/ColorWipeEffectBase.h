@@ -15,7 +15,7 @@ private:
 
 public:
     static constexpr const uint8_t defaultPaletteId = 0u;
-    static constexpr const uint8_t maxDimensions = 1u;
+    static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 
     explicit constexpr ColorWipeEffectBase(const EffectInformation& ei, bool rev, bool useRandomColors)
         : Base{ei},
@@ -24,7 +24,7 @@ public:
     {
     }
 
-    void nextFrameImpl() {
+    void nextFrameImpl(const EffectCoordinate& coordinate) {
         uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
         uint32_t perc = strip.now % cycleTime;
         unsigned prog = (perc * 65535) / cycleTime;

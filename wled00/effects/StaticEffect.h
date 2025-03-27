@@ -12,11 +12,11 @@ public:
     static constexpr const char* const metaData = "Solid";
     static constexpr const uint8_t effectId = FX_MODE_STATIC;
     static constexpr const uint8_t defaultPaletteId = 0u;
-    static constexpr const uint8_t maxDimensions = 2u;
+    static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 
     using Base::Base;
 
-    constexpr void nextFrameImpl() {
+    constexpr void nextFrameImpl(const EffectCoordinate& coordinate) {
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

@@ -1483,28 +1483,42 @@ void WS2812FX::finalizeInit() {
 #pragma GCC optimize ("O3")
 
 namespace {
-template<uint8_t maxDimensions>
+template<EffectDimensionality dimensionality>
 inline void serviceLoop(Segment &seg, Effect* const effect) {
-  const unsigned h = (maxDimensions > 1) ? Segment::vHeight() : 1;
-  const unsigned w = (maxDimensions > 1) ? Segment::vWidth() : Segment::vLength();
+  const unsigned w = Segment::getEffectWidth<dimensionality>();
+  const unsigned h = Segment::getEffectHeight<dimensionality>();
+  EffectCoordinate coordinate{w, h};
 
-  effect->nextFrame();
+  effect->nextFrame(coordinate);
 
-  EffectCoordinate coordinate{};
   for (unsigned y = 0u; y < h; y++) {
     coordinate.setYAbsolute(y);
     effect->nextRow(coordinate);
+
     for (unsigned x = 0u; x < w; x++) {
       coordinate.setXAbsolute(x);
-      const LazyColor oldColor(seg, static_cast<int>(x), (maxDimensions > 1u) ? static_cast<int>(y) : -1);
+      const LazyColor oldColor(seg, static_cast<int>(x), (dimensionality == EffectDimensionality::d1) ? -1 : static_cast<int>(y));
       const uint32_t newColor = effect->getPixelColor(coordinate, oldColor);
-      if constexpr (maxDimensions <= 1) {
+
+      if constexpr (dimensionality == EffectDimensionality::d1) {
         seg.setPixelColor(x, newColor);
+      } else if constexpr (dimensionality == EffectDimensionality::d2VStrips) {
+        // expanded form of indexToVStrip in FX.cpp
+        seg.setPixelColor(((x) | (int((y)+1)<<16)), newColor);
       } else {
         seg.setPixelColorXY(x, y, newColor);
       }
     }
   }
+}
+
+template<>
+inline void serviceLoop<EffectDimensionality::d0>(Segment &seg, Effect* const effect) {
+  EffectCoordinate coordinate{1u, 1u};
+  effect->nextFrame(coordinate);
+  effect->nextRow(coordinate);
+  const uint32_t newColor = effect->getPixelColor(coordinate, LazyColor{seg, 0, 0});
+  seg.fill(newColor);
 }
 }
 
@@ -1677,9 +1691,16 @@ void WS2812FX::service() {
 #endif
         // run effect mode (not in transition)
         {
-          constexpr void (*serviceLoops[3])(Segment &seg, Effect* const effect) = {nullptr, &serviceLoop<1u>, &serviceLoop<2u>};
+          //c++20 could make this safe...
+          constexpr void (*serviceLoops[5])(Segment &seg, Effect* const effect) = {
+            &serviceLoop<EffectDimensionality::d0>,
+            &serviceLoop<EffectDimensionality::d1>,
+            &serviceLoop<EffectDimensionality::d2>,
+            nullptr,
+            &serviceLoop<EffectDimensionality::d2VStrips>,
+          };
           Effect* const effect = seg.getCurrentEffect();
-          serviceLoops[effect->getMaxDimensions()](seg, effect);
+          serviceLoops[static_cast<uint8_t>(effect->getDimensionality())](seg, effect);
           frameDelay = 0;
         }
 

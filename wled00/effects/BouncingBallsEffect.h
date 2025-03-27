@@ -21,11 +21,11 @@ public:
     static constexpr const char* const metaData = "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_BOUNCINGBALLS;
     static constexpr const uint8_t defaultPaletteId = 0u;
-    static constexpr const uint8_t maxDimensions = 2u;
+    static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2VStrips;
 
     using Base::Base;
 
-    void nextFrameImpl() {
+    void nextFrameImpl(const EffectCoordinate& coordinate) {
         numBalls = (SEGMENT.intensity * (maxNumBalls - 1)) / 255 + 1; // minimum 1 ball
         strips = SEGMENT.custom3;
         useBackgroundColor = !SEGMENT.check2;
@@ -52,7 +52,7 @@ public:
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         for (size_t ballIndex = 0; ballIndex < numBalls; ballIndex++) {
-            const Ball& ball = balls[stripIndex * maxNumBalls + ballIndex];
+            const Ball& ball = balls[rdinate.getYAbsolute() * maxNumBalls + ballIndex];
             if (ball.pixelHeight - (ballSize / 2) <= coordinate.getXAbsolute() && coordinate.getXAbsolute() < ball.pixelHeight + ((ballSize + 1) / 2))
                 return ball.color;
         }

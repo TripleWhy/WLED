@@ -20,7 +20,7 @@ public:
     {
     }
 
-    void nextFrameImpl() {
+    void nextFrameImpl(const EffectCoordinate& coordinate) {
         Base::nextFrameImpl(SEGCOLOR(0), SEGCOLOR(1));
     }
 };

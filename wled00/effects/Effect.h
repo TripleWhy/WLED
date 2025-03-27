@@ -7,17 +7,25 @@ class Effect;
 class LazyColor;
 class EffectCoordinate;
 
+enum class EffectDimensionality : uint8_t {
+    d0 = 0,
+    d1 = 1,
+    d2 = 2,
+    //reserved: d3 = 3,
+    d2VStrips = 4,
+};
+
 // Kinda emulates a v-table without needing an actual v-table.
 struct EffectInformation {
     using MakeEffectFunction    = std::unique_ptr<Effect> (*)();
-    using NextFrameFunction     = void     (*)(Effect* effect);
+    using NextFrameFunction     = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using NextRowFunction       = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using GetPixelColorFunction = uint32_t (*)(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor);
 
     const char* metaData;
     const uint8_t effectId;
     const uint8_t defaultPaletteId;
-    const uint8_t maxDimensions;
+    const EffectDimensionality dimensionality;
     const MakeEffectFunction makeEffect;
     const NextFrameFunction nextFrame;
     const NextRowFunction nextRow;
@@ -34,11 +42,11 @@ public:
     constexpr uint8_t getDefaultPaletteId() const {
         return info.defaultPaletteId;
     }
-    constexpr uint8_t getMaxDimensions() const {
-        return info.maxDimensions;
+    constexpr EffectDimensionality getDimensionality() const {
+        return info.dimensionality;
     }
-    constexpr void nextFrame() {
-        info.nextFrame(this);
+    constexpr void nextFrame(const EffectCoordinate& coordinate) {
+        info.nextFrame(this, coordinate);
     }
     constexpr void nextRow(const EffectCoordinate& coordinate) {
         info.nextRow(this, coordinate);
@@ -60,7 +68,7 @@ public:
         T::metaData,
         T::effectId,
         T::defaultPaletteId,
-        T::maxDimensions,
+        T::dimensionality,
         &T::makeEffect,
         &T::nextFrame,
         &T::nextRow,
@@ -71,8 +79,8 @@ public:
         return std::make_unique<T>(T::effectInformation);
     }
 
-    static void nextFrame(Effect* effect) {
-        static_cast<T*>(effect)->nextFrameImpl();
+    static void nextFrame(Effect* effect, const EffectCoordinate& coordinate) {
+        static_cast<T*>(effect)->nextFrameImpl(coordinate);
     }
 
     static void nextRow(Effect* effect, const EffectCoordinate& coordinate) {
@@ -106,7 +114,7 @@ private:
 
 class EffectCoordinate {
 public:
-    constexpr EffectCoordinate() = default;
+    constexpr EffectCoordinate(unsigned width, unsigned height) : width{width}, height{height} {}
     constexpr EffectCoordinate(const EffectCoordinate&) = delete;
     constexpr EffectCoordinate(EffectCoordinate&&) = delete;
     constexpr EffectCoordinate& operator=(const EffectCoordinate&) = delete;
@@ -124,6 +132,10 @@ public:
     constexpr void setYAbsolute(unsigned y) {
         EffectCoordinate::y = y;
     }
+
+public:
+    const unsigned width{0u};
+    const unsigned height{0u};
 
 private:
     unsigned x{0u};

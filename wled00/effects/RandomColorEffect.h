@@ -16,11 +16,11 @@ public:
     static constexpr const char* const metaData = "Random Colors@!,Fade time;;!;01";
     static constexpr const uint8_t effectId = FX_MODE_RANDOM_COLOR;
     static constexpr const uint8_t defaultPaletteId = 0u;
-    static constexpr const uint8_t maxDimensions = 2u;
+    static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 
     using Base::Base;
 
-    void nextFrameImpl() {
+    void nextFrameImpl(const EffectCoordinate& coordinate) {
         uint32_t cycleTime = 200 + (255 - SEGMENT.speed)*50;
         uint32_t it = strip.now / cycleTime;
         uint32_t rem = strip.now % cycleTime;
