@@ -53,7 +53,7 @@ public:
         balls.shrink_to_fit();
 
         for (unsigned stripNr = 0; stripNr < strips; ++stripNr)
-            runVirtualStrip(stripNr, &balls[stripNr * maxNumBalls]);
+            runVirtualStrip(stripNr, coordinate.width, &balls[stripNr * maxNumBalls]);
     }
 
     void nextRowImpl(const EffectCoordinate& coordinate) {
@@ -77,7 +77,7 @@ private:
     // virtualStrip idea by @ewowi (Ewoud Wijma)
     // requires virtual strip # to be embedded into upper 16 bits of index in setPixelColor()
     // the following functions will not work on virtual strips: fill(), fade_out(), fadeToBlack(), blur()
-    void runVirtualStrip(size_t stripNr, Ball* balls) {
+    void runVirtualStrip(size_t stripNr, unsigned width, Ball* balls) {
         constexpr float gravity = -9.81f; // standard value of gravity
         constexpr float initialVelocityFactor = 4.4294469f; // sqrtf(-2.0f * gravity);
         // number of balls based on intensity setting to max of 7 (cycles colors)
@@ -104,7 +104,7 @@ private:
             } else if (balls[i].height > 1.0f) {
                 continue; // do not draw OOB ball
             }
-            balls[i].pixelHeight = balls[i].height * (SEGLEN - 1);
+            balls[i].pixelHeight = balls[i].height * (width - 1);
             balls[i].color = ballColors[i];
         }
     }

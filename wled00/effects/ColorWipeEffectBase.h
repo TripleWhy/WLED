@@ -61,8 +61,8 @@ public:
             col[1] = SEGCOLOR(1);
         }
 
-        ledIndex = (prog * SEGLEN) >> 15;
-        rem = (prog * SEGLEN) * 2; //mod 0xFFFF
+        ledIndex = (prog * coordinate.width) >> 15;
+        rem = (prog * coordinate.width) * 2; //mod 0xFFFF
         rem /= (SEGMENT.intensity +1);
         if (rem > 255) rem = 255;
     }
