@@ -33,6 +33,7 @@
 #include "effects/StrobeEffect.h"
 #include "effects/StrobeRainbowEffect.h"
 #include "effects/TetrixEffect.h"
+#include "effects/TheaterChaseEffect.h"
 #include <memory>
 
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
@@ -137,43 +138,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Alternating pixels running function / Theatre-style crawling lights.
- * Inspired by the Adafruit examples.
- */
-uint16_t mode_theater_chase() {
-  const bool animate = SEGMENT.check1;
-  const bool theatre = SEGMENT.check3;
-  int width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
-  uint32_t cycleTime = 50 + (255 - SEGMENT.speed);
-  uint32_t it = strip.now / cycleTime;
-
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    uint32_t c1 = SEGMENT.color_from_palette(i, true, false, 0);
-    uint32_t c2 = SEGCOLOR(1);
-    if (animate) {
-      c1 = SEGMENT.color_wheel(SEGENV.step); // sets moving palette and rainbow for default
-      //unsigned palIdx = animate ? (i+it)%SEGLEN : i;
-      //c1 = SEGMENT.color_from_palette(palIdx, true, animate, 0);
-    }
-    if (theatre) {
-      if ((i % width) == SEGENV.aux0) c2 = c1;
-    } else {
-      int pos = (i % (width<<1));
-      if ((pos < SEGENV.aux0-width) || ((pos >= SEGENV.aux0) && (pos < SEGENV.aux0+width))) c2 = c1;
-    }
-    SEGMENT.setPixelColor(i,c2);
-  }
-
-  if (it != SEGENV.step) {
-    SEGENV.aux0 = (SEGENV.aux0 +1) % (theatre ? width : (width<<1));
-    SEGENV.step = it;
-  }
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_THEATER_CHASE[] PROGMEM = "Theater@!,Gap size,,,,Rainbow,,Theater;!,!;!;;o1=0,o3=1";
-
 
 /*
  * Running lights effect with smooth sine transition base.
@@ -9435,6 +9399,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(ScanEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RainbowEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RainbowCycleEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(TheaterChaseEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
