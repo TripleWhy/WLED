@@ -33,17 +33,17 @@ public:
         }
 
         if (SEGENV.call == 0) {
-            SEGENV.aux0 = hw_random8();
-            SEGENV.step = 2;
+            colorWheelIndex = hw_random8();
+            step = 2;
         }
-        if (it != SEGENV.step) //new color
+        if (it != step) //new color
         {
-            SEGENV.aux1 = SEGENV.aux0;
-            SEGENV.aux0 = get_random_wheel_index(SEGENV.aux0); //aux0 will store our random color wheel index
-            SEGENV.step = it;
+            previousColorWheelIndex = colorWheelIndex;
+            colorWheelIndex = get_random_wheel_index(colorWheelIndex);
+            step = it;
         }
 
-        color = color_blend(SEGMENT.color_wheel(SEGENV.aux1), SEGMENT.color_wheel(SEGENV.aux0), uint8_t(fade));
+        color = color_blend(SEGMENT.color_wheel(previousColorWheelIndex), SEGMENT.color_wheel(colorWheelIndex), uint8_t(fade));
     }
 
     constexpr uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
@@ -51,5 +51,8 @@ public:
     }
 
 private:
+    uint32_t step{};
     uint32_t color{};
+    uint8_t colorWheelIndex{};
+    uint8_t previousColorWheelIndex{};
 };

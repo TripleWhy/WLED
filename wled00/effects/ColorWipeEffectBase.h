@@ -35,28 +35,28 @@ public:
             } else {
                 prog -= 32767;
             }
-            if (SEGENV.step == 0) SEGENV.step = 1;
+            if (step == 0) step = 1;
         } else {
             back = false;
-            if (SEGENV.step == 2) SEGENV.step = 3; //trigger color change
+            if (step == 2) step = 3; //trigger color change
         }
 
         if (useRandomColors) {
             if (SEGENV.call == 0) {
-                SEGENV.aux0 = hw_random8();
-                SEGENV.step = 3;
+                colorIndex[0] = hw_random8();
+                step = 3;
             }
-            if (SEGENV.step == 1) { //if flag set, change to new random color
-                SEGENV.aux1 = get_random_wheel_index(SEGENV.aux0);
-                SEGENV.step = 2;
+            if (step == 1) { //if flag set, change to new random color
+                colorIndex[1] = get_random_wheel_index(colorIndex[0]);
+                step = 2;
             }
-            if (SEGENV.step == 3) {
-                SEGENV.aux0 = get_random_wheel_index(SEGENV.aux1);
-                SEGENV.step = 0;
+            if (step == 3) {
+                colorIndex[0] = get_random_wheel_index(colorIndex[1]);
+                step = 0;
             }
 
-            col[1] = SEGMENT.color_wheel(SEGENV.aux1);
-            col[0] = SEGMENT.color_wheel(SEGENV.aux0);
+            col[0] = SEGMENT.color_wheel(colorIndex[0]);
+            col[1] = SEGMENT.color_wheel(colorIndex[1]);
         } else {
             col[1] = SEGCOLOR(1);
         }
@@ -84,10 +84,12 @@ public:
     }
 
 private:
+    uint32_t step{};
     bool rev;
     bool useRandomColors;
     bool back{};
     unsigned ledIndex{};
+    uint8_t colorIndex[2]{};
     uint32_t col[2]{};
     uint16_t rem{};
 };

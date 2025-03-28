@@ -33,12 +33,12 @@ public:
         uint32_t rem = strip.now % cycleTime;
 
         bool on = false;
-        if (it != SEGENV.step //new iteration, force on state for one frame, even if set time is too brief
+        if (it != step //new iteration, force on state for one frame, even if set time is too brief
             || rem <= onTime) {
             on = true;
         }
 
-        SEGENV.step = it; //save previous iteration
+        step = it; //save previous iteration
 
         color = on ? color1 : color2;
         usePalette = (do_palette && (color == color1));
@@ -56,5 +56,6 @@ private:
     bool strobe;
     bool do_palette;
     bool usePalette{false}; // like, actually this time
+    uint32_t step{};
     uint32_t color{0u};
 };

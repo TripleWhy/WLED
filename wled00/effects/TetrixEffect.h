@@ -16,7 +16,7 @@ private:
         uint8_t  col{};   // color index
         uint16_t brick{}; // brick size in pixels
         uint16_t stack{0u}; // stack size in pixels
-        uint32_t step{}; // 2D-fication of SEGENV.step (state)
+        uint32_t step{}; // state
     };
 
     using Self = TetrixEffect;

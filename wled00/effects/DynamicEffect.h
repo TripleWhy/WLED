@@ -33,12 +33,12 @@ public:
 
         uint32_t cycleTime = 50 + (255 - SEGMENT.speed)*15;
         uint32_t it = strip.now / cycleTime;
-        if (it != SEGENV.step && SEGMENT.speed != 0) //new color
+        if (it != step && SEGMENT.speed != 0) //new color
         {
             for (unsigned i = 0; i < coordinate.width; i++) {
                 if (hw_random8() <= SEGMENT.intensity) colorIndexes[i] = hw_random8(); // random color index
             }
-            SEGENV.step = it;
+            step = it;
         }
     }
 
@@ -51,5 +51,6 @@ public:
     }
 
 private:
+    uint32_t step{};
     std::vector<uint8_t> colorIndexes;
 };

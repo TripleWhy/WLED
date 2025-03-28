@@ -27,11 +27,11 @@ public:
         uint32_t cycleTime = 50 + (255 - SEGMENT.speed);
         uint32_t it = strip.now / cycleTime;
 
-        counter = SEGENV.aux0;
-        step = SEGENV.step;
+        counter = nextCounter;
+        step = nextStep;
         if (it != step) {
-            SEGENV.aux0 = (SEGENV.aux0 +1) % (theatre ? width : (width<<1));
-            SEGENV.step = it;
+            nextCounter = (nextCounter +1) % (theatre ? width : (width<<1));
+            nextStep = it;
         }
 
         c2 = SEGCOLOR(1);
@@ -61,7 +61,9 @@ public:
 
 private:
     uint16_t counter;
+    uint16_t nextCounter{};
     uint32_t step;
+    uint32_t nextStep{};
     uint32_t c1;
     uint32_t c2;
     int width;
