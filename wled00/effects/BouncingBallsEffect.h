@@ -27,12 +27,22 @@ public:
 
     void nextFrameImpl(const EffectCoordinate& coordinate) {
         numBalls = (SEGMENT.intensity * (maxNumBalls - 1)) / 255 + 1; // minimum 1 ball
-        strips = SEGMENT.custom3;
+        strips = std::min(static_cast<unsigned>(SEGMENT.custom3), coordinate.height);
         useBackgroundColor = !SEGMENT.check2;
 
         if (useBackgroundColor)
             backgroundColor = (SEGCOLOR(2) ? BLACK : SEGCOLOR(1));
-        ballSize = std::max(1u, SEG_H / strips);
+        ballSize = std::max(1u, coordinate.height / strips);
+
+        for (size_t i = 0; i < numBalls; ++i) {
+            if (SEGMENT.palette) {
+                ballColors[i] = SEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
+            } else if (SEGCOLOR(2)) {
+                ballColors[i] = SEGCOLOR(i % NUM_COLORS);
+            } else {
+                ballColors[i] = SEGCOLOR(0);
+            }
+        }
 
         const size_t ballsVectorSize = maxNumBalls * strips; //TODO reduce to actual ball count instead of max ball count?
         balls.resize(ballsVectorSize);
@@ -47,12 +57,12 @@ public:
     }
 
     void nextRowImpl(const EffectCoordinate& coordinate) {
-        stripIndex = (coordinate.getYAbsolute() * strips) / SEG_W;
+        stripIndex = (coordinate.getYAbsolute() * strips) / coordinate.height;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         for (size_t ballIndex = 0; ballIndex < numBalls; ballIndex++) {
-            const Ball& ball = balls[rdinate.getYAbsolute() * maxNumBalls + ballIndex];
+            const Ball& ball = balls[stripIndex * maxNumBalls + ballIndex];
             if (ball.pixelHeight - (ballSize / 2) <= coordinate.getXAbsolute() && coordinate.getXAbsolute() < ball.pixelHeight + ((ballSize + 1) / 2))
                 return ball.color;
         }
@@ -95,21 +105,14 @@ private:
                 continue; // do not draw OOB ball
             }
             balls[i].pixelHeight = balls[i].height * (SEGLEN - 1);
-
-            //TODO currently evaluated once per virtual strip, but the result is the same for all strips
-            if (SEGMENT.palette) {
-                balls[i].color = SEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
-            } else if (SEGCOLOR(2)) {
-                balls[i].color = SEGCOLOR(i % NUM_COLORS);
-            } else {
-                balls[i].color = SEGCOLOR(0);
-            }
+            balls[i].color = ballColors[i];
         }
     }
 
 private:
     unsigned numBalls;
     unsigned strips;
+    std::array<uint32_t, maxNumBalls> ballColors;
     std::vector<Ball> balls;
     uint32_t backgroundColor;
     bool useBackgroundColor;
