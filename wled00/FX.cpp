@@ -25,6 +25,7 @@
 #include "effects/effectUtils.h"
 #include "effects/FadeEffect.h"
 #include "effects/PaletteEffect.h"
+#include "effects/RainbowEffect.h"
 #include "effects/RandomColorEffect.h"
 #include "effects/ScanEffect.h"
 #include "effects/StaticEffect.h"
@@ -135,24 +136,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Cycles all LEDs at once through a rainbow.
- */
-uint16_t mode_rainbow(void) {
-  unsigned counter = (strip.now * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
-  counter = counter >> 8;
-
-  if (SEGMENT.intensity < 128){
-    SEGMENT.fill(color_blend(SEGMENT.color_wheel(counter),WHITE,uint8_t(128-SEGMENT.intensity)));
-  } else {
-    SEGMENT.fill(SEGMENT.color_wheel(counter));
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_RAINBOW[] PROGMEM = "Colorloop@!,Saturation;;!;01";
-
 
 /*
  * Cycles a rainbow over the entire string of LEDs.
@@ -9467,6 +9450,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(BreathEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(FadeEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(ScanEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(RainbowEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
