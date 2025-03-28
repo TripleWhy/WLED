@@ -20,6 +20,7 @@
 #include "effects/ColorSweepRandomEffect.h"
 #include "effects/ColorWipeEffect.h"
 #include "effects/ColorWipeRandomEffect.h"
+#include "effects/DynamicEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/RandomColorEffect.h"
 #include "effects/StaticEffect.h"
@@ -135,42 +136,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Lights every LED in a random color. Changes all LED at the same time
- * to new random colors.
- */
-uint16_t mode_dynamic(void) {
-  if (!SEGENV.allocateData(SEGLEN)) return mode_static(); //allocation failed
-
-  if(SEGENV.call == 0) {
-    //SEGMENT.fill(BLACK);
-    for (unsigned i = 0; i < SEGLEN; i++) SEGENV.data[i] = hw_random8();
-  }
-
-  uint32_t cycleTime = 50 + (255 - SEGMENT.speed)*15;
-  uint32_t it = strip.now / cycleTime;
-  if (it != SEGENV.step && SEGMENT.speed != 0) //new color
-  {
-    for (unsigned i = 0; i < SEGLEN; i++) {
-      if (hw_random8() <= SEGMENT.intensity) SEGENV.data[i] = hw_random8(); // random color index
-    }
-    SEGENV.step = it;
-  }
-
-  if (SEGMENT.check1) {
-    for (unsigned i = 0; i < SEGLEN; i++) {
-      SEGMENT.blendPixelColor(i, SEGMENT.color_wheel(SEGENV.data[i]), 16);
-    }
-  } else {
-    for (unsigned i = 0; i < SEGLEN; i++) {
-      SEGMENT.setPixelColor(i, SEGMENT.color_wheel(SEGENV.data[i]));
-    }
-  }
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_DYNAMIC[] PROGMEM = "Dynamic@!,!,,,,Smooth;;!";
-
 
 /*
  * Does the "standby-breathing" of well known i-Devices.
@@ -9570,6 +9535,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(ColorSweepEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(ColorSweepRandomEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RandomColorEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(DynamicEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
