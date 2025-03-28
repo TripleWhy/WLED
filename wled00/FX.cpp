@@ -25,6 +25,7 @@
 #include "effects/effectUtils.h"
 #include "effects/FadeEffect.h"
 #include "effects/PaletteEffect.h"
+#include "effects/RainbowCycleEffect.h"
 #include "effects/RainbowEffect.h"
 #include "effects/RandomColorEffect.h"
 #include "effects/ScanEffect.h"
@@ -136,24 +137,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Cycles a rainbow over the entire string of LEDs.
- */
-uint16_t mode_rainbow_cycle(void) {
-  unsigned counter = (strip.now * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
-  counter = counter >> 8;
-
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    //intensity/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
-    uint8_t index = (i * (16 << (SEGMENT.intensity /29)) / SEGLEN) + counter;
-    SEGMENT.setPixelColor(i, SEGMENT.color_wheel(index));
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_RAINBOW_CYCLE[] PROGMEM = "Rainbow@!,Size;;!";
-
 
 /*
  * Alternating pixels running function / Theatre-style crawling lights.
@@ -9451,6 +9434,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(FadeEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(ScanEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RainbowEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(RainbowCycleEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
