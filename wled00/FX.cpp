@@ -26,6 +26,7 @@
 #include "effects/FadeEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/RandomColorEffect.h"
+#include "effects/ScanEffect.h"
 #include "effects/StaticEffect.h"
 #include "effects/StrobeEffect.h"
 #include "effects/StrobeRainbowEffect.h"
@@ -134,39 +135,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Runs a single pixel back and forth.
- */
-uint16_t mode_scan(void) {
-  if (SEGLEN <= 1) return mode_static();
-  const bool dual = SEGMENT.check3;
-  uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
-  uint32_t perc = strip.now % cycleTime;
-  int prog = (perc * 65535) / cycleTime;
-  int size = 1 + ((SEGMENT.intensity * SEGLEN) >> 9);
-  int ledIndex = (prog * ((SEGLEN *2) - size *2)) >> 16;
-
-  if (!SEGMENT.check2) SEGMENT.fill(SEGCOLOR(1));
-
-  int led_offset = ledIndex - (SEGLEN - size);
-  led_offset = abs(led_offset);
-
-  if (dual) {
-    for (int j = led_offset; j < led_offset + size; j++) {
-      unsigned i2 = SEGLEN -1 -j;
-      SEGMENT.setPixelColor(i2, SEGMENT.color_from_palette(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
-    }
-  }
-
-  for (int j = led_offset; j < led_offset + size; j++) {
-    SEGMENT.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_SCAN[] PROGMEM = "Scan@!,Size,,,,,Overlay,Dual;!,!,!;!;1;o1=0";
-
 
 /*
  * Cycles all LEDs at once through a rainbow.
@@ -9498,6 +9466,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(DynamicEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(BreathEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(FadeEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(ScanEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
