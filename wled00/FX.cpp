@@ -16,6 +16,7 @@
 #include "effects/BlinkEffect.h"
 #include "effects/BlinkRainbowEffect.h"
 #include "effects/BouncingBallsEffect.h"
+#include "effects/BreathEffect.h"
 #include "effects/ColorSweepEffect.h"
 #include "effects/ColorSweepRandomEffect.h"
 #include "effects/ColorWipeEffect.h"
@@ -136,28 +137,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Does the "standby-breathing" of well known i-Devices.
- */
-uint16_t mode_breath(void) {
-  unsigned var = 0;
-  unsigned counter = (strip.now * ((SEGMENT.speed >> 3) +10)) & 0xFFFFU;
-  counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
-  if (counter < 16384) {
-    if (counter > 8192) counter = 8192 - (counter - 8192);
-    var = sin16_t(counter) / 103; //close to parabolic in range 0-8192, max val. 23170
-  }
-
-  uint8_t lum = 30 + var;
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_BREATH[] PROGMEM = "Breathe@!;!,!;!;01";
-
 
 /*
  * Fades the LEDs between two colors
@@ -9536,6 +9515,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(ColorSweepRandomEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RandomColorEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(DynamicEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(BreathEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
