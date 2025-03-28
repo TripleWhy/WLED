@@ -22,6 +22,8 @@
 #include "effects/ColorWipeEffect.h"
 #include "effects/ColorWipeRandomEffect.h"
 #include "effects/DynamicEffect.h"
+#include "effects/effectUtils.h"
+#include "effects/FadeEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/RandomColorEffect.h"
 #include "effects/StaticEffect.h"
@@ -87,11 +89,6 @@ uint8_t sin_gap(uint16_t in) {
   return sin8_t(in + 192); // correct phase shift of sine so that it starts and stops at 0
 }
 
-uint16_t triwave16(uint16_t in) {
-  if (in < 0x8000) return in *2;
-  return 0xFFFF - (in - 0x8000)*2;
-}
-
 /*
  * Generates a tristate square wave w/ attac & decay
  * @param x input value 0-255
@@ -137,22 +134,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Fades the LEDs between two colors
- */
-uint16_t mode_fade(void) {
-  unsigned counter = (strip.now * ((SEGMENT.speed >> 3) +10));
-  uint8_t lum = triwave16(counter) >> 8;
-
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_FADE[] PROGMEM = "Fade@!;!,!;!;01";
-
 
 /*
  * Runs a single pixel back and forth.
@@ -9516,6 +9497,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(RandomColorEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(DynamicEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(BreathEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(FadeEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
