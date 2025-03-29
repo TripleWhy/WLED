@@ -31,12 +31,13 @@
 #include "effects/RandomColorEffect.h"
 #include "effects/RunningLightsEffect.h"
 #include "effects/ScanEffect.h"
+#include "effects/SparkleEffect.h"
 #include "effects/StaticEffect.h"
 #include "effects/StrobeEffect.h"
 #include "effects/StrobeRainbowEffect.h"
 #include "effects/TetrixEffect.h"
-#include "effects/TwinkleEffect.h"
 #include "effects/TheaterChaseEffect.h"
+#include "effects/TwinkleEffect.h"
 #include <memory>
 
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
@@ -136,29 +137,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Blinks one LED at a time.
- * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
- */
-uint16_t mode_sparkle(void) {
-  uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
-  uint32_t it = strip.now / cycleTime;
-  const bool moving = SEGMENT.check1;
-  if (!SEGMENT.check2) for(unsigned i = 0; i < SEGLEN; i++) {
-    unsigned palIdx = moving ? (i+it)%SEGLEN : i;
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 1));
-  }
-  if (it != SEGENV.step)
-  {
-    SEGENV.aux0 = hw_random16(SEGLEN); // aux0 stores the random led index
-    SEGENV.step = it;
-  }
-
-  SEGMENT.setPixelColor(SEGENV.aux0, SEGCOLOR(0));
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_SPARKLE[] PROGMEM = "Sparkle@!,,,,,Move,Overlay;!,!;!;;m12=0,01=0";
 
 
 /*
@@ -9280,6 +9258,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(RunningLightsEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(TwinkleEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(DissolveEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(SparkleEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
