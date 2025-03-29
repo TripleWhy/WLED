@@ -15,7 +15,6 @@ private:
 public:
     static constexpr const char* const metaData = "Dynamic@!,!,,,,Smooth;;!";
     static constexpr const uint8_t effectId = FX_MODE_DYNAMIC;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 
     using Base::Base;

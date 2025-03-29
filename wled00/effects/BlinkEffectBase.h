@@ -14,7 +14,6 @@ private:
     using Base = Effect;
 
 public:
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 
     explicit constexpr BlinkEffectBase(const EffectInformation& ei, bool strobe, bool do_palette)

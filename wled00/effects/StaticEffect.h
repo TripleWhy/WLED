@@ -11,7 +11,6 @@ private:
 public:
     static constexpr const char* const metaData = "Solid";
     static constexpr const uint8_t effectId = FX_MODE_STATIC;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 
     using Base::Base;

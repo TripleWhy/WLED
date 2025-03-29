@@ -64,6 +64,8 @@ class BaseEffect : public Base {
 public:
     using Base::Base;
 
+    static constexpr const uint8_t defaultPaletteId = 0u;
+
     static constexpr EffectInformation effectInformation {
         T::metaData,
         T::effectId,

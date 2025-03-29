@@ -14,7 +14,6 @@ private:
 public:
     static constexpr const char* const metaData = "Scan@!,Size,,,,,Overlay,Dual;!,!,!;!;1;o1=0";
     static constexpr const uint8_t effectId = FX_MODE_SCAN;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 
     using Base::Base;

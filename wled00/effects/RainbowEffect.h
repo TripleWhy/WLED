@@ -14,7 +14,6 @@ private:
 public:
     static constexpr const char* const metaData = "Colorloop@!,Saturation;;!;01";
     static constexpr const uint8_t effectId = FX_MODE_RAINBOW;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 
     using Base::Base;

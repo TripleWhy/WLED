@@ -20,7 +20,6 @@ private:
 public:
     static constexpr const char* const metaData = "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_BOUNCINGBALLS;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2VStrips;
 
     using Base::Base;

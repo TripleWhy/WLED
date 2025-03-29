@@ -11,7 +11,6 @@ class BufferedEffectBase : public Effect {
     friend class BufferedEffect;
 
 public:
-    static constexpr const uint8_t defaultPaletteId = 0u;
 
 protected:
     class PixelBuffer {

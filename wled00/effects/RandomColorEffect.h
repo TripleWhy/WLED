@@ -15,7 +15,6 @@ private:
 public:
     static constexpr const char* const metaData = "Random Colors@!,Fade time;;!;01";
     static constexpr const uint8_t effectId = FX_MODE_RANDOM_COLOR;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 
     using Base::Base;

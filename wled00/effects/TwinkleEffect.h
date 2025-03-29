@@ -16,7 +16,6 @@ private:
 public:
     static constexpr const char* const metaData = "Twinkle@!,!;!,!;!;;m12=0"; //pixels
     static constexpr const uint8_t effectId = FX_MODE_TWINKLE;
-    static constexpr const uint8_t defaultPaletteId = 0u;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 
     explicit TwinkleEffect(const EffectInformation& ei) : Base{ei, true} {}
