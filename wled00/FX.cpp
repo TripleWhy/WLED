@@ -21,6 +21,7 @@
 #include "effects/ColorSweepRandomEffect.h"
 #include "effects/ColorWipeEffect.h"
 #include "effects/ColorWipeRandomEffect.h"
+#include "effects/DissolveEffect.h"
 #include "effects/DynamicEffect.h"
 #include "effects/effectUtils.h"
 #include "effects/FadeEffect.h"
@@ -135,52 +136,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Dissolve function: Blink several LEDs on and then off
- */
-uint16_t mode_dissolve(void) {
-  unsigned dataSize = sizeof(uint32_t) * SEGLEN;
-  if (!SEGENV.allocateData(dataSize)) return mode_static(); //allocation failed
-  uint32_t* pixels = reinterpret_cast<uint32_t*>(SEGENV.data);
-  uint32_t color = SEGMENT.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0);
-
-  if (SEGENV.call == 0) {
-    for (unsigned i = 0; i < SEGLEN; i++) pixels[i] = SEGCOLOR(1);
-    SEGENV.aux0 = 1;
-  }
-
-  for (unsigned j = 0; j <= SEGLEN / 15; j++) {
-    if (hw_random8() <= SEGMENT.intensity) {
-      for (size_t times = 0; times < 10; times++) { //attempt to spawn a new pixel 10 times
-        unsigned i = hw_random16(SEGLEN);
-        if (SEGENV.aux0) { //dissolve to primary/palette
-          if (pixels[i] == SEGCOLOR(1)) {
-            pixels[i] = color == SEGCOLOR(0) ? SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : color;
-            break; //only spawn 1 new pixel per frame per 50 LEDs
-          }
-        } else { //dissolve to secondary
-          if (pixels[i] != SEGCOLOR(1)) {
-            pixels[i] = SEGCOLOR(1);
-            break;
-          }
-        }
-      }
-    }
-  }
-  // fix for #4401
-  for (unsigned i = 0; i < SEGLEN; i++) SEGMENT.setPixelColor(i, pixels[i]);
-
-  if (SEGENV.step > (255 - SEGMENT.speed) + 15U) {
-    SEGENV.aux0 = !SEGENV.aux0;
-    SEGENV.step = 0;
-  } else {
-    SEGENV.step++;
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_DISSOLVE[] PROGMEM = "Dissolve@Repeat speed,Dissolve speed,,,,Random;!,!;!";
 
 /*
  * Blinks one LED at a time.
@@ -9324,6 +9279,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(TheaterChaseEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RunningLightsEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(TwinkleEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(DissolveEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);

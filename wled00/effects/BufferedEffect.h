@@ -20,6 +20,10 @@ protected:
         template<EffectDimensionality>
         friend class BufferedEffect;
     public:
+        void fill(uint32_t color) {
+            std::fill(pixels.begin(), pixels.end(), color);
+        }
+
         /*
          * fade out function, higher rate = quicker fade
          * fading is highly dependant on frame rate (higher frame rates, faster fading)
