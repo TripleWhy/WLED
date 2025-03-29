@@ -3,14 +3,17 @@
 #include "../FX.h"
 #include "Effect.h"
 
+// The buffered Effect is split into two parts:
+//  1. BufferedEffectBase contains everything that doesn't depend on a template parameter
+//  2. BufferedEffect contains everything that depends on a template parameter.
+// Don't use BufferedEffectBase directly, use BufferedEffect.
+
 class BufferedEffectBase : public Effect {
     using Self = BufferedEffectBase;
     using Base = Effect;
 
     template<EffectDimensionality>
     friend class BufferedEffect;
-
-public:
 
 protected:
     class PixelBuffer {
