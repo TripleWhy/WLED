@@ -700,10 +700,13 @@ typedef struct Segment {
     // 1D support functions (some implement 2D as well)
     void blur(uint8_t, bool smear = false);
     void clear();
+    //TODO remove?
     void fill(uint32_t c);
+    //TODO remove?
     void fade_out(uint8_t r);
     void fadeToSecondaryBy(uint8_t fadeBy);
     void fadeToBlackBy(uint8_t fadeBy);
+    //TODO remove?
     inline void blendPixelColor(int n, uint32_t color, uint8_t blend)    { setPixelColor(n, color_blend(getPixelColor(n), color, blend)); }
     inline void blendPixelColor(int n, CRGB c, uint8_t blend)            { blendPixelColor(n, RGBW32(c.r,c.g,c.b,0), blend); }
     inline void addPixelColor(int n, uint32_t color, bool preserveCR = true)                     { setPixelColor(n, color_add(getPixelColor(n), color, preserveCR)); }

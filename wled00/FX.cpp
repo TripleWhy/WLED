@@ -34,6 +34,7 @@
 #include "effects/StrobeEffect.h"
 #include "effects/StrobeRainbowEffect.h"
 #include "effects/TetrixEffect.h"
+#include "effects/TwinkleEffect.h"
 #include "effects/TheaterChaseEffect.h"
 #include <memory>
 
@@ -134,42 +135,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-/*
- * Blink several LEDs in random colors on, reset, repeat.
- * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
- */
-uint16_t mode_twinkle(void) {
-  SEGMENT.fade_out(224);
-
-  uint32_t cycleTime = 20 + (255 - SEGMENT.speed)*5;
-  uint32_t it = strip.now / cycleTime;
-  if (it != SEGENV.step)
-  {
-    unsigned maxOn = map(SEGMENT.intensity, 0, 255, 1, SEGLEN); // make sure at least one LED is on
-    if (SEGENV.aux0 >= maxOn)
-    {
-      SEGENV.aux0 = 0;
-      SEGENV.aux1 = hw_random(); //new seed for our PRNG
-    }
-    SEGENV.aux0++;
-    SEGENV.step = it;
-  }
-
-  unsigned PRNG16 = SEGENV.aux1;
-
-  for (unsigned i = 0; i < SEGENV.aux0; i++)
-  {
-    PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
-    uint32_t p = (uint32_t)SEGLEN * (uint32_t)PRNG16;
-    unsigned j = p >> 16;
-    SEGMENT.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
-  }
-
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_TWINKLE[] PROGMEM = "Twinkle@!,!;!,!;!;;m12=0"; //pixels
-
 
 /*
  * Dissolve function: Blink several LEDs on and then off
@@ -9358,6 +9323,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(RainbowCycleEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(TheaterChaseEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(RunningLightsEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(TwinkleEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
