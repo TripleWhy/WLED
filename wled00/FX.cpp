@@ -25,6 +25,7 @@
 #include "effects/DynamicEffect.h"
 #include "effects/effectUtils.h"
 #include "effects/FadeEffect.h"
+#include "effects/FlashSparkleEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/RainbowCycleEffect.h"
 #include "effects/RainbowEffect.h"
@@ -137,31 +138,6 @@ uint16_t mode_static(void) {
   return strip.isOffRefreshRequired() ? FRAMETIME : 350;
 }
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-
-
-/*
- * Lights all LEDs in the color. Flashes single col 1 pixels randomly. (List name: Sparkle Dark)
- * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
- */
-uint16_t mode_flash_sparkle(void) {
-  uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
-  uint32_t it = strip.now / cycleTime;
-  const bool moving = SEGMENT.check1;
-  if (!SEGMENT.check2) for (unsigned i = 0; i < SEGLEN; i++) {
-    unsigned palIdx = moving ? (i+it)%SEGLEN : i;
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 0));
-  }
-
-  if (strip.now - SEGENV.aux0 > SEGENV.step) {
-    if(hw_random8((255-SEGMENT.intensity) >> 4) == 0) {
-      SEGMENT.setPixelColor(hw_random16(SEGLEN), SEGCOLOR(1)); //flash
-    }
-    SEGENV.step = strip.now;
-    SEGENV.aux0 = 255-SEGMENT.speed;
-  }
-  return FRAMETIME;
-}
-static const char _data_FX_MODE_FLASH_SPARKLE[] PROGMEM = "Sparkle Dark@!,!,,,,Move,Overlay;Bg,Fx;!;;m12=0";
 
 
 /*
@@ -9259,6 +9235,7 @@ void WS2812FX::setupEffectData(size_t modeCount) {
   addEffect(std::make_unique<EffectFactory>(TwinkleEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(DissolveEffect::effectInformation));
   addEffect(std::make_unique<EffectFactory>(SparkleEffect::effectInformation));
+  addEffect(std::make_unique<EffectFactory>(FlashSparkleEffect::effectInformation));
   // fill reserved word in case there will be any gaps in the array
   for (size_t i=1; i<modeCount; i++) {
     _effectFactories.push_back(nullptr);
