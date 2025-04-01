@@ -121,6 +121,104 @@ protected:
             static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
             blendPixelColorLinear(convertToLinear(x, y), color, blend);
         }
+
+        inline void blur(uint8_t blur_amount, bool smear = false) {
+            if constexpr (dimensionality == EffectDimensionality::d1) {
+                blur1d(blur_amount, smear);
+            } else {
+                blur2d(blur_amount, blur_amount, smear); // symmetrical 2D blur
+            }
+        }
+
+        /*
+         * blurs segment content, source: FastLED colorutils.cpp
+         * Note: for blur_amount > 215 this function does not work properly (creates alternating pattern)
+         */
+        void blur1d(uint8_t blur_amount, bool smear = false) {
+            static_assert(dimensionality == EffectDimensionality::d1, "This function is for 1D effects only.");
+
+            if (blur_amount == 0) {
+                return; // optimization: 0 means "don't blur"
+            }
+            uint8_t keep = smear ? 255 : 255 - blur_amount;
+            uint8_t seep = blur_amount >> 1;
+            unsigned vlength = Segment::getEffectWidth<dimensionality>();
+            uint32_t carryover = BLACK;
+            uint32_t lastnew;       // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration
+            uint32_t last;
+            uint32_t curnew = BLACK;
+            for (unsigned i = 0; i < vlength; i++) {
+            uint32_t cur = getPixelColor(i);
+            uint32_t part = color_fade(cur, seep);
+            curnew = color_fade(cur, keep);
+            if (i > 0) {
+                if (carryover) curnew = color_add(curnew, carryover);
+                uint32_t prev = color_add(lastnew, part);
+                // optimization: only set pixel if color has changed
+                if (last != prev) setPixelColor(i - 1, prev);
+            } else setPixelColor(i, curnew); // first pixel
+            lastnew = curnew;
+            last = cur; // save original value for comparison on next iteration
+            carryover = part;
+            }
+            setPixelColor(vlength - 1, curnew);
+        }
+
+        // 2D blurring, can be asymmetrical
+        void blur2d(uint8_t blur_x, uint8_t blur_y, bool smear) {
+            static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
+
+            const unsigned cols = Segment::getEffectWidth<dimensionality>();
+            const unsigned rows = Segment::getEffectHeight<dimensionality>();
+            uint32_t lastnew;   // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration
+            uint32_t last;
+            if (blur_x) {
+                const uint8_t keepx = smear ? 255 : 255 - blur_x;
+                const uint8_t seepx = blur_x >> 1;
+                for (unsigned row = 0; row < rows; row++) { // blur rows (x direction)
+                    uint32_t carryover = BLACK;
+                    uint32_t curnew = BLACK;
+                    for (unsigned x = 0; x < cols; x++) {
+                        uint32_t cur = getPixelColor(x, row);
+                        uint32_t part = color_fade(cur, seepx);
+                        curnew = color_fade(cur, keepx);
+                        if (x > 0) {
+                            if (carryover) curnew = color_add(curnew, carryover);
+                            uint32_t prev = color_add(lastnew, part);
+                            // optimization: only set pixel if color has changed
+                            if (last != prev) setPixelColor(x - 1, row, prev);
+                        } else setPixelColor(x, row, curnew); // first pixel
+                        lastnew = curnew;
+                        last = cur; // save original value for comparison on next iteration
+                        carryover = part;
+                    }
+                    setPixelColor(cols-1, row, curnew); // set last pixel
+                }
+            }
+            if (blur_y) {
+                const uint8_t keepy = smear ? 255 : 255 - blur_y;
+                const uint8_t seepy = blur_y >> 1;
+                for (unsigned col = 0; col < cols; col++) {
+                    uint32_t carryover = BLACK;
+                    uint32_t curnew = BLACK;
+                    for (unsigned y = 0; y < rows; y++) {
+                        uint32_t cur = getPixelColor(col, y);
+                        uint32_t part = color_fade(cur, seepy);
+                        curnew = color_fade(cur, keepy);
+                        if (y > 0) {
+                            if (carryover) curnew = color_add(curnew, carryover);
+                            uint32_t prev = color_add(lastnew, part);
+                            // optimization: only set pixel if color has changed
+                            if (last != prev) setPixelColor(col, y - 1, prev);
+                        } else setPixelColor(col, y, curnew); // first pixel
+                        lastnew = curnew;
+                        last = cur; //save original value for comparison on next iteration
+                        carryover = part;
+                    }
+                    setPixelColor(col, rows - 1, curnew);
+                }
+            }
+        }
     };
 
 private:
