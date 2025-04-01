@@ -25,6 +25,7 @@ public:
             colorIndexes.clear();
             return;
         }
+        colorIndexes.shrink_to_fit();
 
         if(SEGENV.call == 0) {
             for (unsigned i = 0; i < coordinate.width; i++) colorIndexes[i] = hw_random8();

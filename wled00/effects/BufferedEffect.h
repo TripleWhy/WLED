@@ -1,6 +1,11 @@
 #pragma once
 
 #include "../FX.h"
+#include "../src/font/console_font_4x6.h"
+#include "../src/font/console_font_5x12.h"
+#include "../src/font/console_font_5x8.h"
+#include "../src/font/console_font_6x8.h"
+#include "../src/font/console_font_7x9.h"
 #include "Effect.h"
 
 // The buffered Effect is split into two parts:
@@ -16,6 +21,10 @@ protected:
     public:
         void fill(uint32_t color) {
             std::fill(pixels.begin(), pixels.end(), color);
+        }
+
+        inline void fadeOut(uint8_t rate) {
+            fade(SEGCOLOR(1), rate);
         }
 
         /*
@@ -48,22 +57,37 @@ protected:
             }
         }
 
+        void fadeToBlackBy(uint8_t fadeBy) {
+            if (fadeBy == 0u)
+                return;   // optimization - no scaling to apply
+
+            for (uint32_t& color : pixels) {
+                color = color_fade(color, 255 - fadeBy);
+            }
+        }
+
     protected:
-        uint32_t getPixelColorLinear(unsigned i) const {
+        inline uint32_t getPixelColorLinear(unsigned i) const {
             if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
                 Serial.printf("BufferedEffect::PixelBuffer::getPixelColor: %d >= %u\n", i, pixels.size());
                 std::terminate();
             }
             return pixels[static_cast<size_t>(i)];
         }
-        void setPixelColorLinear(unsigned i, uint32_t c) {
+        inline void setPixelColorLinear(unsigned i, uint32_t c) {
             if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
                 std::terminate();
             }
             pixels[static_cast<size_t>(i)] = c;
         }
-        void blendPixelColorLinear(unsigned n, uint32_t color, uint8_t blend) {
+        inline void blendPixelColorLinear(unsigned n, uint32_t color, uint8_t blend) {
             setPixelColorLinear(n, color_blend(getPixelColorLinear(n), color, blend));
+        }
+        inline void addPixelColorLinear(unsigned n, uint32_t color, bool preserveCR = true) {
+            setPixelColorLinear(n, color_add(getPixelColorLinear(n), color, preserveCR));
+        }
+        inline void fadePixelColorLinear(unsigned n, uint8_t fade) {
+            setPixelColorLinear(n, color_fade(getPixelColorLinear(n), fade, true));
         }
 
     private:
@@ -86,40 +110,60 @@ class BufferedEffect : public BufferedEffectBase {
 protected:
     class PixelBuffer : public PixelBufferBase {
     public:
-        inline void setPixelColor(unsigned x, uint32_t color)
-        {
+        inline void setPixelColor(unsigned x, uint32_t color) {
             static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
             setPixelColorLinear(x, color);
         }
+        inline void setPixelColor(unsigned x, CRGB c) {
+            setPixelColor(x, RGBW32(c.r,c.g,c.b,0));
+        }
 
-        inline void setPixelColor(unsigned x, unsigned y, uint32_t color)
-        {
+        inline void setPixelColor(unsigned x, unsigned y, uint32_t color) {
             static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
             setPixelColorLinear(convertToLinear(x, y), color);
         }
+        inline void setPixelColor(unsigned x, unsigned y, CRGB c) {
+            setPixelColor(x, y, RGBW32(c.r,c.g,c.b,0));
+        }
 
-        inline uint32_t getPixelColor(unsigned x)
-        {
+        inline uint32_t getPixelColor(unsigned x) {
             static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
             return getPixelColorLinear(x);
         }
 
-        inline uint32_t getPixelColor(unsigned x, unsigned y)
-        {
+        inline uint32_t getPixelColor(unsigned x, unsigned y) {
             static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
             return getPixelColorLinear(convertToLinear(x, y));
         }
 
-        inline void blendPixelColor(unsigned x, uint32_t color, uint8_t blend)
-        {
+        inline void blendPixelColor(unsigned x, uint32_t color, uint8_t blend) {
             static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
             blendPixelColorLinear(x, color, blend);
         }
 
-        inline void blendPixelColor(unsigned x, unsigned y, uint32_t color, uint8_t blend)
-        {
+        inline void blendPixelColor(unsigned x, unsigned y, uint32_t color, uint8_t blend) {
             static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
             blendPixelColorLinear(convertToLinear(x, y), color, blend);
+        }
+
+        inline void addPixelColor(unsigned x, uint32_t color, bool preserveCR = true) {
+            static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+            addPixelColorLinear(x, color, preserveCR);
+        }
+
+        inline void addPixelColor(unsigned x, unsigned y, uint32_t color, bool preserveCR = true) {
+            static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+            addPixelColorLinear(convertToLinear(x, y), color, preserveCR);
+        }
+
+        inline void fadePixelColor(unsigned x, uint8_t fade) {
+            static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+            fadePixelColorLinear(x, fade);
+        }
+
+        inline void fadePixelColor(unsigned x, unsigned y, uint8_t fade) {
+            static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+            fadePixelColorLinear(convertToLinear(x, y), fade);
         }
 
         inline void blur(uint8_t blur_amount, bool smear = false) {
@@ -165,7 +209,7 @@ protected:
         }
 
         // 2D blurring, can be asymmetrical
-        void blur2d(uint8_t blur_x, uint8_t blur_y, bool smear) {
+        void blur2d(uint8_t blur_x, uint8_t blur_y, bool smear = false) {
             static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
 
             const unsigned cols = Segment::getEffectWidth<dimensionality>();
@@ -219,6 +263,246 @@ protected:
                 }
             }
         }
+
+        // move() - move all pixels in desired direction delta number of pixels
+        // @param dir direction: 0=left, 1=left-up, 2=up, 3=right-up, 4=right, 5=right-down, 6=down, 7=left-down
+        // @param delta number of pixels to move
+        // @param wrap around
+        void movePixels(unsigned dir, unsigned delta, bool wrap = false) {
+            static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
+
+            switch (dir) {
+            case 0: movePixelsX( delta, wrap);                            break;
+            case 1: movePixelsX( delta, wrap); movePixelsY( delta, wrap); break;
+            case 2:                            movePixelsY( delta, wrap); break;
+            case 3: movePixelsX(-delta, wrap); movePixelsY( delta, wrap); break;
+            case 4: movePixelsX(-delta, wrap);                            break;
+            case 5: movePixelsX(-delta, wrap); movePixelsY(-delta, wrap); break;
+            case 6:                            movePixelsY(-delta, wrap); break;
+            case 7: movePixelsX( delta, wrap); movePixelsY(-delta, wrap); break;
+            }
+        }
+
+        //TODO this can probably be optimized
+        void movePixelsX(int delta, bool wrap) {
+            static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
+
+            if (delta == 0)
+                return; // not active
+
+            const int vW = Segment::getEffectWidth<dimensionality>();   // segment width in logical pixels (can be 0 if segment is inactive)
+            const int vH = Segment::getEffectHeight<dimensionality>();  // segment height in logical pixels (is always >= 1)
+            int absDelta = abs(delta);
+            if (absDelta >= vW)
+                return;
+            uint32_t newPxCol[vW];
+            int newDelta;
+            int stop = vW;
+            int start = 0;
+            if (wrap)
+                newDelta = (delta + vW) % vW; // +cols in case delta < 0
+            else {
+                if (delta < 0)
+                    start = absDelta;
+                stop = vW - absDelta;
+                newDelta = delta > 0 ? delta : 0;
+            }
+            for (int y = 0; y < vH; y++) {
+                for (int x = 0; x < stop; x++) {
+                    int srcX = x + newDelta;
+                    if (wrap)
+                        srcX %= vW; // Wrap using modulo when `wrap` is true
+                    newPxCol[x] = getPixelColor(srcX, y);
+                }
+                for (int x = 0; x < stop; x++)
+                    setPixelColor(x + start, y, newPxCol[x]);
+            }
+        }
+
+        //TODO this can probably be optimized
+        void movePixelsY(int delta, bool wrap) {
+            static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
+
+            if (delta == 0)
+                return; // not active
+
+            const int vW = Segment::getEffectWidth<dimensionality>();   // segment width in logical pixels (can be 0 if segment is inactive)
+            const int vH = Segment::getEffectHeight<dimensionality>();  // segment height in logical pixels (is always >= 1)
+            int absDelta = abs(delta);
+            if (absDelta >= vH)
+                return;
+            uint32_t newPxCol[vH];
+            int newDelta;
+            int stop = vH;
+            int start = 0;
+            if (wrap)
+                newDelta = (delta + vH) % vH; // +rows in case delta < 0
+            else {
+                if (delta < 0) start = absDelta;
+                stop = vH - absDelta;
+                newDelta = delta > 0 ? delta : 0;
+            }
+            for (int x = 0; x < vW; x++) {
+                for (int y = 0; y < stop; y++) {
+                    int srcY = y + newDelta;
+                    if (wrap)
+                        srcY %= vH; // Wrap using modulo when `wrap` is true
+                    newPxCol[y] = getPixelColor(x, srcY);
+                }
+                for (int y = 0; y < stop; y++)
+                    setPixelColor(x, y + start, newPxCol[y]);
+            }
+        }
+
+        void drawCircle(uint16_t cx, uint16_t cy, uint8_t radius, uint32_t col, bool soft = false) {
+            static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
+
+            if (radius == 0)
+                return; // not active
+            if (soft) {
+                // Xiaolin Wu’s algorithm
+                const int rsq = radius*radius;
+                int x = 0;
+                int y = radius;
+                unsigned oldFade = 0;
+                while (x < y) {
+                    float yf = sqrtf(float(rsq - x*x)); // needs to be floating point
+                    uint8_t fade = float(0xFF) * (ceilf(yf) - yf); // how much color to keep
+                    if (oldFade > fade)
+                        y--;
+                    oldFade = fade;
+                    int px, py;
+                    for (uint8_t i = 0; i < 16; i++) {
+                            int swaps = (i & 0x4 ? 1 : 0); // 0,  0,  0,  0,  1,  1,  1,  1,  0,  0,  0,  0,  1,  1,  1,  1
+                            int adj =  (i < 8) ? 0 : 1;    // 0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  1,  1,  1
+                            int dx = (i & 1) ? -1 : 1;     // 1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1
+                            int dy = (i & 2) ? -1 : 1;     // 1,  1, -1, -1,  1,  1, -1, -1,  1,  1, -1, -1,  1,  1, -1, -1
+                            if (swaps) {
+                                px = cx + (y - adj) * dx;
+                                py = cy + x * dy;
+                            } else {
+                                px = cx + x * dx;
+                                py = cy + (y - adj) * dy;
+                            }
+                            uint32_t pixCol = getPixelColor(px, py);
+                            setPixelColor(px, py, adj ? color_blend(pixCol, col, fade) : color_blend(col, pixCol, fade));
+                    }
+                    x++;
+                }
+            } else {
+                // Bresenham’s Algorithm
+                int d = 3 - (2*radius);
+                int y = radius, x = 0;
+                while (y >= x) {
+                    for (int i = 0; i < 4; i++) {
+                        int dx = (i & 1) ? -x : x;
+                        int dy = (i & 2) ? -y : y;
+                        setPixelColor(cx + dx, cy + dy, col);
+                        setPixelColor(cx + dy, cy + dx, col);
+                    }
+                    x++;
+                    if (d > 0) {
+                        y--;
+                        d += 4 * (x - y) + 10;
+                    } else {
+                        d += 4 * x + 6;
+                    }
+                }
+            }
+        }
+
+        // by stepko, taken from https://editor.soulmatelights.com/gallery/573-blobs
+        void fillCircle(uint16_t cx, uint16_t cy, uint8_t radius, uint32_t col, bool soft = false) {
+            static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
+
+            if (radius == 0)
+                return; // not active
+
+            const int vW = Segment::getEffectWidth<dimensionality>();   // segment width in logical pixels (can be 0 if segment is inactive)
+            const int vH = Segment::getEffectHeight<dimensionality>();  // segment height in logical pixels (is always >= 1)
+
+            // draw soft bounding circle
+            if (soft)
+                drawCircle(cx, cy, radius, col, soft);
+            // fill it
+            for (int y = -radius; y <= radius; y++) {
+                for (int x = -radius; x <= radius; x++) {
+                    if (x * x + y * y <= radius * radius &&
+                        int(cx)+x >= 0 && int(cy)+y >= 0 &&
+                        int(cx)+x < vW && int(cy)+y < vH)
+                    setPixelColor(cx + x, cy + y, col);
+                }
+            }
+        }
+
+        // inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+        //     void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2 = 0, int8_t rotate = 0, bool usePalGrad = false);
+        // inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c, CRGB c2, int8_t rotate = 0, bool usePalGrad = false) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0), RGBW32(c2.r,c2.g,c2.b,0), rotate, usePalGrad); } // automatic inline
+        // draws a raster font character on canvas
+        // only supports: 4x6=24, 5x8=40, 5x12=60, 6x8=48 and 7x9=63 fonts ATM
+        void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2, int8_t rotate = 0, bool usePalGrad = false) {
+            if (chr < 32 || chr > 126)
+                return; // only ASCII 32-126 supported
+            chr -= 32; // align with font table entries
+            const int font = w*h;
+
+            CRGB col = CRGB(color);
+            CRGBPalette16 grad = CRGBPalette16(col, col2 ? CRGB(col2) : col);
+            if (usePalGrad)
+                grad = SEGPALETTE; // selected palette as gradient
+
+            const int width = Segment::getEffectWidth<dimensionality>();
+            const int height = Segment::getEffectHeight<dimensionality>();
+
+            //if (w<5 || w>6 || h!=8) return;
+            for (int i = 0; i<h; i++) { // character height
+                uint8_t bits = 0;
+                switch (font) {
+                    case 24: bits = pgm_read_byte_near(&console_font_4x6[(chr * h) + i]); break;  // 5x8 font
+                    case 40: bits = pgm_read_byte_near(&console_font_5x8[(chr * h) + i]); break;  // 5x8 font
+                    case 48: bits = pgm_read_byte_near(&console_font_6x8[(chr * h) + i]); break;  // 6x8 font
+                    case 63: bits = pgm_read_byte_near(&console_font_7x9[(chr * h) + i]); break;  // 7x9 font
+                    case 60: bits = pgm_read_byte_near(&console_font_5x12[(chr * h) + i]); break; // 5x12 font
+                    default: return;
+                }
+                CRGBW c = ColorFromPalette(grad, (i+1)*255/h, 255u, LINEARBLEND_NOWRAP);
+                for (int j = 0; j<w; j++) { // character width
+                    int x0, y0;
+                    switch (rotate) {
+                        case -1: x0 = x + (h-1) - i; y0 = y + (w-1) - j; break; // -90 deg
+                        case -2:
+                        case  2: x0 = x + j;         y0 = y + (h-1) - i; break; // 180 deg
+                        case  1: x0 = x + i;         y0 = y + j;         break; // +90 deg
+                        default: x0 = x + (w-1) - j; y0 = y + i;         break; // no rotation
+                    }
+                    if (x0 < 0 || x0 >= width || y0 < 0 || y0 >= height)
+                        continue; // drawing off-screen
+                    if (((bits>>(j+(8-w))) & 0x01)) { // bit set
+                        setPixelColor(x0, y0, c.color32);
+                    }
+                }
+            }
+        }
+
+        void wuPixel(uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu
+            constexpr auto WU_WEIGHT = [](unsigned a, unsigned b) -> uint8_t { return ((uint8_t) (((a)*(b)+(a)+(b))>>8)); };
+            // extract the fractional parts and derive their inverses
+            unsigned xx = x & 0xff, yy = y & 0xff, ix = 255 - xx, iy = 255 - yy;
+            // calculate the intensities for each affected pixel
+            uint8_t wu[4] = {WU_WEIGHT(ix, iy), WU_WEIGHT(xx, iy),
+                             WU_WEIGHT(ix, yy), WU_WEIGHT(xx, yy)};
+            // multiply the intensities by the colour, and saturating-add them to the pixels
+            for (int i = 0; i < 4; i++) {
+                int wu_x = (x >> 8) + (i & 1);        // precalculate x
+                int wu_y = (y >> 8) + ((i >> 1) & 1); // precalculate y
+                CRGB led = getPixelColor(wu_x, wu_y);
+                CRGB oldLed = led;
+                led.r = qadd8(led.r, c.r * wu[i] >> 8);
+                led.g = qadd8(led.g, c.g * wu[i] >> 8);
+                led.b = qadd8(led.b, c.b * wu[i] >> 8);
+                if (led != oldLed) setPixelColor(wu_x, wu_y, RGBW32(led.r, led.g, led.b, 0)); // don't repaint if same color
+            }
+        }
     };
 
 private:
@@ -245,6 +529,7 @@ protected:
             buffer.pixels.clear();
             return;
         }
+        buffer.pixels.shrink_to_fit();
 
         for (unsigned y = 0u; y < height; ++y) {
             for (unsigned x = 0u; x < width; ++x) {
@@ -255,12 +540,13 @@ protected:
 
 public:
     void nextFrameImpl(const EffectCoordinate& coordinate) {
-        const size_t length = Segment::getEffectWidth<dimensionality>() * Segment::getEffectHeight<dimensionality>();
+        const size_t length = coordinate.width * coordinate.height;
         buffer.pixels.resize(length, 0u);
         if (buffer.pixels.size() != length) {
             buffer.pixels.clear();
             return;
         }
+        buffer.pixels.shrink_to_fit();
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

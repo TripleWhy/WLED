@@ -23,7 +23,7 @@ public:
     void nextFrameImpl(const EffectCoordinate& coordinate) {
         Base::nextFrameImpl(coordinate);
 
-        buffer.fade(SEGCOLOR(1), 224);
+        buffer.fadeOut(224);
 
         uint32_t cycleTime = 20 + (255 - SEGMENT.speed)*5;
         uint32_t it = strip.now / cycleTime;

@@ -52,8 +52,8 @@ public:
     }
 
 private:
-    bool strobe;
-    bool do_palette;
+    const bool strobe;
+    const bool do_palette;
     bool usePalette{false}; // like, actually this time
     uint32_t step{};
     uint32_t color{0u};

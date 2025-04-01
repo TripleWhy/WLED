@@ -1,0 +1,50 @@
+#pragma once
+
+#include "../FX.h"
+#include "BufferedEffect.h"
+#include "Effect.h"
+
+/*
+  Blends random colors across palette
+  Modified, originally by Mark Kriegsman https://gist.github.com/kriegsman/1f7ccbbfa492a73c015e
+*/
+class BlendsEffect : public BaseEffect<BlendsEffect> {
+private:
+    using Self = BlendsEffect;
+    using Base = BaseEffect<Self>;
+
+public:
+    static constexpr const char* const metaData = "Blends@Shift speed,Blend speed;;!";
+    static constexpr const uint8_t effectId = FX_MODE_BLENDS;
+    static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
+
+    using Base::Base;
+
+    void nextFrameImpl(const EffectCoordinate& coordinate) {
+        pixelLen = coordinate.width > UINT8_MAX ? UINT8_MAX : coordinate.width;
+        pixels.resize(pixelLen);
+        if (pixels.size() != pixelLen) {
+            pixels.clear();
+            return;
+        }
+        pixels.shrink_to_fit();
+
+        uint8_t blendSpeed = map(SEGMENT.intensity, 0, UINT8_MAX, 10, 128);
+        unsigned shift = (strip.now * ((SEGMENT.speed >> 3) +1)) >> 8;
+
+        for (unsigned i = 0; i < pixelLen; i++) {
+            pixels[i] = color_blend(pixels[i], SEGMENT.color_from_palette(shift + quadwave8((i + 1) * 16), false, PALETTE_SOLID_WRAP, 255), blendSpeed);
+            shift += 3;
+        }
+    }
+
+    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        return pixels[coordinate.getXAbsolute() % pixelLen];
+    }
+
+private:
+    std::vector<uint32_t> pixels{};
+    unsigned pixelLen{};
+};
+
+

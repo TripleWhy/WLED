@@ -55,6 +55,17 @@ public:
         return info.getPixelColor(this, coordinate, currentColor);
     }
 
+    template<typename T>
+    static inline bool resizeVector(std::vector<T>& vector, size_t size) {
+        vector.resize(size);
+        if (vector.size() != size) {
+            vector.clear();
+            return false;
+        }
+        vector.shrink_to_fit();
+        return true;
+    }
+
 private:
     const EffectInformation& info;
 };

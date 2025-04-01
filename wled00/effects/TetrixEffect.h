@@ -36,6 +36,7 @@ public:
         drops.clear();
         return;
       }
+      drops.shrink_to_fit();
 
       for (unsigned y=0; y < coordinate.height; ++y)
         runStrip(y, coordinate.width, &drops[y]);

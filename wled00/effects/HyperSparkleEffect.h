@@ -8,16 +8,16 @@
  * Like flash sparkle. With more flash.
  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
  */
-class HyperFlashSparkleEffect : public BaseEffect<HyperFlashSparkleEffect, BufferedEffect<EffectDimensionality::d1>> {
+class HyperSparkleEffect : public BaseEffect<HyperSparkleEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
-    using Self = HyperFlashSparkleEffect;
+    using Self = HyperSparkleEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
     static constexpr const char* const metaData = "Sparkle+@!,!,,,,Move,Overlay;Bg,Fx;!;;m12=0";
     static constexpr const uint8_t effectId = FX_MODE_HYPER_SPARKLE;
 
-    explicit HyperFlashSparkleEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit HyperSparkleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
     void nextFrameImpl(const EffectCoordinate& coordinate) {
         Base::nextFrameImpl(coordinate);

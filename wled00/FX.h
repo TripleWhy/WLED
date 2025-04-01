@@ -716,14 +716,6 @@ typedef struct Segment {
     [[gnu::hot]] uint32_t color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) const;
     [[gnu::hot]] uint32_t color_wheel(uint8_t pos) const;
 
-    // 2D Blur: shortcuts for bluring columns or rows only (50% faster than full 2D blur)
-    inline void blurCols(fract8 blur_amount, bool smear = false) { // blur all columns
-      blur2D(0, blur_amount, smear);
-    }
-    inline void blurRows(fract8 blur_amount, bool smear = false) { // blur all rows
-      blur2D(blur_amount, 0, smear);
-    }
-
     // 2D matrix
     [[gnu::hot]] unsigned virtualWidth()  const; // segment width in virtual pixels (accounts for groupping and spacing)
     [[gnu::hot]] unsigned virtualHeight() const; // segment height in virtual pixels (accounts for groupping and spacing)
@@ -793,8 +785,6 @@ typedef struct Segment {
     inline void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)            { fadePixelColor(x, fade); }
     //inline void box_blur(unsigned i, bool vertical, fract8 blur_amount) {}
     inline void blur2D(uint8_t blur_x, uint8_t blur_y, bool smear = false) {}
-    inline void blurRow(int row, fract8 blur_amount, bool smear = false) {}
-    inline void blurCol(int col, fract8 blur_amount, bool smear = false) {}
     inline void moveX(int delta, bool wrap = false) {}
     inline void moveY(int delta, bool wrap = false) {}
     inline void move(uint8_t dir, uint8_t delta, bool wrap = false) {}
