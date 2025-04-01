@@ -79,7 +79,7 @@ private:
           if (int(drop->pos) < int(drop->stack)) drop->pos = drop->stack;
           for (unsigned i = unsigned(drop->pos); i < width; i++) {
             uint32_t col = i < unsigned(drop->pos)+drop->brick ? SEGMENT.color_from_palette(drop->col, false, false, 0) : SEGCOLOR(1);
-            setBufferPixelColor(i, y, col);
+            buffer.setPixelColor(i, y, col);
           }
         } else {                          // we hit bottom
           drop->step = 0;                 // proceed with next brick, go back to init
@@ -92,7 +92,7 @@ private:
         drop->brick = 0;                  // reset brick size (no more growing)
         if (drop->step > strip.now) {
           // allow fading of virtual strip
-          for (unsigned x = 0; x < width; ++x) blendBufferPixelColor(x, y, SEGCOLOR(1), 25); // 10% blend
+          for (unsigned x = 0; x < width; ++x) buffer.blendPixelColor(x, y, SEGCOLOR(1), 25); // 10% blend
         } else {
           drop->stack = 0;                // reset brick stack size
           drop->step = 0;                 // proceed with next brick

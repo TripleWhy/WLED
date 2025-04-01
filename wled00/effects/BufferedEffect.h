@@ -9,14 +9,8 @@
 // Don't use BufferedEffectBase directly, use BufferedEffect.
 
 class BufferedEffectBase : public Effect {
-    using Self = BufferedEffectBase;
-    using Base = Effect;
-
-    template<EffectDimensionality>
-    friend class BufferedEffect;
-
 protected:
-    class PixelBuffer {
+    class PixelBufferBase {
         template<EffectDimensionality>
         friend class BufferedEffect;
     public:
@@ -54,37 +48,82 @@ protected:
             }
         }
 
-    private:
-        uint32_t getPixelColor(unsigned i) const {
+    protected:
+        uint32_t getPixelColorLinear(unsigned i) const {
             if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
                 Serial.printf("BufferedEffect::PixelBuffer::getPixelColor: %d >= %u\n", i, pixels.size());
                 std::terminate();
             }
             return pixels[static_cast<size_t>(i)];
         }
-        void setPixelColor(unsigned i, uint32_t c) {
+        void setPixelColorLinear(unsigned i, uint32_t c) {
             if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
                 std::terminate();
             }
             pixels[static_cast<size_t>(i)] = c;
         }
-        void blendPixelColor(unsigned n, uint32_t color, uint8_t blend) {
-            setPixelColor(n, color_blend(getPixelColor(n), color, blend));
+        void blendPixelColorLinear(unsigned n, uint32_t color, uint8_t blend) {
+            setPixelColorLinear(n, color_blend(getPixelColorLinear(n), color, blend));
         }
 
     private:
         std::vector<uint32_t> pixels;
     };
 
-protected:
-    using Base::Base;
+private:
+    using Self = BufferedEffectBase;
+    using Base = Effect;
+
+    template<EffectDimensionality>
+    friend class BufferedEffect;
 
 protected:
-    PixelBuffer buffer{};
+    using Base::Base;
 };
 
 template<EffectDimensionality _dimensionality>
 class BufferedEffect : public BufferedEffectBase {
+protected:
+    class PixelBuffer : public PixelBufferBase {
+    public:
+        inline void setPixelColor(unsigned x, uint32_t color)
+        {
+            static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+            setPixelColorLinear(x, color);
+        }
+
+        inline void setPixelColor(unsigned x, unsigned y, uint32_t color)
+        {
+            static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+            setPixelColorLinear(convertToLinear(x, y), color);
+        }
+
+        inline uint32_t getPixelColor(unsigned x)
+        {
+            static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+            return getPixelColorLinear(x);
+        }
+
+        inline uint32_t getPixelColor(unsigned x, unsigned y)
+        {
+            static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+            return getPixelColorLinear(convertToLinear(x, y));
+        }
+
+        inline void blendPixelColor(unsigned x, uint32_t color, uint8_t blend)
+        {
+            static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+            blendPixelColorLinear(x, color, blend);
+        }
+
+        inline void blendPixelColor(unsigned x, unsigned y, uint32_t color, uint8_t blend)
+        {
+            static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+            blendPixelColorLinear(convertToLinear(x, y), color, blend);
+        }
+    };
+
+private:
     using Self = BufferedEffect;
     using Base = BufferedEffectBase;
 
@@ -127,44 +166,7 @@ public:
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        return buffer.getPixelColor(convertToLinear(coordinate.getXAbsolute(), coordinate.getYAbsolute()));
-    }
-
-protected:
-    inline void setBufferPixelColor(unsigned x, uint32_t color)
-    {
-        static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
-        buffer.setPixelColor(x, color);
-    }
-
-    inline void setBufferPixelColor(unsigned x, unsigned y, uint32_t color)
-    {
-        static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
-        buffer.setPixelColor(convertToLinear(x, y), color);
-    }
-
-    inline uint32_t getBufferPixelColor(unsigned x)
-    {
-        static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
-        return buffer.getPixelColor(x);
-    }
-
-    inline uint32_t getBufferPixelColor(unsigned x, unsigned y)
-    {
-        static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
-        return buffer.getPixelColor(convertToLinear(x, y));
-    }
-
-    inline void blendBufferPixelColor(unsigned x, uint32_t color, uint8_t blend)
-    {
-        static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
-        buffer.blendPixelColor(x, color, blend);
-    }
-
-    inline void blendBufferPixelColor(unsigned x, unsigned y, uint32_t color, uint8_t blend)
-    {
-        static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
-        buffer.blendPixelColor(convertToLinear(x, y), color, blend);
+        return buffer.getPixelColorLinear(convertToLinear(coordinate.getXAbsolute(), coordinate.getYAbsolute()));
     }
 
 private:
@@ -184,4 +186,7 @@ private:
             return convertToLinear(x, y);
         }
     }
+
+protected:
+    PixelBuffer buffer{};
 };

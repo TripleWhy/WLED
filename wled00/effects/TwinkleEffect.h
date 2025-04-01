@@ -44,7 +44,7 @@ public:
             PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
             uint32_t p = (uint32_t)coordinate.width * (uint32_t)PRNG16;
             unsigned j = p >> 16;
-            setBufferPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
         }
     }
 

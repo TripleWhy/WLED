@@ -34,13 +34,13 @@ public:
                 for (size_t times = 0; times < 10; times++) { //attempt to spawn a new pixel 10 times
                     unsigned i = hw_random16(coordinate.width);
                     if (dissolveToPrimary) { //dissolve to primary/palette
-                        if (getBufferPixelColor(i) == SEGCOLOR(1)) {
-                            setBufferPixelColor(i, color == SEGCOLOR(0) ? SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : color);
+                        if (buffer.getPixelColor(i) == SEGCOLOR(1)) {
+                            buffer.setPixelColor(i, color == SEGCOLOR(0) ? SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : color);
                             break; //only spawn 1 new pixel per frame per 50 LEDs
                         }
                     } else { //dissolve to secondary
-                        if (getBufferPixelColor(i) != SEGCOLOR(1)) {
-                            setBufferPixelColor(i, SEGCOLOR(1));
+                        if (buffer.getPixelColor(i) != SEGCOLOR(1)) {
+                            buffer.setPixelColor(i, SEGCOLOR(1));
                             break;
                         }
                     }

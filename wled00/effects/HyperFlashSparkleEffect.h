@@ -28,7 +28,7 @@ public:
         if (!SEGMENT.check2) {
             for (unsigned i = 0; i < coordinate.width; i++) {
                 unsigned palIdx = moving ? (i+it)%coordinate.width : i;
-                setBufferPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 0));
+                buffer.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 0));
             }
         }
 
@@ -36,7 +36,7 @@ public:
           if (hw_random8((255-SEGMENT.intensity) >> 4) == 0) {
             int len = max(1, (int)coordinate.width/3);
             for (int i = 0; i < len; i++) {
-                setBufferPixelColor(hw_random16(coordinate.width), SEGCOLOR(1));
+                buffer.setPixelColor(hw_random16(coordinate.width), SEGCOLOR(1));
             }
           }
           flashTimestamp = strip.now;
