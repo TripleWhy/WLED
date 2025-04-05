@@ -1,9 +1,10 @@
 #pragma once
 #ifndef WLED_DISABLE_PARTICLESYSTEM1D
 
-#include "../FX.h"
-#include "BufferedEffect.h"
-#include "Effect.h"
+#include "../../FX.h"
+#include "../../FXparticleSystem.h"
+#include "../BufferedEffect.h"
+#include "../Effect.h"
 
 /*
   Particle based balance: particles move back and forth (1D pendent to 2D particle box)

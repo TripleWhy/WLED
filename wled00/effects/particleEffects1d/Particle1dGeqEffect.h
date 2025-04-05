@@ -1,26 +1,26 @@
 #pragma once
 #ifndef WLED_DISABLE_PARTICLESYSTEM1D
 
-#include "../FX.h"
-#include "BufferedEffect.h"
-#include "Effect.h"
-#include "effectUtils.h"
+#include "../../FX.h"
+#include "../../FXparticleSystem.h"
+#include "../BufferedEffect.h"
+#include "../Effect.h"
 
 /*
   Particle based 1D GEQ effect, each frequency bin gets an emitter, distributed over the strip
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particle1dgeqEffect : public BaseEffect<Particle1dgeqEffect, BufferedEffect<EffectDimensionality::d1>> {
+class Particle1dGeqEffect : public BaseEffect<Particle1dGeqEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
-    using Self = Particle1dgeqEffect;
+    using Self = Particle1dGeqEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
     static constexpr const char* const metaData = "PS GEQ 1D@Speed,!,Size,Blur,,,,;,!;!;1f;pal=0,sx=50,ix=200,c1=0,c2=0,c3=0,o1=1,o2=1";
-    static constexpr const uint8_t effectId = FX_MODE_PS_1D_GEQ;
+    static constexpr const uint8_t effectId = FX_MODE_PS1DGEQ;
 
-    explicit Particle1dgeqEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit Particle1dGeqEffect(const EffectInformation& ei) : Base{ei, false} {}
 
     void nextFrameImpl(const EffectCoordinate& coordinate) {
         Base::nextFrameImpl(coordinate);

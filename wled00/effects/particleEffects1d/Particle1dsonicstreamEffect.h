@@ -1,10 +1,10 @@
 #pragma once
 #ifndef WLED_DISABLE_PARTICLESYSTEM1D
 
-#include "../FX.h"
-#include "BufferedEffect.h"
-#include "Effect.h"
-#include "effectUtils.h"
+#include "../../FX.h"
+#include "../../FXparticleSystem.h"
+#include "../BufferedEffect.h"
+#include "../Effect.h"
 
 /*
   Particle based AR effect, swoop particles along the strip with selected frequency loudness

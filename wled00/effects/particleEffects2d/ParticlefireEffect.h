@@ -2,9 +2,10 @@
 #ifndef WLED_DISABLE_2D
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
-#include "../FX.h"
-#include "BufferedEffect.h"
-#include "Effect.h"
+#include "../../FX.h"
+#include "../../FXparticleSystem.h"
+#include "../BufferedEffect.h"
+#include "../Effect.h"
 
 /*
   Particle Fire
