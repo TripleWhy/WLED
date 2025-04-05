@@ -2,7 +2,6 @@
 
 #include "../FX.h"
 #include "Effect.h"
-#include "effectUtils.h"
 
 /*
   Imitates a washing machine, rotating same waves forward, then pause, then backward.

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../wled.h"
 #include <memory>
+#include "../wled.h"
+#include "effectUtils.h"
 
 class Effect;
 class LazyColor;

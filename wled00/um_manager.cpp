@@ -88,3 +88,12 @@ void Usermod::appendConfigData(Print& settingsScript) {
   this->appendConfigData();
   oappend_shim = nullptr;
 }
+
+um_data_t* getAudioData() {
+  um_data_t *um_data;
+  if (!UsermodManager::getUMData(&um_data, USERMOD_ID_AUDIOREACTIVE)) {
+      // add support for no audio
+      um_data = simulateSound(SEGMENT.soundSim);
+  }
+  return um_data;
+}

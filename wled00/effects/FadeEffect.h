@@ -2,7 +2,6 @@
 
 #include "../FX.h"
 #include "Effect.h"
-#include "effectUtils.h"
 
 /*
  * Fades the LEDs between two colors

@@ -2,7 +2,6 @@
 
 #include "../FX.h"
 #include "Effect.h"
-#include "effectUtils.h"
 
 /*
  * Running lights effect with smooth sine transition base.

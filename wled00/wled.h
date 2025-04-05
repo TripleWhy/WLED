@@ -921,17 +921,6 @@ WLED_GLOBAL uint32_t ledMaps _INIT(0); // bitfield representation of available l
 WLED_GLOBAL uint16_t ledMaps _INIT(0); // bitfield representation of available ledmaps
 #endif
 
-#define FRAMETIME        strip.getFrameTime()
-/* How much data bytes each segment should max allocate to leave enough space for other segments,
-  assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
-#define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
-#define SEGMENT          strip._segments[strip.getCurrSegmentId()]
-#define SEGENV           strip._segments[strip.getCurrSegmentId()]
-
-// paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
-#define PALETTE_SOLID_WRAP   (strip.paletteBlend == 1 || strip.paletteBlend == 3)
-#define PALETTE_MOVING_WRAP !(strip.paletteBlend == 2 || (strip.paletteBlend == 0 && SEGMENT.speed == 0))
-
 // global I2C SDA pin (used for usermods)
 #ifndef I2CSDAPIN
 WLED_GLOBAL int8_t i2c_sda  _INIT(-1);

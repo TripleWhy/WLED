@@ -4,7 +4,6 @@
 #include "../FX.h"
 #include "BufferedEffect.h"
 #include "Effect.h"
-#include "effectUtils.h"
 
 /////////////////////////
 //    * 2D Waverly     //
