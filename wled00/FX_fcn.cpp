@@ -204,7 +204,7 @@ void Segment::resetIfRequired() {
   if (!reset) return;
   //DEBUG_PRINTF_P(PSTR("-- Segment reset: %p\n"), this);
   if (data && _dataLen > 0) memset(data, 0, _dataLen);  // prevent heap fragmentation (just erase buffer instead of deallocateData())
-  next_time = 0; step = 0; call = 0; aux0 = 0; aux1 = 0;
+  next_time = 0; call = 0;
   reset = false;
   #ifdef WLED_ENABLE_GIF
   endImagePlayback(this);
@@ -328,9 +328,6 @@ void Segment::swapSegenv(tmpsegd_t &tmpSeg) {
   tmpSeg._check1T    = check1;
   tmpSeg._check2T    = check2;
   tmpSeg._check3T    = check3;
-  tmpSeg._aux0T      = aux0;
-  tmpSeg._aux1T      = aux1;
-  tmpSeg._stepT      = step;
   tmpSeg._callT      = call;
   tmpSeg._dataT      = data;
   tmpSeg._dataLenT   = _dataLen;
@@ -346,9 +343,6 @@ void Segment::swapSegenv(tmpsegd_t &tmpSeg) {
     check1    = _t->_segT._check1T;
     check2    = _t->_segT._check2T;
     check3    = _t->_segT._check3T;
-    aux0      = _t->_segT._aux0T;
-    aux1      = _t->_segT._aux1T;
-    step      = _t->_segT._stepT;
     call      = _t->_segT._callT;
     data      = _t->_segT._dataT;
     _dataLen  = _t->_segT._dataLenT;
@@ -359,9 +353,6 @@ void Segment::restoreSegenv(const tmpsegd_t &tmpSeg) {
   //DEBUG_PRINTF_P(PSTR("--  Restoring temp seg: %p->(%p) [%d->%p]\n"), &tmpSeg, this, _dataLen, data);
   if (isInTransition() && &(_t->_segT) != &tmpSeg) {
     // update possibly changed variables to keep old effect running correctly
-    _t->_segT._aux0T = aux0;
-    _t->_segT._aux1T = aux1;
-    _t->_segT._stepT = step;
     _t->_segT._callT = call;
     //if (_t->_segT._dataT != data) DEBUG_PRINTF_P(PSTR("---  data re-allocated: (%p) %p -> %p\n"), this, _t->_segT._dataT, data);
     _t->_segT._dataT = data;
@@ -377,9 +368,6 @@ void Segment::restoreSegenv(const tmpsegd_t &tmpSeg) {
   check1    = tmpSeg._check1T;
   check2    = tmpSeg._check2T;
   check3    = tmpSeg._check3T;
-  aux0      = tmpSeg._aux0T;
-  aux1      = tmpSeg._aux1T;
-  step      = tmpSeg._stepT;
   call      = tmpSeg._callT;
   data      = tmpSeg._dataT;
   _dataLen  = tmpSeg._dataLenT;

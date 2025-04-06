@@ -30,8 +30,8 @@ public:
         PRNG16 = 11337;
 
         // Calculate speed
-        if (SEGMENT.speed > 100) SEGENV.aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
-        else SEGENV.aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
+        if (SEGMENT.speed > 100) aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
+        else aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
 
         // Set up the background color, "bg".
         bg = CRGB(SEGCOLOR(1));
@@ -84,10 +84,10 @@ private:
     //
     //  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
     //  Colors are chosen from a palette. Read more about this effect using the link above!
-    static CRGB twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
+    CRGB twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
     {
         // Overall twinkle speed (changed)
-        unsigned ticks = ms / SEGENV.aux0;
+        unsigned ticks = ms / aux0;
         unsigned fastcycle8 = uint8_t(ticks);
         uint16_t slowcycle16 = (ticks >> 8) + salt;
         slowcycle16 += sin8_t(slowcycle16);
@@ -145,4 +145,5 @@ private:
     uint16_t PRNG16{};
     CRGB bg{};
     unsigned backgroundBrightness{};
+    uint16_t aux0{};
 };

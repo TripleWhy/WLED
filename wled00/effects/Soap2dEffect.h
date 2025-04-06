@@ -54,9 +54,9 @@ public:
             }
         }
         // init also if dimensions changed
-        if (SEGENV.call == 0 || SEGMENT.aux0 != cols || SEGMENT.aux1 != rows) {
-            SEGMENT.aux0 = cols;
-            SEGMENT.aux1 = rows;
+        if (SEGENV.call == 0 || aux0 != cols || aux1 != rows) {
+            aux0 = cols;
+            aux1 = rows;
             for (int i = 0; i < cols; i++) {
                 for (int j = 0; j < rows; j++) {
                     buffer.setPixelColor(i, j, ColorFromPalette(SEGPALETTE,~noisePixels[XY(coordinate,i,j)].noise3d*3));
@@ -128,6 +128,8 @@ private:
 private:
     std::vector<NoisePixel> noisePixels{};
     std::array<uint32_t, 3> noisecoord{};
+    uint16_t aux0{};
+    uint16_t aux1{};
 };
 
 

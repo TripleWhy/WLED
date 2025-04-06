@@ -43,7 +43,7 @@ public:
 
         CRGB backgroundColor = SEGCOLOR(1);
 
-        if (SEGENV.call == 0 || strip.now - SEGMENT.step > 3000) {
+        if (SEGENV.call == 0 || strip.now - step > 3000) {
             step = strip.now;
             aux0 = 0;
 

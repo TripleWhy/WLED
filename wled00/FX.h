@@ -423,10 +423,7 @@ typedef struct Segment {
 
     // runtime data
     unsigned long next_time;  // millis() of next update
-    uint32_t step;  // custom "step" var
     uint32_t call;  // call counter
-    uint16_t aux0;  // custom var
-    uint16_t aux1;  // custom var
     byte     *data; // effect data pointer
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
 
@@ -442,9 +439,6 @@ typedef struct Segment {
         bool    _check2T  : 1;        // checkmark 2
         bool    _check3T  : 1;        // checkmark 3
       };
-      uint16_t _aux0T;
-      uint16_t _aux1T;
-      uint32_t _stepT;
       uint32_t _callT;
       uint8_t *_dataT;
       unsigned _dataLenT;
@@ -539,10 +533,7 @@ typedef struct Segment {
       startY(0),
       stopY(1),
       name(nullptr),
-      step(0),
       call(0),
-      aux0(0),
-      aux1(0),
       data(nullptr),
       _capabilities(0),
       _default_palette(0),
