@@ -37,6 +37,7 @@ static_assert(std::is_pod_v<EffectInformation>);
 class Effect {
 public:
     explicit constexpr Effect(const EffectInformation& ei) : info(ei) {}
+    virtual ~Effect() = default;
     constexpr uint8_t getEffectId() const {
         return info.effectId;
     }
