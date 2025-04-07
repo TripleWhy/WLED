@@ -808,13 +808,10 @@ class WS2812FX {  // 96 bytes
       _mainSegment(0)
     {
       WS2812FX::instance = this;
-      _effectInfos.reserve(MODE_COUNT); // allocate memory to prevent initial fragmentation (does not increase size())
-      setupEffectData(std::max(size_t{1}, _effectInfos.capacity()));
     }
 
     ~WS2812FX() {
       if (customMappingTable) free(customMappingTable);
-      _effectInfos.clear();
       _segments.clear();
 #ifndef WLED_DISABLE_2D
       panel.clear();
@@ -840,8 +837,7 @@ class WS2812FX {  // 96 bytes
       fixInvalidSegments(),                       // fixes incorrect segment configuration
       setPixelColor(unsigned i, uint32_t c) const,      // paints absolute strip pixel with index n and color c
       show(),                                     // initiates LED output
-      setTargetFps(unsigned fps),
-      setupEffectData(size_t modeCount);          // add default effects to the list; defined in FX.cpp
+      setTargetFps(unsigned fps);
 
     inline void resetTimebase()           { timebase = 0UL - millis(); }
     inline void restartRuntime()          { for (Segment &seg : _segments) { seg.markForReset().resetIfRequired(); } }
@@ -874,8 +870,7 @@ class WS2812FX {  // 96 bytes
       getActiveSegmentsNum() const,
       getFirstSelectedSegId() const,
       getLastActiveSegmentId() const,
-      getActiveSegsLightCapabilities(bool selectedOnly = false) const,
-      addEffect(const EffectInformation& effectInfo);                     // add effect to the list; defined in FX.cpp;
+      getActiveSegsLightCapabilities(bool selectedOnly = false) const;
 
     inline uint8_t getBrightness() const    { return _brightness; }       // returns current strip brightness
     inline static constexpr unsigned getMaxSegments() { return MAX_NUM_SEGMENTS; }  // returns maximum number of supported segments (fixed value)
@@ -884,7 +879,7 @@ class WS2812FX {  // 96 bytes
     inline uint8_t getMainSegmentId() const { return _mainSegment; }      // returns main segment index
     inline uint8_t getPaletteCount() const  { return 13 + GRADIENT_PALETTE_COUNT + customPalettes.size(); }
     inline uint8_t getTargetFps() const     { return _targetFps; }        // returns rough FPS value for las 2s interval
-    inline size_t  getModeCount() const     { return _effectInfos.size(); }  // returns number of registered modes/effects
+    inline size_t  getModeCount() const     { return MODE_COUNT; }  // returns number of registered modes/effects
 
     uint16_t
       getLengthPhysical() const,
@@ -905,9 +900,9 @@ class WS2812FX {  // 96 bytes
 
     inline uint32_t getLastShow() const   { return _lastShow; }           // returns millis() timestamp of last strip.show() call
 
-    inline const EffectInformation* getEffectInformation(uint8_t effectId) const { return _effectInfos[effectId]; }
-    inline const EffectInformation* safeGetEffectInformation(uint8_t effectId) const { return (effectId < getModeCount()) ? _effectInfos[effectId] : nullptr; }
-    const char *getModeData(unsigned id = 0) const { const EffectInformation* const info = safeGetEffectInformation(id); return (info != nullptr) ? info->metaData : PSTR("Solid"); }
+    const EffectInformation* getEffectInformation(uint8_t effectId) const;
+    const EffectInformation* safeGetEffectInformation(uint8_t effectId) const;
+    const char *getModeData(unsigned id = 0) const;
 
     Segment&        getSegment(unsigned id);
     inline Segment& getFirstSelectedSeg() { return _segments[getFirstSelectedSegId()]; }  // returns reference to first segment that is "selected"
@@ -989,8 +984,6 @@ class WS2812FX {  // 96 bytes
       bool _hasWhiteChannel      : 1;
       bool _triggered            : 1;
     };
-
-    std::vector<const EffectInformation*> _effectInfos;
 
     show_callback _callback;
 

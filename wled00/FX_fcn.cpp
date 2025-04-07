@@ -1969,17 +1969,6 @@ void WS2812FX::setRange(uint16_t i, uint16_t i2, uint32_t col) {
   for (unsigned x = i; x <= i2; x++) setPixelColor(x, col);
 }
 
-#ifdef WLED_DEBUG
-void WS2812FX::printSize() {
-  size_t size = 0;
-  for (const Segment &seg : _segments) size += seg.getSize();
-  DEBUG_PRINTF_P(PSTR("Segments: %d -> %u/%dB\n"), _segments.size(), size, SegmentMemoryManager::getUsedSpace());
-  for (const Segment &seg : _segments) DEBUG_PRINTF_P(PSTR("  Seg: %d,%d [A=%d, 2D=%d, RGB=%d, W=%d, CCT=%d]\n"), seg.width(), seg.height(), seg.isActive(), seg.is2D(), seg.hasRGB(), seg.hasWhite(), seg.isCCT());
-  DEBUG_PRINTF_P(PSTR("Modes: %d*%d=%uB\n"), sizeof(mode_ptr), _effectInfos.size(), (_effectInfos.capacity()*sizeof(mode_ptr)));
-  DEBUG_PRINTF_P(PSTR("Map: %d*%d=%uB\n"), sizeof(uint16_t), (int)customMappingSize, customMappingSize*sizeof(uint16_t));
-}
-#endif
-
 void WS2812FX::loadCustomPalettes() {
   byte tcp[72]; //support gradient palettes with up to 18 entries
   CRGBPalette16 targetPalette;

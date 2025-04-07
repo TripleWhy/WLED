@@ -251,264 +251,271 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // mode data
-static const char _data_RESERVED[] PROGMEM = "RSVD";
 
-// add (or replace reserved) effect mode and data into vector
-// use id==255 to find unallocated gaps (with "Reserved" data string)
-// if vector size() is smaller than id (single) data is appended at the end (regardless of id)
-// return the actual id used for the effect or 255 if the add failed.
-uint8_t WS2812FX::addEffect(const EffectInformation& effectInfo) {
-  for (size_t i = _effectInfos.size(); i < effectInfo.effectId; ++i) {
-    _effectInfos.push_back(nullptr);
-  }
-  if (effectInfo.effectId < _effectInfos.size()) {
-    if (_effectInfos[effectInfo.effectId] != nullptr) return 255; // do not overwrite an already added effect
-    _effectInfos[effectInfo.effectId] = &effectInfo;
-    return effectInfo.effectId;
-  } else if (_effectInfos.size() < 255) { // 255 is reserved for indicating the effect wasn't added
-    _effectInfos.push_back(&effectInfo);
-    return _effectInfos.size() - 1;
-  } else {
-    return 255u; // The vector is full so return 255
-  }
+static constexpr void assignEffectInfo(std::array<const EffectInformation*, MODE_COUNT>& array, const EffectInformation& info) {
+  array[info.effectId] = &info;
 }
 
-void WS2812FX::setupEffectData(size_t modeCount) {
-  _effectInfos.resize(modeCount);
-
-  addEffect(StaticEffect::effectInformation);
-  addEffect(BlinkEffect::effectInformation);
-  addEffect(BreathEffect::effectInformation);
-  addEffect(ColorWipeEffect::effectInformation);
-  addEffect(ColorWipeRandomEffect::effectInformation);
-  addEffect(RandomColorEffect::effectInformation);
-  addEffect(ColorSweepEffect::effectInformation);
-  addEffect(DynamicEffect::effectInformation);
-  addEffect(RainbowEffect::effectInformation);
-  addEffect(RainbowCycleEffect::effectInformation);
-  addEffect(ScanEffect::effectInformation);
-  //addEffect(DualScanEffect::effectInformation);
-  addEffect(FadeEffect::effectInformation);
-  addEffect(TheaterChaseEffect::effectInformation);
-  //addEffect(TheaterChaseRainbowEffect::effectInformation);
-  addEffect(RunningLightsEffect::effectInformation);
-  //addEffect(SawEffect::effectInformation);
-  addEffect(TwinkleEffect::effectInformation);
-  addEffect(DissolveEffect::effectInformation);
-  //addEffect(DissolveRandomEffect::effectInformation);
-  addEffect(SparkleEffect::effectInformation);
-  addEffect(FlashSparkleEffect::effectInformation);
-  addEffect(HyperSparkleEffect::effectInformation);
-  addEffect(StrobeEffect::effectInformation);
-  addEffect(StrobeRainbowEffect::effectInformation);
-  addEffect(MultiStrobeEffect::effectInformation);
-  addEffect(BlinkRainbowEffect::effectInformation);
-  addEffect(AndroidEffect::effectInformation);
-  addEffect(ChaseColorEffect::effectInformation);
-  addEffect(ChaseRandomEffect::effectInformation);
-  addEffect(ChaseRainbowEffect::effectInformation);
-  addEffect(ChaseFlashEffect::effectInformation);
-  addEffect(ChaseFlashRandomEffect::effectInformation);
-  addEffect(ChaseRainbowWhiteEffect::effectInformation);
-  addEffect(ColorfulEffect::effectInformation);
-  addEffect(TrafficLightEffect::effectInformation);
-  addEffect(ColorSweepRandomEffect::effectInformation);
-  //addEffect(RunningColorEffect::effectInformation);
-  addEffect(AuroraEffect::effectInformation);
-  addEffect(RunningRandomEffect::effectInformation);
-  addEffect(LarsonScannerEffect::effectInformation);
-  addEffect(RainEffect::effectInformation);
-  addEffect(Pride2015Effect::effectInformation);
-  addEffect(ColorwavesEffect::effectInformation);
-  addEffect(FireworksEffect::effectInformation);
-  addEffect(TetrixEffect::effectInformation);
-  addEffect(FireFlickerEffect::effectInformation);
-  addEffect(GradientEffect::effectInformation);
-  addEffect(LoadingEffect::effectInformation);
-  addEffect(FairyEffect::effectInformation);
-  addEffect(TwoDotsEffect::effectInformation);
-  addEffect(FairytwinkleEffect::effectInformation);
-  //addEffect(RunningDualEffect::effectInformation);
+static constexpr std::array<const EffectInformation*, MODE_COUNT> setupEffectData() {
+  std::array<const EffectInformation*, MODE_COUNT> array{};
+  assignEffectInfo(array, StaticEffect::effectInformation);
+  assignEffectInfo(array, BlinkEffect::effectInformation);
+  assignEffectInfo(array, BreathEffect::effectInformation);
+  assignEffectInfo(array, ColorWipeEffect::effectInformation);
+  assignEffectInfo(array, ColorWipeRandomEffect::effectInformation);
+  assignEffectInfo(array, RandomColorEffect::effectInformation);
+  assignEffectInfo(array, ColorSweepEffect::effectInformation);
+  assignEffectInfo(array, DynamicEffect::effectInformation);
+  assignEffectInfo(array, RainbowEffect::effectInformation);
+  assignEffectInfo(array, RainbowCycleEffect::effectInformation);
+  assignEffectInfo(array, ScanEffect::effectInformation);
+  //assignEffectInfo(array, DualScanEffect::effectInformation);
+  assignEffectInfo(array, FadeEffect::effectInformation);
+  assignEffectInfo(array, TheaterChaseEffect::effectInformation);
+  //assignEffectInfo(array, TheaterChaseRainbowEffect::effectInformation);
+  assignEffectInfo(array, RunningLightsEffect::effectInformation);
+  //assignEffectInfo(array, SawEffect::effectInformation);
+  assignEffectInfo(array, TwinkleEffect::effectInformation);
+  assignEffectInfo(array, DissolveEffect::effectInformation);
+  //assignEffectInfo(array, DissolveRandomEffect::effectInformation);
+  assignEffectInfo(array, SparkleEffect::effectInformation);
+  assignEffectInfo(array, FlashSparkleEffect::effectInformation);
+  assignEffectInfo(array, HyperSparkleEffect::effectInformation);
+  assignEffectInfo(array, StrobeEffect::effectInformation);
+  assignEffectInfo(array, StrobeRainbowEffect::effectInformation);
+  assignEffectInfo(array, MultiStrobeEffect::effectInformation);
+  assignEffectInfo(array, BlinkRainbowEffect::effectInformation);
+  assignEffectInfo(array, AndroidEffect::effectInformation);
+  assignEffectInfo(array, ChaseColorEffect::effectInformation);
+  assignEffectInfo(array, ChaseRandomEffect::effectInformation);
+  assignEffectInfo(array, ChaseRainbowEffect::effectInformation);
+  assignEffectInfo(array, ChaseFlashEffect::effectInformation);
+  assignEffectInfo(array, ChaseFlashRandomEffect::effectInformation);
+  assignEffectInfo(array, ChaseRainbowWhiteEffect::effectInformation);
+  assignEffectInfo(array, ColorfulEffect::effectInformation);
+  assignEffectInfo(array, TrafficLightEffect::effectInformation);
+  assignEffectInfo(array, ColorSweepRandomEffect::effectInformation);
+  //assignEffectInfo(array, RunningColorEffect::effectInformation);
+  assignEffectInfo(array, AuroraEffect::effectInformation);
+  assignEffectInfo(array, RunningRandomEffect::effectInformation);
+  assignEffectInfo(array, LarsonScannerEffect::effectInformation);
+  assignEffectInfo(array, RainEffect::effectInformation);
+  assignEffectInfo(array, Pride2015Effect::effectInformation);
+  assignEffectInfo(array, ColorwavesEffect::effectInformation);
+  assignEffectInfo(array, FireworksEffect::effectInformation);
+  assignEffectInfo(array, TetrixEffect::effectInformation);
+  assignEffectInfo(array, FireFlickerEffect::effectInformation);
+  assignEffectInfo(array, GradientEffect::effectInformation);
+  assignEffectInfo(array, LoadingEffect::effectInformation);
+  assignEffectInfo(array, FairyEffect::effectInformation);
+  assignEffectInfo(array, TwoDotsEffect::effectInformation);
+  assignEffectInfo(array, FairytwinkleEffect::effectInformation);
+  //assignEffectInfo(array, RunningDualEffect::effectInformation);
   #ifdef WLED_ENABLE_GIF
-  addEffect(ImageEffect::effectInformation);
+  assignEffectInfo(array, ImageEffect::effectInformation);
   #endif
-  addEffect(TricolorChaseEffect::effectInformation);
-  addEffect(TricolorWipeEffect::effectInformation);
-  addEffect(TricolorFadeEffect::effectInformation);
-  addEffect(LightningEffect::effectInformation);
-  addEffect(IcuEffect::effectInformation);
-  //addEffect(DualLarsonScannerEffect::effectInformation);
-  addEffect(RandomChaseEffect::effectInformation);
-  addEffect(OscillateEffect::effectInformation);
-  addEffect(JuggleEffect::effectInformation);
-  addEffect(PaletteEffect::effectInformation);
-  addEffect(BpmEffect::effectInformation);
-  addEffect(Fillnoise8Effect::effectInformation);
-  addEffect(Noise161Effect::effectInformation);
-  addEffect(Noise162Effect::effectInformation);
-  addEffect(Noise163Effect::effectInformation);
-  addEffect(Noise164Effect::effectInformation);
-  addEffect(ColortwinkleEffect::effectInformation);
-  addEffect(LakeEffect::effectInformation);
-  addEffect(MeteorEffect::effectInformation);
-  //addEffect(MeteorSmoothEffect::effectInformation); // merged with mode_meteor
-  addEffect(RailwayEffect::effectInformation);
-  addEffect(RippleEffect::effectInformation);
-  addEffect(TwinklefoxEffect::effectInformation);
-  addEffect(TwinklecatEffect::effectInformation);
-  addEffect(HalloweenEyesEffect::effectInformation);
-  addEffect(StaticPatternEffect::effectInformation);
-  addEffect(TriStaticPatternEffect::effectInformation);
-  addEffect(SpotsEffect::effectInformation);
-  addEffect(SpotsFadeEffect::effectInformation);
-  addEffect(CometEffect::effectInformation);
+  assignEffectInfo(array, TricolorChaseEffect::effectInformation);
+  assignEffectInfo(array, TricolorWipeEffect::effectInformation);
+  assignEffectInfo(array, TricolorFadeEffect::effectInformation);
+  assignEffectInfo(array, LightningEffect::effectInformation);
+  assignEffectInfo(array, IcuEffect::effectInformation);
+  //assignEffectInfo(array, DualLarsonScannerEffect::effectInformation);
+  assignEffectInfo(array, RandomChaseEffect::effectInformation);
+  assignEffectInfo(array, OscillateEffect::effectInformation);
+  assignEffectInfo(array, JuggleEffect::effectInformation);
+  assignEffectInfo(array, PaletteEffect::effectInformation);
+  assignEffectInfo(array, BpmEffect::effectInformation);
+  assignEffectInfo(array, Fillnoise8Effect::effectInformation);
+  assignEffectInfo(array, Noise161Effect::effectInformation);
+  assignEffectInfo(array, Noise162Effect::effectInformation);
+  assignEffectInfo(array, Noise163Effect::effectInformation);
+  assignEffectInfo(array, Noise164Effect::effectInformation);
+  assignEffectInfo(array, ColortwinkleEffect::effectInformation);
+  assignEffectInfo(array, LakeEffect::effectInformation);
+  assignEffectInfo(array, MeteorEffect::effectInformation);
+  //assignEffectInfo(array, MeteorSmoothEffect::effectInformation); // merged with mode_meteor
+  assignEffectInfo(array, RailwayEffect::effectInformation);
+  assignEffectInfo(array, RippleEffect::effectInformation);
+  assignEffectInfo(array, TwinklefoxEffect::effectInformation);
+  assignEffectInfo(array, TwinklecatEffect::effectInformation);
+  assignEffectInfo(array, HalloweenEyesEffect::effectInformation);
+  assignEffectInfo(array, StaticPatternEffect::effectInformation);
+  assignEffectInfo(array, TriStaticPatternEffect::effectInformation);
+  assignEffectInfo(array, SpotsEffect::effectInformation);
+  assignEffectInfo(array, SpotsFadeEffect::effectInformation);
+  assignEffectInfo(array, CometEffect::effectInformation);
   #ifdef WLED_PS_DONT_REPLACE_FX
-  addEffect(MultiCometEffect::effectInformation);
-  addEffect(RollingBallsEffect::effectInformation);
-  addEffect(SparkleEffect::effectInformation);
-  addEffect(GlitterEffect::effectInformation);
-  //addEffect(SolidGlitterEffect::effectInformation);
-  addEffect(StarburstEffect::effectInformation);
-  addEffect(DancingShadowsEffect::effectInformation);
-  addEffect(Fire2012Effect::effectInformation);
-  addEffect(ExplodingFireworksEffect::effectInformation);
+  assignEffectInfo(array, MultiCometEffect::effectInformation);
+  assignEffectInfo(array, RollingBallsEffect::effectInformation);
+  assignEffectInfo(array, SparkleEffect::effectInformation);
+  assignEffectInfo(array, GlitterEffect::effectInformation);
+  //assignEffectInfo(array, SolidGlitterEffect::effectInformation);
+  assignEffectInfo(array, StarburstEffect::effectInformation);
+  assignEffectInfo(array, DancingShadowsEffect::effectInformation);
+  assignEffectInfo(array, Fire2012Effect::effectInformation);
+  assignEffectInfo(array, ExplodingFireworksEffect::effectInformation);
   #endif
-  addEffect(CandleEffect::effectInformation);
-  addEffect(BouncingBallsEffect::effectInformation);
-  addEffect(PopcornEffect::effectInformation);
-  addEffect(DripEffect::effectInformation);
-  addEffect(SinelonEffect::effectInformation);
-  //addEffect(SinelonDualEffect::effectInformation);
-  //addEffect(SinelonRainbowEffect::effectInformation);
-  addEffect(PopcornEffect::effectInformation);
-  addEffect(DripEffect::effectInformation);
-  addEffect(PlasmaEffect::effectInformation);
-  addEffect(PercentEffect::effectInformation);
-  //addEffect(RippleRainbowEffect::effectInformation);
-  addEffect(HeartbeatEffect::effectInformation);
-  addEffect(PacificaEffect::effectInformation);
-  //addEffect(CandleMultiEffect::effectInformation);
-  //addEffect(SolidGlitterEffect::effectInformation);
-  addEffect(SunriseEffect::effectInformation);
-  addEffect(PhasedEffect::effectInformation);
-  addEffect(TwinkleupEffect::effectInformation);
-  addEffect(NoisepalEffect::effectInformation);
-  addEffect(SinewaveEffect::effectInformation);
-  addEffect(PhasedNoiseEffect::effectInformation);
-  addEffect(FlowEffect::effectInformation);
-  addEffect(ChunchunEffect::effectInformation);
-  addEffect(WashingMachineEffect::effectInformation);
-  addEffect(BlendsEffect::effectInformation);
-  addEffect(TvSimulatorEffect::effectInformation);
-  //addEffect(DynamicSmoothEffect::effectInformation);
+  assignEffectInfo(array, CandleEffect::effectInformation);
+  assignEffectInfo(array, BouncingBallsEffect::effectInformation);
+  assignEffectInfo(array, PopcornEffect::effectInformation);
+  assignEffectInfo(array, DripEffect::effectInformation);
+  assignEffectInfo(array, SinelonEffect::effectInformation);
+  //assignEffectInfo(array, SinelonDualEffect::effectInformation);
+  //assignEffectInfo(array, SinelonRainbowEffect::effectInformation);
+  assignEffectInfo(array, PopcornEffect::effectInformation);
+  assignEffectInfo(array, DripEffect::effectInformation);
+  assignEffectInfo(array, PlasmaEffect::effectInformation);
+  assignEffectInfo(array, PercentEffect::effectInformation);
+  //assignEffectInfo(array, RippleRainbowEffect::effectInformation);
+  assignEffectInfo(array, HeartbeatEffect::effectInformation);
+  assignEffectInfo(array, PacificaEffect::effectInformation);
+  //assignEffectInfo(array, CandleMultiEffect::effectInformation);
+  //assignEffectInfo(array, SolidGlitterEffect::effectInformation);
+  assignEffectInfo(array, SunriseEffect::effectInformation);
+  assignEffectInfo(array, PhasedEffect::effectInformation);
+  assignEffectInfo(array, TwinkleupEffect::effectInformation);
+  assignEffectInfo(array, NoisepalEffect::effectInformation);
+  assignEffectInfo(array, SinewaveEffect::effectInformation);
+  assignEffectInfo(array, PhasedNoiseEffect::effectInformation);
+  assignEffectInfo(array, FlowEffect::effectInformation);
+  assignEffectInfo(array, ChunchunEffect::effectInformation);
+  assignEffectInfo(array, WashingMachineEffect::effectInformation);
+  assignEffectInfo(array, BlendsEffect::effectInformation);
+  assignEffectInfo(array, TvSimulatorEffect::effectInformation);
+  //assignEffectInfo(array, DynamicSmoothEffect::effectInformation);
 
   // --- 1D audio effects ---
-  addEffect(PixelsEffect::effectInformation);
-  addEffect(PixelwaveEffect::effectInformation);
-  addEffect(JugglesEffect::effectInformation);
-  addEffect(MatripixEffect::effectInformation);
-  addEffect(GravimeterEffect::effectInformation);
-  addEffect(PlasmoidEffect::effectInformation);
-  addEffect(PuddlesEffect::effectInformation);
-  addEffect(MidnoiseEffect::effectInformation);
-  addEffect(NoisemeterEffect::effectInformation);
-  addEffect(FreqwaveEffect::effectInformation);
-  addEffect(FreqmatrixEffect::effectInformation);
-  addEffect(WaterfallEffect::effectInformation);
-  addEffect(FreqpixelsEffect::effectInformation);
-  addEffect(NoisefireEffect::effectInformation);
-  addEffect(PuddlepeakEffect::effectInformation);
-  addEffect(NoisemoveEffect::effectInformation);
-  addEffect(PerlinmoveEffect::effectInformation);
-  addEffect(RipplepeakEffect::effectInformation);
-  addEffect(FreqmapEffect::effectInformation);
-  addEffect(GravcenterEffect::effectInformation);
-  addEffect(GravcentricEffect::effectInformation);
-  addEffect(GravfreqEffect::effectInformation);
-  addEffect(DjLightEffect::effectInformation);
-  addEffect(BlurzEffect::effectInformation);
-  addEffect(FlowStripeEffect::effectInformation);
-  addEffect(WavesinsEffect::effectInformation);
-  addEffect(RocktavesEffect::effectInformation);
+  assignEffectInfo(array, PixelsEffect::effectInformation);
+  assignEffectInfo(array, PixelwaveEffect::effectInformation);
+  assignEffectInfo(array, JugglesEffect::effectInformation);
+  assignEffectInfo(array, MatripixEffect::effectInformation);
+  assignEffectInfo(array, GravimeterEffect::effectInformation);
+  assignEffectInfo(array, PlasmoidEffect::effectInformation);
+  assignEffectInfo(array, PuddlesEffect::effectInformation);
+  assignEffectInfo(array, MidnoiseEffect::effectInformation);
+  assignEffectInfo(array, NoisemeterEffect::effectInformation);
+  assignEffectInfo(array, FreqwaveEffect::effectInformation);
+  assignEffectInfo(array, FreqmatrixEffect::effectInformation);
+  assignEffectInfo(array, WaterfallEffect::effectInformation);
+  assignEffectInfo(array, FreqpixelsEffect::effectInformation);
+  assignEffectInfo(array, NoisefireEffect::effectInformation);
+  assignEffectInfo(array, PuddlepeakEffect::effectInformation);
+  assignEffectInfo(array, NoisemoveEffect::effectInformation);
+  assignEffectInfo(array, PerlinmoveEffect::effectInformation);
+  assignEffectInfo(array, RipplepeakEffect::effectInformation);
+  assignEffectInfo(array, FreqmapEffect::effectInformation);
+  assignEffectInfo(array, GravcenterEffect::effectInformation);
+  assignEffectInfo(array, GravcentricEffect::effectInformation);
+  assignEffectInfo(array, GravfreqEffect::effectInformation);
+  assignEffectInfo(array, DjLightEffect::effectInformation);
+  assignEffectInfo(array, BlurzEffect::effectInformation);
+  assignEffectInfo(array, FlowStripeEffect::effectInformation);
+  assignEffectInfo(array, WavesinsEffect::effectInformation);
+  assignEffectInfo(array, RocktavesEffect::effectInformation);
 
   // --- 2D  effects ---
   #ifndef WLED_DISABLE_2D
-  addEffect(Plasmarotozoom2dEffect::effectInformation);
-  addEffect(Spaceships2dEffect::effectInformation);
-  addEffect(Crazybees2dEffect::effectInformation);
+  assignEffectInfo(array, Plasmarotozoom2dEffect::effectInformation);
+  assignEffectInfo(array, Spaceships2dEffect::effectInformation);
+  assignEffectInfo(array, Crazybees2dEffect::effectInformation);
 
   #ifdef WLED_PS_DONT_REPLACE_FX
-  addEffect(Ghostrider2dEffect::effectInformation);
-  addEffect(Floatingblobs2dEffect::effectInformation);
+  assignEffectInfo(array, Ghostrider2dEffect::effectInformation);
+  assignEffectInfo(array, Floatingblobs2dEffect::effectInformation);
   #endif
 
-  addEffect(Scrollingtext2dEffect::effectInformation);
-  addEffect(Driftrose2dEffect::effectInformation);
-  addEffect(Distortionwaves2dEffect::effectInformation);
-  addEffect(Geq2dEffect::effectInformation); // audio
-  addEffect(Noise2dEffect::effectInformation);
-  addEffect(Firenoise2dEffect::effectInformation);
-  addEffect(Squaredswirl2dEffect::effectInformation);
+  assignEffectInfo(array, Scrollingtext2dEffect::effectInformation);
+  assignEffectInfo(array, Driftrose2dEffect::effectInformation);
+  assignEffectInfo(array, Distortionwaves2dEffect::effectInformation);
+  assignEffectInfo(array, Geq2dEffect::effectInformation); // audio
+  assignEffectInfo(array, Noise2dEffect::effectInformation);
+  assignEffectInfo(array, Firenoise2dEffect::effectInformation);
+  assignEffectInfo(array, Squaredswirl2dEffect::effectInformation);
 
   //non audio
-  addEffect(Dna2dEffect::effectInformation);
-  addEffect(Matrix2dEffect::effectInformation);
-  addEffect(Metaballs2dEffect::effectInformation);
-  addEffect(FunkyPlank2dEffect::effectInformation); // audio
-  addEffect(Pulser2dEffect::effectInformation);
-  addEffect(Drift2dEffect::effectInformation);
-  addEffect(Waverly2dEffect::effectInformation); // audio
-  addEffect(Sunradiation2dEffect::effectInformation);
-  addEffect(ColoredBursts2dEffect::effectInformation);
-  addEffect(Julia2dEffect::effectInformation);
-  addEffect(Gameoflife2dEffect::effectInformation);
-  addEffect(Tartan2dEffect::effectInformation);
-  addEffect(PolarLights2dEffect::effectInformation);
-  addEffect(Swirl2dEffect::effectInformation); // audio
-  addEffect(Lissajous2dEffect::effectInformation);
-  addEffect(Frizzles2dEffect::effectInformation);
-  addEffect(Plasmaball2dEffect::effectInformation);
-  addEffect(Hiphotic2dEffect::effectInformation);
-  addEffect(Sindots2dEffect::effectInformation);
-  addEffect(DnaSpiral2dEffect::effectInformation);
-  addEffect(BlackHole2dEffect::effectInformation);
-  addEffect(Soap2dEffect::effectInformation);
-  addEffect(Octopus2dEffect::effectInformation);
-  addEffect(Wavingcell2dEffect::effectInformation);
-  addEffect(Akemi2dEffect::effectInformation); // audio
+  assignEffectInfo(array, Dna2dEffect::effectInformation);
+  assignEffectInfo(array, Matrix2dEffect::effectInformation);
+  assignEffectInfo(array, Metaballs2dEffect::effectInformation);
+  assignEffectInfo(array, FunkyPlank2dEffect::effectInformation); // audio
+  assignEffectInfo(array, Pulser2dEffect::effectInformation);
+  assignEffectInfo(array, Drift2dEffect::effectInformation);
+  assignEffectInfo(array, Waverly2dEffect::effectInformation); // audio
+  assignEffectInfo(array, Sunradiation2dEffect::effectInformation);
+  assignEffectInfo(array, ColoredBursts2dEffect::effectInformation);
+  assignEffectInfo(array, Julia2dEffect::effectInformation);
+  assignEffectInfo(array, Gameoflife2dEffect::effectInformation);
+  assignEffectInfo(array, Tartan2dEffect::effectInformation);
+  assignEffectInfo(array, PolarLights2dEffect::effectInformation);
+  assignEffectInfo(array, Swirl2dEffect::effectInformation); // audio
+  assignEffectInfo(array, Lissajous2dEffect::effectInformation);
+  assignEffectInfo(array, Frizzles2dEffect::effectInformation);
+  assignEffectInfo(array, Plasmaball2dEffect::effectInformation);
+  assignEffectInfo(array, Hiphotic2dEffect::effectInformation);
+  assignEffectInfo(array, Sindots2dEffect::effectInformation);
+  assignEffectInfo(array, DnaSpiral2dEffect::effectInformation);
+  assignEffectInfo(array, BlackHole2dEffect::effectInformation);
+  assignEffectInfo(array, Soap2dEffect::effectInformation);
+  assignEffectInfo(array, Octopus2dEffect::effectInformation);
+  assignEffectInfo(array, Wavingcell2dEffect::effectInformation);
+  assignEffectInfo(array, Akemi2dEffect::effectInformation); // audio
 
   #ifndef WLED_DISABLE_PARTICLESYSTEM2D
-  addEffect(ParticlevolcanoEffect::effectInformation);
-  addEffect(ParticlefireEffect::effectInformation);
-  addEffect(ParticlefireworksEffect::effectInformation);
-  addEffect(ParticlevortexEffect::effectInformation);
-  addEffect(ParticleperlinEffect::effectInformation);
-  addEffect(ParticlepitEffect::effectInformation);
-  addEffect(ParticleboxEffect::effectInformation);
-  addEffect(ParticleattractorEffect::effectInformation); // 872 bytes
-  addEffect(ParticleimpactEffect::effectInformation);
-  addEffect(ParticlewaterfallEffect::effectInformation);
-  addEffect(ParticlesprayEffect::effectInformation);
-  addEffect(ParticleGEQEffect::effectInformation);
-  addEffect(ParticlecenterGEQEffect::effectInformation);
-  addEffect(ParticleghostriderEffect::effectInformation);
-  addEffect(ParticleblobsEffect::effectInformation);
+  assignEffectInfo(array, ParticlevolcanoEffect::effectInformation);
+  assignEffectInfo(array, ParticlefireEffect::effectInformation);
+  assignEffectInfo(array, ParticlefireworksEffect::effectInformation);
+  assignEffectInfo(array, ParticlevortexEffect::effectInformation);
+  assignEffectInfo(array, ParticleperlinEffect::effectInformation);
+  assignEffectInfo(array, ParticlepitEffect::effectInformation);
+  assignEffectInfo(array, ParticleboxEffect::effectInformation);
+  assignEffectInfo(array, ParticleattractorEffect::effectInformation); // 872 bytes
+  assignEffectInfo(array, ParticleimpactEffect::effectInformation);
+  assignEffectInfo(array, ParticlewaterfallEffect::effectInformation);
+  assignEffectInfo(array, ParticlesprayEffect::effectInformation);
+  assignEffectInfo(array, ParticleGEQEffect::effectInformation);
+  assignEffectInfo(array, ParticlecenterGEQEffect::effectInformation);
+  assignEffectInfo(array, ParticleghostriderEffect::effectInformation);
+  assignEffectInfo(array, ParticleblobsEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM2D
   #endif // WLED_DISABLE_2D
 
   #ifndef WLED_DISABLE_PARTICLESYSTEM1D
-  addEffect(ParticleDripEffect::effectInformation);
-  addEffect(ParticlePinballEffect::effectInformation); //potential replacement for: bouncing balls, rollingballs, popcorn
-  addEffect(ParticleDancingShadowsEffect::effectInformation);
-  addEffect(ParticleFireworks1DEffect::effectInformation);
-  addEffect(ParticleSparklerEffect::effectInformation);
-  addEffect(ParticleHourglassEffect::effectInformation);
-  addEffect(Particle1DsprayEffect::effectInformation);
-  addEffect(ParticleBalanceEffect::effectInformation);
-  addEffect(ParticleChaseEffect::effectInformation);
-  addEffect(ParticleStarburstEffect::effectInformation);
-  addEffect(Particle1dGeqEffect::effectInformation);
-  addEffect(ParticleFire1DEffect::effectInformation);
-  addEffect(Particle1DsonicstreamEffect::effectInformation);
+  assignEffectInfo(array, ParticleDripEffect::effectInformation);
+  assignEffectInfo(array, ParticlePinballEffect::effectInformation); //potential replacement for: bouncing balls, rollingballs, popcorn
+  assignEffectInfo(array, ParticleDancingShadowsEffect::effectInformation);
+  assignEffectInfo(array, ParticleFireworks1DEffect::effectInformation);
+  assignEffectInfo(array, ParticleSparklerEffect::effectInformation);
+  assignEffectInfo(array, ParticleHourglassEffect::effectInformation);
+  assignEffectInfo(array, Particle1DsprayEffect::effectInformation);
+  assignEffectInfo(array, ParticleBalanceEffect::effectInformation);
+  assignEffectInfo(array, ParticleChaseEffect::effectInformation);
+  assignEffectInfo(array, ParticleStarburstEffect::effectInformation);
+  assignEffectInfo(array, Particle1dGeqEffect::effectInformation);
+  assignEffectInfo(array, ParticleFire1DEffect::effectInformation);
+  assignEffectInfo(array, Particle1DsonicstreamEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM1D
+
+  return array;
+}
+
+static constexpr std::array<const EffectInformation*, MODE_COUNT> _effectInfos = setupEffectData();
+
+#ifdef WLED_DEBUG
+void WS2812FX::printSize() {
+  size_t size = 0;
+  for (const Segment &seg : _segments) size += seg.getSize();
+  DEBUG_PRINTF_P(PSTR("Segments: %d -> %u/%dB\n"), _segments.size(), size, SegmentMemoryManager::getUsedSpace());
+  for (const Segment &seg : _segments) DEBUG_PRINTF_P(PSTR("  Seg: %d,%d [A=%d, 2D=%d, RGB=%d, W=%d, CCT=%d]\n"), seg.width(), seg.height(), seg.isActive(), seg.is2D(), seg.hasRGB(), seg.hasWhite(), seg.isCCT());
+  DEBUG_PRINTF_P(PSTR("Modes: %d*%d=%uB\n"), sizeof(mode_ptr), _effectInfos.size(), (_effectInfos.size()*sizeof(mode_ptr)));
+  DEBUG_PRINTF_P(PSTR("Map: %d*%d=%uB\n"), sizeof(uint16_t), (int)customMappingSize, customMappingSize*sizeof(uint16_t));
+}
+#endif
+
+const EffectInformation* WS2812FX::getEffectInformation(uint8_t effectId) const {
+  return _effectInfos[effectId];
+}
+const EffectInformation* WS2812FX::safeGetEffectInformation(uint8_t effectId) const {
+  return (effectId < getModeCount()) ? _effectInfos[effectId] : nullptr;
+}
+const char* WS2812FX::getModeData(unsigned id) const {
+  const EffectInformation* const info = safeGetEffectInformation(id); return (info != nullptr) ? info->metaData : PSTR("Solid");
 }
