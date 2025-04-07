@@ -257,262 +257,258 @@ static const char _data_RESERVED[] PROGMEM = "RSVD";
 // use id==255 to find unallocated gaps (with "Reserved" data string)
 // if vector size() is smaller than id (single) data is appended at the end (regardless of id)
 // return the actual id used for the effect or 255 if the add failed.
-uint8_t WS2812FX::addEffect(std::unique_ptr<EffectFactory>&& factory) {
-  uint8_t id = factory->getEffectId();
-  if (id == 255u) { // find empty slot
-    for (size_t i=1; i<_effectFactories.size(); i++) if (_effectFactories[i] == nullptr) { id = i; break; }
+uint8_t WS2812FX::addEffect(const EffectInformation& effectInfo) {
+  for (size_t i = _effectInfos.size(); i < effectInfo.effectId; ++i) {
+    _effectInfos.push_back(nullptr);
   }
-  for (size_t i = _effectFactories.size(); i < id; ++i) {
-    _effectFactories.push_back(nullptr);
-  }
-  if (id < _effectFactories.size()) {
-    if (_effectFactories[id] != nullptr) return 255; // do not overwrite an already added effect
-    _effectFactories[id] = std::move(factory);
-    return id;
-  } else if (_effectFactories.size() < 255) { // 255 is reserved for indicating the effect wasn't added
-    _effectFactories.push_back(std::move(factory));
-    return _effectFactories.size() - 1;
+  if (effectInfo.effectId < _effectInfos.size()) {
+    if (_effectInfos[effectInfo.effectId] != nullptr) return 255; // do not overwrite an already added effect
+    _effectInfos[effectInfo.effectId] = &effectInfo;
+    return effectInfo.effectId;
+  } else if (_effectInfos.size() < 255) { // 255 is reserved for indicating the effect wasn't added
+    _effectInfos.push_back(&effectInfo);
+    return _effectInfos.size() - 1;
   } else {
     return 255u; // The vector is full so return 255
   }
 }
 
 void WS2812FX::setupEffectData(size_t modeCount) {
-  _effectFactories.resize(modeCount);
+  _effectInfos.resize(modeCount);
 
-  addEffect(std::make_unique<EffectFactory>(StaticEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BlinkEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BreathEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColorWipeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColorWipeRandomEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RandomColorEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColorSweepEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DynamicEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RainbowCycleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ScanEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(DualScanEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FadeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TheaterChaseEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(TheaterChaseRainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RunningLightsEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(SawEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TwinkleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DissolveEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(DissolveRandomEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SparkleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FlashSparkleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(HyperSparkleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(StrobeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(StrobeRainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(MultiStrobeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BlinkRainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(AndroidEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChaseColorEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChaseRandomEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChaseRainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChaseFlashEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChaseFlashRandomEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChaseRainbowWhiteEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColorfulEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TrafficLightEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColorSweepRandomEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(RunningColorEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(AuroraEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RunningRandomEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(LarsonScannerEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RainEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Pride2015Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColorwavesEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FireworksEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TetrixEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FireFlickerEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(GradientEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(LoadingEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FairyEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TwoDotsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FairytwinkleEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(RunningDualEffect::effectInformation));
+  addEffect(StaticEffect::effectInformation);
+  addEffect(BlinkEffect::effectInformation);
+  addEffect(BreathEffect::effectInformation);
+  addEffect(ColorWipeEffect::effectInformation);
+  addEffect(ColorWipeRandomEffect::effectInformation);
+  addEffect(RandomColorEffect::effectInformation);
+  addEffect(ColorSweepEffect::effectInformation);
+  addEffect(DynamicEffect::effectInformation);
+  addEffect(RainbowEffect::effectInformation);
+  addEffect(RainbowCycleEffect::effectInformation);
+  addEffect(ScanEffect::effectInformation);
+  //addEffect(DualScanEffect::effectInformation);
+  addEffect(FadeEffect::effectInformation);
+  addEffect(TheaterChaseEffect::effectInformation);
+  //addEffect(TheaterChaseRainbowEffect::effectInformation);
+  addEffect(RunningLightsEffect::effectInformation);
+  //addEffect(SawEffect::effectInformation);
+  addEffect(TwinkleEffect::effectInformation);
+  addEffect(DissolveEffect::effectInformation);
+  //addEffect(DissolveRandomEffect::effectInformation);
+  addEffect(SparkleEffect::effectInformation);
+  addEffect(FlashSparkleEffect::effectInformation);
+  addEffect(HyperSparkleEffect::effectInformation);
+  addEffect(StrobeEffect::effectInformation);
+  addEffect(StrobeRainbowEffect::effectInformation);
+  addEffect(MultiStrobeEffect::effectInformation);
+  addEffect(BlinkRainbowEffect::effectInformation);
+  addEffect(AndroidEffect::effectInformation);
+  addEffect(ChaseColorEffect::effectInformation);
+  addEffect(ChaseRandomEffect::effectInformation);
+  addEffect(ChaseRainbowEffect::effectInformation);
+  addEffect(ChaseFlashEffect::effectInformation);
+  addEffect(ChaseFlashRandomEffect::effectInformation);
+  addEffect(ChaseRainbowWhiteEffect::effectInformation);
+  addEffect(ColorfulEffect::effectInformation);
+  addEffect(TrafficLightEffect::effectInformation);
+  addEffect(ColorSweepRandomEffect::effectInformation);
+  //addEffect(RunningColorEffect::effectInformation);
+  addEffect(AuroraEffect::effectInformation);
+  addEffect(RunningRandomEffect::effectInformation);
+  addEffect(LarsonScannerEffect::effectInformation);
+  addEffect(RainEffect::effectInformation);
+  addEffect(Pride2015Effect::effectInformation);
+  addEffect(ColorwavesEffect::effectInformation);
+  addEffect(FireworksEffect::effectInformation);
+  addEffect(TetrixEffect::effectInformation);
+  addEffect(FireFlickerEffect::effectInformation);
+  addEffect(GradientEffect::effectInformation);
+  addEffect(LoadingEffect::effectInformation);
+  addEffect(FairyEffect::effectInformation);
+  addEffect(TwoDotsEffect::effectInformation);
+  addEffect(FairytwinkleEffect::effectInformation);
+  //addEffect(RunningDualEffect::effectInformation);
   #ifdef WLED_ENABLE_GIF
-  addEffect(std::make_unique<EffectFactory>(ImageEffect::effectInformation));
+  addEffect(ImageEffect::effectInformation);
   #endif
-  addEffect(std::make_unique<EffectFactory>(TricolorChaseEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TricolorWipeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TricolorFadeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(LightningEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(IcuEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(DualLarsonScannerEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RandomChaseEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(OscillateEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(JuggleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PaletteEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BpmEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Fillnoise8Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Noise161Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Noise162Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Noise163Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Noise164Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColortwinkleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(LakeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(MeteorEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(MeteorSmoothEffect::effectInformation)); // merged with mode_meteor
-  addEffect(std::make_unique<EffectFactory>(RailwayEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RippleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TwinklefoxEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TwinklecatEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(HalloweenEyesEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(StaticPatternEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TriStaticPatternEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SpotsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SpotsFadeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(CometEffect::effectInformation));
+  addEffect(TricolorChaseEffect::effectInformation);
+  addEffect(TricolorWipeEffect::effectInformation);
+  addEffect(TricolorFadeEffect::effectInformation);
+  addEffect(LightningEffect::effectInformation);
+  addEffect(IcuEffect::effectInformation);
+  //addEffect(DualLarsonScannerEffect::effectInformation);
+  addEffect(RandomChaseEffect::effectInformation);
+  addEffect(OscillateEffect::effectInformation);
+  addEffect(JuggleEffect::effectInformation);
+  addEffect(PaletteEffect::effectInformation);
+  addEffect(BpmEffect::effectInformation);
+  addEffect(Fillnoise8Effect::effectInformation);
+  addEffect(Noise161Effect::effectInformation);
+  addEffect(Noise162Effect::effectInformation);
+  addEffect(Noise163Effect::effectInformation);
+  addEffect(Noise164Effect::effectInformation);
+  addEffect(ColortwinkleEffect::effectInformation);
+  addEffect(LakeEffect::effectInformation);
+  addEffect(MeteorEffect::effectInformation);
+  //addEffect(MeteorSmoothEffect::effectInformation); // merged with mode_meteor
+  addEffect(RailwayEffect::effectInformation);
+  addEffect(RippleEffect::effectInformation);
+  addEffect(TwinklefoxEffect::effectInformation);
+  addEffect(TwinklecatEffect::effectInformation);
+  addEffect(HalloweenEyesEffect::effectInformation);
+  addEffect(StaticPatternEffect::effectInformation);
+  addEffect(TriStaticPatternEffect::effectInformation);
+  addEffect(SpotsEffect::effectInformation);
+  addEffect(SpotsFadeEffect::effectInformation);
+  addEffect(CometEffect::effectInformation);
   #ifdef WLED_PS_DONT_REPLACE_FX
-  addEffect(std::make_unique<EffectFactory>(MultiCometEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RollingBallsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SparkleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(GlitterEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(SolidGlitterEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(StarburstEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DancingShadowsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Fire2012Effect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ExplodingFireworksEffect::effectInformation));
+  addEffect(MultiCometEffect::effectInformation);
+  addEffect(RollingBallsEffect::effectInformation);
+  addEffect(SparkleEffect::effectInformation);
+  addEffect(GlitterEffect::effectInformation);
+  //addEffect(SolidGlitterEffect::effectInformation);
+  addEffect(StarburstEffect::effectInformation);
+  addEffect(DancingShadowsEffect::effectInformation);
+  addEffect(Fire2012Effect::effectInformation);
+  addEffect(ExplodingFireworksEffect::effectInformation);
   #endif
-  addEffect(std::make_unique<EffectFactory>(CandleEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BouncingBallsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PopcornEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DripEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SinelonEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(SinelonDualEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(SinelonRainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PopcornEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DripEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PlasmaEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PercentEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(RippleRainbowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(HeartbeatEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PacificaEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(CandleMultiEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(SolidGlitterEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SunriseEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PhasedEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TwinkleupEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(NoisepalEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(SinewaveEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PhasedNoiseEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FlowEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ChunchunEffect::effectInformation));  
-  addEffect(std::make_unique<EffectFactory>(WashingMachineEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BlendsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(TvSimulatorEffect::effectInformation));
-  //addEffect(std::make_unique<EffectFactory>(DynamicSmoothEffect::effectInformation));
+  addEffect(CandleEffect::effectInformation);
+  addEffect(BouncingBallsEffect::effectInformation);
+  addEffect(PopcornEffect::effectInformation);
+  addEffect(DripEffect::effectInformation);
+  addEffect(SinelonEffect::effectInformation);
+  //addEffect(SinelonDualEffect::effectInformation);
+  //addEffect(SinelonRainbowEffect::effectInformation);
+  addEffect(PopcornEffect::effectInformation);
+  addEffect(DripEffect::effectInformation);
+  addEffect(PlasmaEffect::effectInformation);
+  addEffect(PercentEffect::effectInformation);
+  //addEffect(RippleRainbowEffect::effectInformation);
+  addEffect(HeartbeatEffect::effectInformation);
+  addEffect(PacificaEffect::effectInformation);
+  //addEffect(CandleMultiEffect::effectInformation);
+  //addEffect(SolidGlitterEffect::effectInformation);
+  addEffect(SunriseEffect::effectInformation);
+  addEffect(PhasedEffect::effectInformation);
+  addEffect(TwinkleupEffect::effectInformation);
+  addEffect(NoisepalEffect::effectInformation);
+  addEffect(SinewaveEffect::effectInformation);
+  addEffect(PhasedNoiseEffect::effectInformation);
+  addEffect(FlowEffect::effectInformation);
+  addEffect(ChunchunEffect::effectInformation);
+  addEffect(WashingMachineEffect::effectInformation);
+  addEffect(BlendsEffect::effectInformation);
+  addEffect(TvSimulatorEffect::effectInformation);
+  //addEffect(DynamicSmoothEffect::effectInformation);
 
   // --- 1D audio effects ---
-  addEffect(std::make_unique<EffectFactory>(PixelsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PixelwaveEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(JugglesEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(MatripixEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(GravimeterEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PlasmoidEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PuddlesEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(MidnoiseEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(NoisemeterEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FreqwaveEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FreqmatrixEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(WaterfallEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FreqpixelsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(NoisefireEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PuddlepeakEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(NoisemoveEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PerlinmoveEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RipplepeakEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FreqmapEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(GravcenterEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(GravcentricEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(GravfreqEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DjLightEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BlurzEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FlowStripeEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(WavesinsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(RocktavesEffect::effectInformation));
+  addEffect(PixelsEffect::effectInformation);
+  addEffect(PixelwaveEffect::effectInformation);
+  addEffect(JugglesEffect::effectInformation);
+  addEffect(MatripixEffect::effectInformation);
+  addEffect(GravimeterEffect::effectInformation);
+  addEffect(PlasmoidEffect::effectInformation);
+  addEffect(PuddlesEffect::effectInformation);
+  addEffect(MidnoiseEffect::effectInformation);
+  addEffect(NoisemeterEffect::effectInformation);
+  addEffect(FreqwaveEffect::effectInformation);
+  addEffect(FreqmatrixEffect::effectInformation);
+  addEffect(WaterfallEffect::effectInformation);
+  addEffect(FreqpixelsEffect::effectInformation);
+  addEffect(NoisefireEffect::effectInformation);
+  addEffect(PuddlepeakEffect::effectInformation);
+  addEffect(NoisemoveEffect::effectInformation);
+  addEffect(PerlinmoveEffect::effectInformation);
+  addEffect(RipplepeakEffect::effectInformation);
+  addEffect(FreqmapEffect::effectInformation);
+  addEffect(GravcenterEffect::effectInformation);
+  addEffect(GravcentricEffect::effectInformation);
+  addEffect(GravfreqEffect::effectInformation);
+  addEffect(DjLightEffect::effectInformation);
+  addEffect(BlurzEffect::effectInformation);
+  addEffect(FlowStripeEffect::effectInformation);
+  addEffect(WavesinsEffect::effectInformation);
+  addEffect(RocktavesEffect::effectInformation);
 
   // --- 2D  effects ---
   #ifndef WLED_DISABLE_2D
-  addEffect(std::make_unique<EffectFactory>(Plasmarotozoom2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Spaceships2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Crazybees2dEffect::effectInformation));
+  addEffect(Plasmarotozoom2dEffect::effectInformation);
+  addEffect(Spaceships2dEffect::effectInformation);
+  addEffect(Crazybees2dEffect::effectInformation);
 
   #ifdef WLED_PS_DONT_REPLACE_FX
-  addEffect(std::make_unique<EffectFactory>(Ghostrider2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Floatingblobs2dEffect::effectInformation));
+  addEffect(Ghostrider2dEffect::effectInformation);
+  addEffect(Floatingblobs2dEffect::effectInformation);
   #endif
 
-  addEffect(std::make_unique<EffectFactory>(Scrollingtext2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Driftrose2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Distortionwaves2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Geq2dEffect::effectInformation)); // audio
-  addEffect(std::make_unique<EffectFactory>(Noise2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Firenoise2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Squaredswirl2dEffect::effectInformation));
+  addEffect(Scrollingtext2dEffect::effectInformation);
+  addEffect(Driftrose2dEffect::effectInformation);
+  addEffect(Distortionwaves2dEffect::effectInformation);
+  addEffect(Geq2dEffect::effectInformation); // audio
+  addEffect(Noise2dEffect::effectInformation);
+  addEffect(Firenoise2dEffect::effectInformation);
+  addEffect(Squaredswirl2dEffect::effectInformation);
 
   //non audio
-  addEffect(std::make_unique<EffectFactory>(Dna2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Matrix2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Metaballs2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(FunkyPlank2dEffect::effectInformation)); // audio
-  addEffect(std::make_unique<EffectFactory>(Pulser2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Drift2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Waverly2dEffect::effectInformation)); // audio
-  addEffect(std::make_unique<EffectFactory>(Sunradiation2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ColoredBursts2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Julia2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Gameoflife2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Tartan2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(PolarLights2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Swirl2dEffect::effectInformation)); // audio
-  addEffect(std::make_unique<EffectFactory>(Lissajous2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Frizzles2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Plasmaball2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Hiphotic2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Sindots2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(DnaSpiral2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(BlackHole2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Soap2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Octopus2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Wavingcell2dEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Akemi2dEffect::effectInformation)); // audio
+  addEffect(Dna2dEffect::effectInformation);
+  addEffect(Matrix2dEffect::effectInformation);
+  addEffect(Metaballs2dEffect::effectInformation);
+  addEffect(FunkyPlank2dEffect::effectInformation); // audio
+  addEffect(Pulser2dEffect::effectInformation);
+  addEffect(Drift2dEffect::effectInformation);
+  addEffect(Waverly2dEffect::effectInformation); // audio
+  addEffect(Sunradiation2dEffect::effectInformation);
+  addEffect(ColoredBursts2dEffect::effectInformation);
+  addEffect(Julia2dEffect::effectInformation);
+  addEffect(Gameoflife2dEffect::effectInformation);
+  addEffect(Tartan2dEffect::effectInformation);
+  addEffect(PolarLights2dEffect::effectInformation);
+  addEffect(Swirl2dEffect::effectInformation); // audio
+  addEffect(Lissajous2dEffect::effectInformation);
+  addEffect(Frizzles2dEffect::effectInformation);
+  addEffect(Plasmaball2dEffect::effectInformation);
+  addEffect(Hiphotic2dEffect::effectInformation);
+  addEffect(Sindots2dEffect::effectInformation);
+  addEffect(DnaSpiral2dEffect::effectInformation);
+  addEffect(BlackHole2dEffect::effectInformation);
+  addEffect(Soap2dEffect::effectInformation);
+  addEffect(Octopus2dEffect::effectInformation);
+  addEffect(Wavingcell2dEffect::effectInformation);
+  addEffect(Akemi2dEffect::effectInformation); // audio
 
   #ifndef WLED_DISABLE_PARTICLESYSTEM2D
-  addEffect(std::make_unique<EffectFactory>(ParticlevolcanoEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlefireEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlefireworksEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlevortexEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleperlinEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlepitEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleboxEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleattractorEffect::effectInformation)); // 872 bytes
-  addEffect(std::make_unique<EffectFactory>(ParticleimpactEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlewaterfallEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlesprayEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleGEQEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlecenterGEQEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleghostriderEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleblobsEffect::effectInformation));
+  addEffect(ParticlevolcanoEffect::effectInformation);
+  addEffect(ParticlefireEffect::effectInformation);
+  addEffect(ParticlefireworksEffect::effectInformation);
+  addEffect(ParticlevortexEffect::effectInformation);
+  addEffect(ParticleperlinEffect::effectInformation);
+  addEffect(ParticlepitEffect::effectInformation);
+  addEffect(ParticleboxEffect::effectInformation);
+  addEffect(ParticleattractorEffect::effectInformation); // 872 bytes
+  addEffect(ParticleimpactEffect::effectInformation);
+  addEffect(ParticlewaterfallEffect::effectInformation);
+  addEffect(ParticlesprayEffect::effectInformation);
+  addEffect(ParticleGEQEffect::effectInformation);
+  addEffect(ParticlecenterGEQEffect::effectInformation);
+  addEffect(ParticleghostriderEffect::effectInformation);
+  addEffect(ParticleblobsEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM2D
   #endif // WLED_DISABLE_2D
 
   #ifndef WLED_DISABLE_PARTICLESYSTEM1D
-  addEffect(std::make_unique<EffectFactory>(ParticleDripEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticlePinballEffect::effectInformation)); //potential replacement for: bouncing balls, rollingballs, popcorn
-  addEffect(std::make_unique<EffectFactory>(ParticleDancingShadowsEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleFireworks1DEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleSparklerEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleHourglassEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Particle1DsprayEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleBalanceEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleChaseEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleStarburstEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Particle1dGeqEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(ParticleFire1DEffect::effectInformation));
-  addEffect(std::make_unique<EffectFactory>(Particle1DsonicstreamEffect::effectInformation));
+  addEffect(ParticleDripEffect::effectInformation);
+  addEffect(ParticlePinballEffect::effectInformation); //potential replacement for: bouncing balls, rollingballs, popcorn
+  addEffect(ParticleDancingShadowsEffect::effectInformation);
+  addEffect(ParticleFireworks1DEffect::effectInformation);
+  addEffect(ParticleSparklerEffect::effectInformation);
+  addEffect(ParticleHourglassEffect::effectInformation);
+  addEffect(Particle1DsprayEffect::effectInformation);
+  addEffect(ParticleBalanceEffect::effectInformation);
+  addEffect(ParticleChaseEffect::effectInformation);
+  addEffect(ParticleStarburstEffect::effectInformation);
+  addEffect(Particle1dGeqEffect::effectInformation);
+  addEffect(ParticleFire1DEffect::effectInformation);
+  addEffect(Particle1DsonicstreamEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM1D
 }

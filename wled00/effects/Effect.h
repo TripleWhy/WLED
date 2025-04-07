@@ -122,22 +122,6 @@ public:
     }
 };
 
-class EffectFactory {
-public:
-    explicit constexpr EffectFactory(const EffectInformation& ei) : info(ei) {}
-    constexpr uint8_t getEffectId() const {
-        return info.effectId;
-    }
-    constexpr const char* getMetaData() const {
-        return info.metaData;
-    }
-    SegmentAllocator<Effect>::unique_ptr makeEffect() const {
-        return info.makeEffect();
-    }
-private:
-    const EffectInformation& info;
-};
-
 class EffectCoordinate {
 public:
     constexpr EffectCoordinate(unsigned width, unsigned height) : width{width}, height{height} {}

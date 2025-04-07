@@ -535,20 +535,20 @@ Segment &Segment::setOption(uint8_t n, bool val) {
 }
 
 Segment &Segment::setMode(uint8_t effectId, bool loadDefaults) {
-  EffectFactory* effectFactory = nullptr;
+  const EffectInformation* effectInfo = nullptr;
   // skip reserved
-  while (effectId < strip.getModeCount() && (effectFactory = strip.getEffectFactory(effectId)) == nullptr) effectId++;
-  if (effectFactory == nullptr) {
+  while (effectId < strip.getModeCount() && (effectInfo = strip.getEffectInformation(effectId)) == nullptr) effectId++;
+  if (effectInfo == nullptr) {
     effectId = 0; // set solid mode
-    effectFactory = strip.getEffectFactory(0);
+    effectInfo = strip.getEffectInformation(0);
   }
   if ((effect != nullptr) && (effectId == effect->getEffectId())) return *this;
 #ifndef WLED_DISABLE_MODE_BLEND
   //DEBUG_PRINTF_P(PSTR("- Starting effect transition: %d\n"), effectId);
   startTransition(strip.getTransition(), std::move(effect)); // set effect transitions
 #endif
-  effect = effectFactory->makeEffect();
-  const char* metaData = effectFactory->getMetaData();
+  effect = effectInfo->makeEffect();
+  const char* const metaData = effectInfo->metaData;
   int sOpt;
   // load default values from effect string
   if (loadDefaults) {
@@ -1975,7 +1975,7 @@ void WS2812FX::printSize() {
   for (const Segment &seg : _segments) size += seg.getSize();
   DEBUG_PRINTF_P(PSTR("Segments: %d -> %u/%dB\n"), _segments.size(), size, SegmentMemoryManager::getUsedSpace());
   for (const Segment &seg : _segments) DEBUG_PRINTF_P(PSTR("  Seg: %d,%d [A=%d, 2D=%d, RGB=%d, W=%d, CCT=%d]\n"), seg.width(), seg.height(), seg.isActive(), seg.is2D(), seg.hasRGB(), seg.hasWhite(), seg.isCCT());
-  DEBUG_PRINTF_P(PSTR("Modes: %d*%d=%uB\n"), sizeof(mode_ptr), _effectFactories.size(), (_effectFactories.capacity()*sizeof(mode_ptr)));
+  DEBUG_PRINTF_P(PSTR("Modes: %d*%d=%uB\n"), sizeof(mode_ptr), _effectInfos.size(), (_effectInfos.capacity()*sizeof(mode_ptr)));
   DEBUG_PRINTF_P(PSTR("Map: %d*%d=%uB\n"), sizeof(uint16_t), (int)customMappingSize, customMappingSize*sizeof(uint16_t));
 }
 #endif
