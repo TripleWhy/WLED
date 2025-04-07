@@ -52,5 +52,5 @@ public:
 
 private:
     uint32_t step{};
-    std::vector<uint8_t> colorIndexes;
+    SegmentAllocator<uint8_t>::vector colorIndexes;
 };

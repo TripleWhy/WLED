@@ -147,7 +147,7 @@ public:
     }
 
 private:
-    std::vector<CRGB> prevLeds{};
+    SegmentAllocator<CRGB>::vector prevLeds{};
     std::array<uint16_t, crcBufferLen> crcBuffer{};
     uint32_t step{};
     uint16_t aux0{};

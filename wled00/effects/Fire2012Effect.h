@@ -104,7 +104,7 @@ private:
     }
 
 private:
-    std::vector<byte> heat{};
+    SegmentAllocator<byte>::vector heat{};
     uint32_t step{};
 };
 

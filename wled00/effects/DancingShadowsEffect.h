@@ -164,7 +164,7 @@ public:
     }
 
 private:
-    std::vector<Spotlight> spotlights{};
+    SegmentAllocator<Spotlight>::vector spotlights{};
     uint16_t previousSpotlightCount{};
 };
 

@@ -108,7 +108,7 @@ public:
     }
 
 private:
-    std::vector<Flasher> flashers;
+    SegmentAllocator<Flasher>::vector flashers;
 };
 
 

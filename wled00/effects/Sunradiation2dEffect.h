@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    std::vector<byte> bump{};
+    SegmentAllocator<byte>::vector bump{};
 };
 
 

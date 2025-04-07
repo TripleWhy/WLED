@@ -89,7 +89,7 @@ public:
     }
 
 private:
-    std::vector<byte> trail{};
+    SegmentAllocator<byte>::vector trail{};
     uint32_t step{};
 };
 

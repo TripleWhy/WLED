@@ -112,7 +112,7 @@ private:
     unsigned numBalls;
     unsigned strips;
     std::array<uint32_t, maxNumBalls> ballColors;
-    std::vector<Ball> balls;
+    SegmentAllocator<Ball>::vector balls;
     uint32_t backgroundColor;
     bool useBackgroundColor;
     unsigned stripIndex;

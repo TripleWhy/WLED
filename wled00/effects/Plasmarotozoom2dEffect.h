@@ -68,7 +68,7 @@ public:
 
 private:
     float a{};
-    std::vector<byte> plasma{};
+    SegmentAllocator<byte>::vector plasma{};
 
     float kosinus{};
     float sinus{};

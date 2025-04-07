@@ -103,5 +103,5 @@ private:
     }
 
 private:
-    std::vector<Tetris> drops;
+    SegmentAllocator<Tetris>::vector drops;
 };

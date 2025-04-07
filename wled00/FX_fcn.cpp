@@ -48,9 +48,7 @@
 #endif
 
 
-#if MAX_NUM_SEGMENTS < WLED_MAX_BUSSES
-  #error "Max segments must be at least max number of busses!"
-#endif
+static_assert(MAX_NUM_SEGMENTS >= WLED_MAX_BUSSES, "Max segments must be at least max number of busses!");
 
 static constexpr unsigned sumPinsRequired(const unsigned* current, size_t count) {
  return (count > 0) ? (Bus::getNumberOfPins(*current) + sumPinsRequired(current+1,count-1)) : 0;
@@ -68,7 +66,6 @@ static constexpr bool validatePinsAndTypes(const unsigned* types, unsigned numTy
 ///////////////////////////////////////////////////////////////////////////////
 // Segment class implementation
 ///////////////////////////////////////////////////////////////////////////////
-unsigned      Segment::_usedSegmentData   = 0U; // amount of RAM all segments use for their data[]
 uint16_t      Segment::maxWidth           = DEFAULT_LED_COUNT;
 uint16_t      Segment::maxHeight          = 1;
 unsigned      Segment::_vLength           = 0;
@@ -99,11 +96,8 @@ Segment::Segment(const Segment &orig) {
   memcpy((void*)this, (void*)&orig, sizeof(Segment));
   _t = nullptr; // copied segment cannot be in transition
   name = nullptr;
-  data = nullptr;
-  _dataLen = 0;
   effect.release(); // The ownership still lies with orig, but unique_ptr was memcpy'd, so remove the pointer here without destroying the effect.
   if (orig.name) { name = static_cast<char*>(malloc(strlen(orig.name)+1)); if (name) strcpy(name, orig.name); }
-  if (orig.data) { if (allocateData(orig._dataLen)) memcpy(data, orig.data, orig._dataLen); }
 }
 
 // move constructor
@@ -112,8 +106,6 @@ Segment::Segment(Segment &&orig) noexcept {
   memcpy((void*)this, (void*)&orig, sizeof(Segment));
   orig._t   = nullptr; // old segment cannot be in transition any more
   orig.name = nullptr;
-  orig.data = nullptr;
-  orig._dataLen = 0;
   orig.effect.release(); // The ownership lies with this, but unique_ptr was memcpy'd, so remove the pointer in orig without destroying the effect.
 }
 
@@ -124,16 +116,12 @@ Segment& Segment::operator= (const Segment &orig) {
     // clean destination
     if (name) { free(name); name = nullptr; }
     stopTransition();
-    deallocateData();
     // copy source
     memcpy((void*)this, (void*)&orig, sizeof(Segment));
     // erase pointers to allocated data
-    data = nullptr;
-    _dataLen = 0;
     effect.release(); // The ownership still lies with orig, but unique_ptr was memcpy'd, so remove the pointer here without destroying the effect.
     // copy source data
     if (orig.name) { name = static_cast<char*>(malloc(strlen(orig.name)+1)); if (name) strcpy(name, orig.name); }
-    if (orig.data) { if (allocateData(orig._dataLen)) memcpy(data, orig.data, orig._dataLen); }
   }
   return *this;
 }
@@ -144,53 +132,12 @@ Segment& Segment::operator= (Segment &&orig) noexcept {
   if (this != &orig) {
     if (name) { free(name); name = nullptr; } // free old name
     stopTransition();
-    deallocateData(); // free old runtime data
     memcpy((void*)this, (void*)&orig, sizeof(Segment));
     orig.name = nullptr;
-    orig.data = nullptr;
-    orig._dataLen = 0;
     orig._t   = nullptr; // old segment cannot be in transition
     orig.effect.release(); // The ownership lies with this, but unique_ptr was memcpy'd, so remove the pointer in orig without destroying the effect.
   }
   return *this;
-}
-
-// allocates effect data buffer on heap and initialises (erases) it
-bool IRAM_ATTR_YN Segment::allocateData(size_t len) {
-  if (len == 0) return false; // nothing to do
-  if (data && _dataLen >= len) {          // already allocated enough (reduce fragmentation)
-    if (call == 0) memset(data, 0, len);  // erase buffer if called during effect initialisation
-    return true;
-  }
-  //DEBUG_PRINTF_P(PSTR("--   Allocating data (%d): %p\n", len, this);
-  deallocateData(); // if the old buffer was smaller release it first
-  if (Segment::getUsedSegmentData() + len > MAX_SEGMENT_DATA) {
-    // not enough memory
-    DEBUG_PRINT(F("!!! Effect RAM depleted: "));
-    DEBUG_PRINTF_P(PSTR("%d/%d !!!\n"), len, Segment::getUsedSegmentData());
-    errorFlag = ERR_NORAM;
-    return false;
-  }
-  // do not use SPI RAM on ESP32 since it is slow
-  data = (byte*)calloc(len, sizeof(byte));
-  if (!data) { DEBUG_PRINTLN(F("!!! Allocation failed. !!!")); return false; } // allocation failed
-  Segment::addUsedSegmentData(len);
-  //DEBUG_PRINTF_P(PSTR("---  Allocated data (%p): %d/%d -> %p\n"), this, len, Segment::getUsedSegmentData(), data);
-  _dataLen = len;
-  return true;
-}
-
-void IRAM_ATTR_YN Segment::deallocateData() {
-  if (!data) { _dataLen = 0; return; }
-  //DEBUG_PRINTF_P(PSTR("---  Released data (%p): %d/%d -> %p\n"), this, _dataLen, Segment::getUsedSegmentData(), data);
-  if ((Segment::getUsedSegmentData() > 0) && (_dataLen > 0)) { // check that we don't have a dangling / inconsistent data pointer
-    free(data);
-  } else {
-    DEBUG_PRINTF_P(PSTR("---- Released data (%p): inconsistent UsedSegmentData (%d/%d), cowardly refusing to free nothing.\n"), this, _dataLen, Segment::getUsedSegmentData());
-  }
-  data = nullptr;
-  Segment::addUsedSegmentData(_dataLen <= Segment::getUsedSegmentData() ? -_dataLen : -Segment::getUsedSegmentData());
-  _dataLen = 0;
 }
 
 /**
@@ -203,7 +150,6 @@ void IRAM_ATTR_YN Segment::deallocateData() {
 void Segment::resetIfRequired() {
   if (!reset) return;
   //DEBUG_PRINTF_P(PSTR("-- Segment reset: %p\n"), this);
-  if (data && _dataLen > 0) memset(data, 0, _dataLen);  // prevent heap fragmentation (just erase buffer instead of deallocateData())
   next_time = 0; call = 0;
   reset = false;
   #ifdef WLED_ENABLE_GIF
@@ -261,7 +207,7 @@ CRGBPalette16 &Segment::loadPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
   return targetPalette;
 }
 
-void Segment::startTransition(uint16_t dur, std::unique_ptr<Effect>&& oldEffect) {
+void Segment::startTransition(uint16_t dur, SegmentAllocator<Effect>::unique_ptr&& oldEffect) {
   if (dur == 0) {
     if (isInTransition()) _t->_dur = dur; // this will stop transition in next handleTransition()
     return;
@@ -269,7 +215,7 @@ void Segment::startTransition(uint16_t dur, std::unique_ptr<Effect>&& oldEffect)
   if (isInTransition()) return; // already in transition no need to store anything
 
   // starting a transition has to occur before change so we get current values 1st
-  _t = std::make_unique<Transition>(dur); // no previous transition running
+  _t = SegmentAllocator<Transition>::make_unique(dur); // no previous transition running
   if (!_t) return; // failed to allocate data
 
   //DEBUG_PRINTF_P(PSTR("-- Started transition: %p (%p)\n"), this, _t);
@@ -329,8 +275,6 @@ void Segment::swapSegenv(tmpsegd_t &tmpSeg) {
   tmpSeg._check2T    = check2;
   tmpSeg._check3T    = check3;
   tmpSeg._callT      = call;
-  tmpSeg._dataT      = data;
-  tmpSeg._dataLenT   = _dataLen;
   if (isInTransition() && &tmpSeg != &(_t->_segT)) {
     // swap SEGENV with transitional data
     options   = _t->_segT._optionsT;
@@ -344,8 +288,6 @@ void Segment::swapSegenv(tmpsegd_t &tmpSeg) {
     check2    = _t->_segT._check2T;
     check3    = _t->_segT._check3T;
     call      = _t->_segT._callT;
-    data      = _t->_segT._dataT;
-    _dataLen  = _t->_segT._dataLenT;
   }
 }
 
@@ -369,8 +311,6 @@ void Segment::restoreSegenv(const tmpsegd_t &tmpSeg) {
   check2    = tmpSeg._check2T;
   check3    = tmpSeg._check3T;
   call      = tmpSeg._callT;
-  data      = tmpSeg._dataT;
-  _dataLen  = tmpSeg._dataLenT;
 }
 #endif
 
@@ -1166,6 +1106,7 @@ void Segment::fill(uint32_t c) {
  * fading is highly dependant on frame rate (higher frame rates, faster fading)
  * each frame will fade at max 9% or as little as 0.8%
  */
+//TODO remove
 void Segment::fade_out(uint8_t rate) {
   if (!isActive()) return; // not active
   const int cols = is2D() ? vWidth() : vLength();
@@ -1221,6 +1162,7 @@ void Segment::fadeToBlackBy(uint8_t fadeBy) {
  * blurs segment content, source: FastLED colorutils.cpp
  * Note: for blur_amount > 215 this function does not work properly (creates alternating pattern)
  */
+//TODO remove
 void Segment::blur(uint8_t blur_amount, bool smear) {
   if (!isActive() || blur_amount == 0) return; // optimization: 0 means "don't blur"
 #ifndef WLED_DISABLE_2D
@@ -2031,7 +1973,7 @@ void WS2812FX::setRange(uint16_t i, uint16_t i2, uint32_t col) {
 void WS2812FX::printSize() {
   size_t size = 0;
   for (const Segment &seg : _segments) size += seg.getSize();
-  DEBUG_PRINTF_P(PSTR("Segments: %d -> %u/%dB\n"), _segments.size(), size, Segment::getUsedSegmentData());
+  DEBUG_PRINTF_P(PSTR("Segments: %d -> %u/%dB\n"), _segments.size(), size, SegmentMemoryManager::getUsedSpace());
   for (const Segment &seg : _segments) DEBUG_PRINTF_P(PSTR("  Seg: %d,%d [A=%d, 2D=%d, RGB=%d, W=%d, CCT=%d]\n"), seg.width(), seg.height(), seg.isActive(), seg.is2D(), seg.hasRGB(), seg.hasWhite(), seg.isCCT());
   DEBUG_PRINTF_P(PSTR("Modes: %d*%d=%uB\n"), sizeof(mode_ptr), _effectFactories.size(), (_effectFactories.capacity()*sizeof(mode_ptr)));
   DEBUG_PRINTF_P(PSTR("Map: %d*%d=%uB\n"), sizeof(uint16_t), (int)customMappingSize, customMappingSize*sizeof(uint16_t));

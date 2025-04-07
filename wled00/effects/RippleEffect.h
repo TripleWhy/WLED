@@ -90,7 +90,7 @@ public:
     }
 
 private:
-    std::vector<Ripple> ripples{};
+    SegmentAllocator<Ripple>::vector ripples{};
     uint16_t aux0{};
     uint16_t aux1{};
 };

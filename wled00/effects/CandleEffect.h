@@ -99,7 +99,7 @@ public:
     }
 
 private:
-    std::vector<byte> data{};
+    SegmentAllocator<byte>::vector data{};
     uint32_t step{};
     uint16_t aux0{};
     uint16_t aux1{};

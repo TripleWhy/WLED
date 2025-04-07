@@ -126,7 +126,7 @@ private:
     }
 
 private:
-    std::vector<NoisePixel> noisePixels{};
+    SegmentAllocator<NoisePixel>::vector noisePixels{};
     std::array<uint32_t, 3> noisecoord{};
     uint16_t aux0{};
     uint16_t aux1{};

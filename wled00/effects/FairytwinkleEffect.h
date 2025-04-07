@@ -69,7 +69,7 @@ private:
     }
 
 private:
-    std::vector<FairyEffect::Flasher> flashers{};
+    SegmentAllocator<FairyEffect::Flasher>::vector flashers{};
     unsigned now16;
     uint16_t PRNG16;
     unsigned riseFallTime;

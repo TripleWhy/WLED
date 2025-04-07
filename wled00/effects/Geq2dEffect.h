@@ -72,7 +72,7 @@ public:
     }
 
 private:
-    std::vector<uint16_t> previousBarHeight{}; //array of previous bar heights per frequency band
+    SegmentAllocator<uint16_t>::vector previousBarHeight{}; //array of previous bar heights per frequency band
     uint32_t step{};
 };
 

@@ -153,7 +153,7 @@ public:
     }
 
 private:
-    std::vector<Spark> sparks{};
+    SegmentAllocator<Spark>::vector sparks{};
     float dying_gravity{};
     uint16_t aux0{};
     uint16_t aux1{};

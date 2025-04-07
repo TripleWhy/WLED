@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "../memory/CircularAllocator.h"
 #include "../wled.h"
 #include "effectUtils.h"
 
@@ -18,7 +19,7 @@ enum class EffectDimensionality : uint8_t {
 
 // Kinda emulates a v-table without needing an actual v-table.
 struct EffectInformation {
-    using MakeEffectFunction    = std::unique_ptr<Effect> (*)();
+    using MakeEffectFunction    = SegmentAllocator<Effect>::unique_ptr (*)();
     using NextFrameFunction     = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using NextRowFunction       = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using GetPixelColorFunction = uint32_t (*)(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor);
@@ -57,11 +58,19 @@ public:
         return info.getPixelColor(this, coordinate, currentColor);
     }
 
-    template<typename T>
-    static inline bool resizeVector(std::vector<T>& vector, size_t size) {
+    template<typename Vector>
+    static inline bool resizeVector(Vector& vector, size_t size, bool preserveContent = false) {
+        if (vector.size() == size) {
+            return true;
+        }
+        if (!preserveContent) {
+            vector.clear();
+            vector.shrink_to_fit();
+        }
         vector.resize(size);
         if (vector.size() != size) {
             vector.clear();
+            vector.shrink_to_fit();
             return false;
         }
         vector.shrink_to_fit();
@@ -90,8 +99,10 @@ public:
         &T::getPixelColor,
     };
 
-    static std::unique_ptr<Effect> makeEffect() {
-        return std::make_unique<T>(T::effectInformation);
+    static SegmentAllocator<Effect>::unique_ptr makeEffect() {
+        // Don't try `new T` here, that would not use the allocator.
+        typename SegmentAllocator<T>::unique_ptr t = SegmentAllocator<T>::make_unique(T::effectInformation);
+        return SegmentAllocator<Effect>::unique_ptr(static_cast<Effect*>(t.release()));
     }
 
     static void nextFrame(Effect* effect, const EffectCoordinate& coordinate) {
@@ -120,7 +131,7 @@ public:
     constexpr const char* getMetaData() const {
         return info.metaData;
     }
-    std::unique_ptr<Effect> makeEffect() const {
+    SegmentAllocator<Effect>::unique_ptr makeEffect() const {
         return info.makeEffect();
     }
 private:

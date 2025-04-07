@@ -91,7 +91,7 @@ protected:
         }
 
     private:
-        std::vector<uint32_t> pixels;
+        SegmentAllocator<uint32_t>::vector pixels;
     };
 
 private:

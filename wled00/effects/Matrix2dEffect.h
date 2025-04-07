@@ -90,7 +90,7 @@ public:
     }
 
 private:
-    std::vector<byte> data{};
+    SegmentAllocator<byte>::vector data{};
     uint32_t step{};
 };
 

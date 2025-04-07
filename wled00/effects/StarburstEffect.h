@@ -162,6 +162,6 @@ public:
     }
 
 private:
-    std::vector<Star> stars{};
+    SegmentAllocator<Star>::vector stars{};
 };
 

@@ -174,7 +174,7 @@ public:
 private:
     uint16_t previousIntensity{};
     uint16_t wavecount{};
-    std::vector<AuroraWave> waves{};
+    SegmentAllocator<AuroraWave>::vector waves{};
 };
 
 

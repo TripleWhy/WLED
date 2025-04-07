@@ -95,7 +95,7 @@ private:
     }
 
 private:
-    std::vector<Spark> popcorn{};
+    SegmentAllocator<Spark>::vector popcorn{};
 };
 
 

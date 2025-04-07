@@ -22,6 +22,7 @@
 #include "const.h"
 #include "bus_manager.h"
 #include "effects/Effect.h"
+#include "memory/CircularAllocator.h"
 
 #define FASTLED_INTERNAL //remove annoying pragma messages
 #define USE_GET_MILLISECOND_TIMER
@@ -71,20 +72,6 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 #define FPS_MULTIPLIER 1 // dev option: multiplier to get sub-frame FPS without floats
 #endif
 #define FPS_CALC_SHIFT 7 // bit shift for fixed point math
-
-/* each segment uses 82 bytes of SRAM memory, so if you're application fails because of
-  insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
-#ifdef ESP8266
-  #define MAX_NUM_SEGMENTS  16
-  /* How much data bytes all segments combined may allocate */
-  #define MAX_SEGMENT_DATA  5120
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
-  #define MAX_NUM_SEGMENTS  20
-  #define MAX_SEGMENT_DATA  (MAX_NUM_SEGMENTS*512)  // 10k by default (S2 is short on free RAM)
-#else
-  #define MAX_NUM_SEGMENTS  32  // warning: going beyond 32 may consume too much RAM for stable operation
-  #define MAX_SEGMENT_DATA  (MAX_NUM_SEGMENTS*1280) // 40k by default
-#endif
 
 #define NUM_COLORS       3 /* number of colors per segment */
 #define SEGCOLOR(x)      Segment::getCurrentColor(x)
@@ -424,7 +411,6 @@ typedef struct Segment {
     // runtime data
     unsigned long next_time;  // millis() of next update
     uint32_t call;  // call counter
-    byte     *data; // effect data pointer
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
 
     typedef struct TemporarySegmentData {
@@ -440,16 +426,11 @@ typedef struct Segment {
         bool    _check3T  : 1;        // checkmark 3
       };
       uint32_t _callT;
-      uint8_t *_dataT;
-      unsigned _dataLenT;
-      TemporarySegmentData()
-        : _dataT(nullptr) // just in case...
-        , _dataLenT(0)
-      {}
     } tmpsegd_t;
 
   private:
-    std::unique_ptr<Effect> effect;
+    SegmentAllocator<Effect>::unique_ptr effect;
+
     union {
       uint8_t  _capabilities;
       struct {
@@ -461,8 +442,6 @@ typedef struct Segment {
       };
     };
     uint8_t         _default_palette;  // palette number that gets assigned to pal0
-    unsigned        _dataLen;
-    static unsigned _usedSegmentData;
     static uint8_t  _segBri;                  // brightness of segment for current effect
     static unsigned _vLength;                 // 1D dimension used for current effect
     static unsigned _vWidth, _vHeight;        // 2D dimensions used for current effect
@@ -486,7 +465,7 @@ typedef struct Segment {
     struct Transition {
       #ifndef WLED_DISABLE_MODE_BLEND
       tmpsegd_t     _segT;        // previous segment environment
-      std::unique_ptr<Effect> _effectT;       // previous mode/effect
+      SegmentAllocator<Effect>::unique_ptr _effectT;       // previous mode/effect
       #else
       uint32_t      _colorT[NUM_COLORS];
       #endif
@@ -505,7 +484,7 @@ typedef struct Segment {
         , _dur(dur)
       {}
     };
-    std::unique_ptr<Transition> _t;
+    SegmentAllocator<Transition>::unique_ptr _t;
 
     [[gnu::hot]] void _setPixelColorXY_raw(const int& x, const int& y, uint32_t& col) const; // set pixel without mapping (internal use only)
 
@@ -534,10 +513,8 @@ typedef struct Segment {
       stopY(1),
       name(nullptr),
       call(0),
-      data(nullptr),
       _capabilities(0),
       _default_palette(0),
-      _dataLen(0),
       _t(nullptr)
     {
       #ifdef WLED_DEBUG
@@ -557,12 +534,10 @@ typedef struct Segment {
       #ifdef WLED_DEBUG
       //Serial.printf("-- Destroying segment: %p", this);
       //if (name) Serial.printf(" %s (%p)", name, name);
-      //if (data) Serial.printf(" %d->(%p)", (int)_dataLen, data);
       //Serial.println();
       #endif
       if (name) { free(name); name = nullptr; }
       stopTransition();
-      deallocateData();
       effect = nullptr;
     }
 
@@ -570,7 +545,7 @@ typedef struct Segment {
     Segment& operator= (Segment &&orig) noexcept; // move assignment
 
 #ifdef WLED_DEBUG
-    size_t getSize() const { return sizeof(Segment) + (data?_dataLen:0) + (name?strlen(name):0) + (_t?sizeof(Transition):0); }
+    size_t getSize() const { return sizeof(Segment) + (name?strlen(name):0) + (_t?sizeof(Transition):0); }
 #endif
 
     inline uint8_t  getEffectId()        const { return (effect != nullptr) ? effect->getEffectId() : 0u; }
@@ -590,8 +565,6 @@ typedef struct Segment {
     inline Segment &clearName()                { if (name) free(name); name = nullptr; return *this; }
     inline Segment &setName(const String &name) { return setName(name.c_str()); }
 
-    inline static unsigned getUsedSegmentData()            { return Segment::_usedSegmentData; }
-    inline static void     addUsedSegmentData(int len)     { Segment::_usedSegmentData += len; }
     #ifndef WLED_DISABLE_MODE_BLEND
     inline static void     modeBlend(bool blend)           { _modeBlend = blend; }
     inline static bool     getmodeBlend(void)              { return _modeBlend; }
@@ -643,9 +616,6 @@ typedef struct Segment {
     void    refreshLightCapabilities();
 
     // runtime data functions
-    inline uint16_t dataSize() const { return _dataLen; }
-    bool allocateData(size_t len);  // allocates effect data buffer in heap and clears it
-    void deallocateData();          // deallocates (frees) effect data buffer from heap
     void resetIfRequired();         // sets all SEGENV variables to 0 and clears data buffer
     /**
       * Flags that before the next effect is calculated,
@@ -656,7 +626,7 @@ typedef struct Segment {
     inline Segment &markForReset() { reset = true; return *this; }  // setOption(SEG_OPTION_RESET, true)
 
     // transition functions
-    void     startTransition(uint16_t dur, std::unique_ptr<Effect>&& oldEffect = nullptr); // transition has to start before actual segment values change
+    void     startTransition(uint16_t dur, SegmentAllocator<Effect>::unique_ptr&& oldEffect = nullptr); // transition has to start before actual segment values change
     void     stopTransition();                  // ends transition mode by destroying transition structure (does nothing if not in transition)
     inline void handleTransition() { updateTransitionProgress(); if (progress() == 0xFFFFU) stopTransition(); }
     #ifndef WLED_DISABLE_MODE_BLEND
@@ -797,12 +767,6 @@ typedef struct Segment {
 class WS2812FX {  // 96 bytes
   typedef uint16_t (*mode_ptr)(); // pointer to mode function
   typedef void (*show_callback)(); // pre show callback
-  typedef struct ModeData {
-    uint8_t     _id;   // mode (effect) id
-    mode_ptr    _fcn;  // mode (effect) function
-    const char *_data; // mode (effect) name and its UI control data
-    ModeData(uint8_t id, uint16_t (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
-  } mode_data_t;
 
   static WS2812FX* instance;
 

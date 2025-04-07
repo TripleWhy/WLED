@@ -78,7 +78,7 @@ private:
     };
 
 private:
-    std::vector<Map> rMap{};
+    SegmentAllocator<Map>::vector rMap{};
     uint8_t offsX{};
     uint8_t offsY{};
 
