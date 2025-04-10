@@ -26,7 +26,6 @@ struct EffectInformation {
 
     const char* metaData;
     const uint8_t effectId;
-    const uint8_t defaultPaletteId;
     const EffectDimensionality dimensionality;
     const MakeEffectFunction makeEffect;
     const NextFrameFunction nextFrame;
@@ -41,9 +40,6 @@ public:
     virtual ~Effect() = default;
     constexpr uint8_t getEffectId() const {
         return info.effectId;
-    }
-    constexpr uint8_t getDefaultPaletteId() const {
-        return info.defaultPaletteId;
     }
     constexpr EffectDimensionality getDimensionality() const {
         return info.dimensionality;
@@ -86,12 +82,9 @@ class BaseEffect : public Base {
 public:
     using Base::Base;
 
-    static constexpr const uint8_t defaultPaletteId = 0u;
-
     static constexpr EffectInformation effectInformation {
         T::metaData,
         T::effectId,
-        T::defaultPaletteId,
         T::dimensionality,
         &T::makeEffect,
         &T::nextFrame,
