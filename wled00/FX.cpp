@@ -497,7 +497,10 @@ static constexpr std::array<const EffectInformation*, MODE_COUNT> setupEffectDat
   return array;
 }
 
-static constexpr std::array<const EffectInformation*, MODE_COUNT> _effectInfos = setupEffectData();
+// c++20 can do this without needing a complicated function
+namespace {
+  constexpr std::array<const EffectInformation*, MODE_COUNT> _effectInfos PROGMEM = setupEffectData();
+}
 
 #ifdef WLED_DEBUG
 void WS2812FX::printSize() {
