@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Dissolve@Repeat speed,Dissolve speed,,,,Random;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Dissolve@Repeat speed,Dissolve speed,,,,Random;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_DISSOLVE;
 
     explicit DissolveEffect(const EffectInformation& ei) : Base{ei, false} {}

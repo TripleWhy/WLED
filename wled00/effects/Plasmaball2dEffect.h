@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Plasma Ball@Speed,,Fade,Blur;;!;2";
+    static constexpr const char metaData[] PROGMEM = "Plasma Ball@Speed,,Fade,Blur;;!;2";
     static constexpr const uint8_t effectId = FX_MODE_2DPLASMABALL;
 
     explicit Plasmaball2dEffect(const EffectInformation& ei) : Base{ei, false} {}

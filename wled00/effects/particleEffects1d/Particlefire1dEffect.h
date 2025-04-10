@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Fire 1D@!,!,Cooling,Blur;,!;!;1;pal=35,sx=100,ix=50,c1=80,c2=100,c3=28,o1=1,o2=1";
+    static constexpr const char metaData[] PROGMEM = "PS Fire 1D@!,!,Cooling,Blur;,!;!;1;pal=35,sx=100,ix=50,c1=80,c2=100,c3=28,o1=1,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS_FIRE1D;
 
     explicit Particlefire1dEffect(const EffectInformation& ei) : Base{ei, false} {}

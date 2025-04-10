@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS GEQ 2D@Speed,Intensity,Diverge,Bounce,Gravity,Cylinder,Walls,Floor;;!;2f;pal=0,sx=155,ix=200,c1=0";
+    static constexpr const char metaData[] PROGMEM = "PS GEQ 2D@Speed,Intensity,Diverge,Bounce,Gravity,Cylinder,Walls,Floor;;!;2f;pal=0,sx=155,ix=200,c1=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEGEQ;
 
     explicit ParticlegeqEffect(const EffectInformation& ei) : Base{ei, false} {}

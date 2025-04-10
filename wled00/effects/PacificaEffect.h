@@ -33,7 +33,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Pacifica@!,Angle;;!;;pal=51";
+    static constexpr const char metaData[] PROGMEM = "Pacifica@!,Angle;;!;;pal=51";
     static constexpr const uint8_t effectId = FX_MODE_PACIFICA;
 
     explicit PacificaEffect(const EffectInformation& ei) : Base{ei, false} {}

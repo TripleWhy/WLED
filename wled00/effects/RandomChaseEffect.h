@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Stream 2@!;;";
+    static constexpr const char metaData[] PROGMEM = "Stream 2@!;;";
     static constexpr const uint8_t effectId = FX_MODE_RANDOM_CHASE;
 
     explicit RandomChaseEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -16,7 +16,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Multi Comet@!,Fade;!,!;!;1";
+    static constexpr const char metaData[] PROGMEM = "Multi Comet@!,Fade;!,!;!;1";
     static constexpr const uint8_t effectId = FX_MODE_MULTI_COMET;
 
     explicit MultiCometEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -18,7 +18,7 @@ private:
     using Spark = PopcornEffect::Spark;
 
 public:
-    static constexpr const char* const metaData = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=11,ix=128";
+    static constexpr const char metaData[] PROGMEM = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=11,ix=128";
     static constexpr const uint8_t effectId = FX_MODE_EXPLODING_FIREWORKS;
 
     explicit ExplodingFireworksEffect(const EffectInformation& ei) : Base{ei, false} {}

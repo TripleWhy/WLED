@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Lightning@!,!,,,,,Overlay;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Lightning@!,!,,,,,Overlay;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_LIGHTNING;
 
     explicit LightningEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -34,7 +34,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Crazy Bees@!,Blur,,,,Smear;;!;2;pal=11,ix=0";
+    static constexpr const char metaData[] PROGMEM = "Crazy Bees@!,Blur,,,,Smear;;!;2;pal=11,ix=0";
     static constexpr const uint8_t effectId = FX_MODE_2DCRAZYBEES;
 
     explicit Crazybees2dEffect(const EffectInformation& ei) : Base{ei, false} {}

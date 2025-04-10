@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Noisefire@!,!;;;01v;m12=2,si=0";
+    static constexpr const char metaData[] PROGMEM = "Noisefire@!,!;;;01v;m12=2,si=0";
     static constexpr const uint8_t effectId = FX_MODE_NOISEFIRE;
 
     explicit NoisefireEffect(const EffectInformation& ei) : Base{ei, false} {}

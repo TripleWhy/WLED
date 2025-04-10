@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Flow Stripe@Hue speed,Effect speed;;";
+    static constexpr const char metaData[] PROGMEM = "Flow Stripe@Hue speed,Effect speed;;";
     static constexpr const uint8_t effectId = FX_MODE_FLOWSTRIPE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

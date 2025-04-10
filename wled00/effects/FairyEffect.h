@@ -25,7 +25,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Fairy@!,# of flashers;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Fairy@!,# of flashers;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_FAIRY;
 
     explicit FairyEffect(const EffectInformation& ei) : Base{ei, false} {}

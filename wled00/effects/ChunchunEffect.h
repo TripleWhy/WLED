@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Chunchun@!,Gap size;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Chunchun@!,Gap size;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_CHUNCHUN;
 
     explicit ChunchunEffect(const EffectInformation& ei) : Base{ei, false} {}

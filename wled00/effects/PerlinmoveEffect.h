@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Perlin Move@!,# of pixels,Fade rate;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Perlin Move@!,# of pixels,Fade rate;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_PERLINMOVE;
 
     explicit PerlinmoveEffect(const EffectInformation& ei) : Base{ei, false} {}

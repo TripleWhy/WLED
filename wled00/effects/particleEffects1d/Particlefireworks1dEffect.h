@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Fireworks 1D@Gravity,Explosion,Firing side,Blur,Saturation,,Colorful,Smooth;,!;!;1;sx=150,c2=30,c3=31,o2=1";
+    static constexpr const char metaData[] PROGMEM = "PS Fireworks 1D@Gravity,Explosion,Firing side,Blur,Saturation,,Colorful,Smooth;,!;!;1;sx=150,c2=30,c3=31,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS_FIREWORKS1D;
 
     explicit Particlefireworks1dEffect(const EffectInformation& ei) : Base{ei, false} {}

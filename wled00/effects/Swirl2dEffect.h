@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Swirl@!,Sensitivity,Blur;,Bg Swirl;!;2v;ix=64,si=0";
+    static constexpr const char metaData[] PROGMEM = "Swirl@!,Sensitivity,Blur;,Bg Swirl;!;2v;ix=64,si=0";
     static constexpr const uint8_t effectId = FX_MODE_2DSWIRL;
 
     explicit Swirl2dEffect(const EffectInformation& ei) : Base{ei, false} {}

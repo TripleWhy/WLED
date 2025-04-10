@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Lake@!;Fx;!";
+    static constexpr const char metaData[] PROGMEM = "Lake@!;Fx;!";
     static constexpr const uint8_t effectId = FX_MODE_LAKE;
 
     explicit LakeEffect(const EffectInformation& ei) : Base{ei, false} {}

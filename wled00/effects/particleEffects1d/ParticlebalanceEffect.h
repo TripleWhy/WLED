@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS 1D Balance@!,!,Hardness,Blur,Tilt,Position Color,Wrap,Random;,!;!;1;pal=18,c2=0,c3=4,o1=1";
+    static constexpr const char metaData[] PROGMEM = "PS 1D Balance@!,!,Hardness,Blur,Tilt,Position Color,Wrap,Random;,!;!;1;pal=18,c2=0,c3=4,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PS_BALANCE;
 
     explicit ParticlebalanceEffect(const EffectInformation& ei) : Base{ei, false} {}

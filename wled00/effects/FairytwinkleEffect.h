@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<FairytwinkleEffect>;
 
     public:
-    static constexpr const char* const metaData = "Fairytwinkle@!,!;!,!;!;;m12=0";
+    static constexpr const char metaData[] PROGMEM = "Fairytwinkle@!,!;!,!;!;;m12=0";
     static constexpr const uint8_t effectId = FX_MODE_FAIRYTWINKLE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

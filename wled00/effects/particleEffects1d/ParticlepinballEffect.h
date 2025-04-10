@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Pinball@Speed,!,Size,Blur,Gravity,Collide,Rolling,Position Color;,!;!;1;pal=0,ix=220,c2=0,c3=8,o1=1";
+    static constexpr const char metaData[] PROGMEM = "PS Pinball@Speed,!,Size,Blur,Gravity,Collide,Rolling,Position Color;,!;!;1;pal=0,ix=220,c2=0,c3=8,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PSPINBALL;
 
     explicit ParticlepinballEffect(const EffectInformation& ei) : Base{ei, false} {}

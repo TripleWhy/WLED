@@ -32,7 +32,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Fireworks Starburst@Chance,Fragments,,,,,Overlay;,!;!;;pal=11,m12=0";
+    static constexpr const char metaData[] PROGMEM = "Fireworks Starburst@Chance,Fragments,,,,,Overlay;,!;!;;pal=11,m12=0";
     static constexpr const uint8_t effectId = FX_MODE_STARBURST;
 
     explicit StarburstEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Washing Machine@!,!;;!";
+    static constexpr const char metaData[] PROGMEM = "Washing Machine@!,!;;!";
     static constexpr const uint8_t effectId = FX_MODE_WASHING_MACHINE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

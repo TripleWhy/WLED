@@ -12,7 +12,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Rainbow@!,Size;;!";
+    static constexpr const char metaData[] PROGMEM = "Rainbow@!,Size;;!";
     static constexpr const uint8_t effectId = FX_MODE_RAINBOW_CYCLE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Firenoise@X scale,Y scale,,,,Palette;;!;2;pal=66";
+    static constexpr const char metaData[] PROGMEM = "Firenoise@X scale,Y scale,,,,Palette;;!;2;pal=66";
     static constexpr const uint8_t effectId = FX_MODE_2DFIRENOISE;
 
     explicit Firenoise2dEffect(const EffectInformation& ei) : Base{ei, false} {}

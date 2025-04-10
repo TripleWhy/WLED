@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Sun Radiation@Variance,Brightness;;;2";
+    static constexpr const char metaData[] PROGMEM = "Sun Radiation@Variance,Brightness;;;2";
     static constexpr const uint8_t effectId = FX_MODE_2DSUNRADIATION;
 
     explicit Sunradiation2dEffect(const EffectInformation& ei) : Base{ei, false} {}

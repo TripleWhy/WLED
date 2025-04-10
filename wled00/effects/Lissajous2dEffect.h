@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Lissajous@X frequency,Fade rate,Blur,,Speed,Smear;!;!;2;c1=0";
+    static constexpr const char metaData[] PROGMEM = "Lissajous@X frequency,Fade rate,Blur,,Speed,Smear;!;!;2;c1=0";
     static constexpr const uint8_t effectId = FX_MODE_2DLISSAJOUS;
 
     explicit Lissajous2dEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -10,7 +10,7 @@ private:
     using Base = BaseEffect<Self, TwinklefoxEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Twinklefox@!,Twinkle rate,,,,Cool;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Twinklefox@!,Twinkle rate,,,,Cool;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_TWINKLEFOX;
 
     explicit TwinklefoxEffect(const EffectInformation& ei) : Base{ei, false} {}

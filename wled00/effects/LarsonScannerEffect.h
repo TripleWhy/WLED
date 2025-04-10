@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Scanner@!,Trail,Delay,,,Shift palette,Bi-delay,Dual;!,!,!;!;;m12=0,c1=0,o1=0,o3=0";
+    static constexpr const char metaData[] PROGMEM = "Scanner@!,Trail,Delay,,,Shift palette,Bi-delay,Dual;!,!,!;!;;m12=0,c1=0,o1=0,o3=0";
     static constexpr const uint8_t effectId = FX_MODE_LARSON_SCANNER;
 
     explicit LarsonScannerEffect(const EffectInformation& ei) : Base{ei, false} {}

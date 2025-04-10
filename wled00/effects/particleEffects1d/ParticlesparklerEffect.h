@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Sparkler@Move,!,Saturation,Blur,Sparklers,Slide,Bounce,Large;,!;!;1;pal=0,sx=255,c1=0,c2=0,c3=6";
+    static constexpr const char metaData[] PROGMEM = "PS Sparkler@Move,!,Saturation,Blur,Sparklers,Slide,Bounce,Large;,!;!;1;pal=0,sx=255,c1=0,c2=0,c3=6";
     static constexpr const uint8_t effectId = FX_MODE_PS_SPARKLER;
 
     explicit ParticlesparklerEffect(const EffectInformation& ei) : Base{ei, false} {}

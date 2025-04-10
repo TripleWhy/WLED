@@ -33,7 +33,7 @@ private:
     #endif
 
 public:
-    static constexpr const char* const metaData = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic;;!;12;ix=112,c1=0,o1=1,o2=0,o3=1";
+    static constexpr const char metaData[] PROGMEM = "Palette@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic;;!;12;ix=112,c1=0,o1=1,o2=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PALETTE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2;
 

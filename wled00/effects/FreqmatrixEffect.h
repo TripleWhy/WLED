@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Freqmatrix@Speed,Sound effect,Low bin,High bin,Sensitivity;;;01f;m12=3,si=0";
+    static constexpr const char metaData[] PROGMEM = "Freqmatrix@Speed,Sound effect,Low bin,High bin,Sensitivity;;;01f;m12=3,si=0";
     static constexpr const uint8_t effectId = FX_MODE_FREQMATRIX;
 
     explicit FreqmatrixEffect(const EffectInformation& ei) : Base{ei, false} {}

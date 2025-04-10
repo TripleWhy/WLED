@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, ColorwavesPrideEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Pride 2015@!;;";
+    static constexpr const char metaData[] PROGMEM = "Pride 2015@!;;";
     static constexpr const uint8_t effectId = FX_MODE_PRIDE_2015;
 
     explicit Pride2015Effect(const EffectInformation& ei) : Base{ei, true} {}

@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Colorful@!,Saturation;1,2,3;!";
+    static constexpr const char metaData[] PROGMEM = "Colorful@!,Saturation;1,2,3;!";
     static constexpr const uint8_t effectId = FX_MODE_COLORFUL;
 
     explicit ColorfulEffect(const EffectInformation& ei) : Base{ei, false} {}

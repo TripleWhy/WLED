@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Sonic Stream@!,!,Color,Blur,Bin,Mod,Filter,Push;,!;!;1f;c3=0,o2=1";
+    static constexpr const char metaData[] PROGMEM = "PS Sonic Stream@!,!,Color,Blur,Bin,Mod,Filter,Push;,!;!;1f;c3=0,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS_SONICSTREAM;
 
     explicit Particle1dsonicstreamEffect(const EffectInformation& ei) : Base{ei, false} {}

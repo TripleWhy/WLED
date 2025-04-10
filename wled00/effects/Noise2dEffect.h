@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Noise2D@!,Scale;;!;2";
+    static constexpr const char metaData[] PROGMEM = "Noise2D@!,Scale;;!;2";
     static constexpr const uint8_t effectId = FX_MODE_2DNOISE;
 
     explicit Noise2dEffect(const EffectInformation& ei) : Base{ei, false} {}

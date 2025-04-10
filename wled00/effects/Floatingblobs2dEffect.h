@@ -16,7 +16,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Blobs@!,# blobs,Blur,Trail;!;!;2;c1=8";
+    static constexpr const char metaData[] PROGMEM = "Blobs@!,# blobs,Blur,Trail;!;!;2;c1=8";
     static constexpr const uint8_t effectId = FX_MODE_2DBLOBS;
 
     explicit Floatingblobs2dEffect(const EffectInformation& ei) : Base{ei, false} {}

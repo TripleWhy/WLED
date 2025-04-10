@@ -12,7 +12,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Noise Pal@!,Scale;;!";
+    static constexpr const char metaData[] PROGMEM = "Noise Pal@!,Scale;;!";
     static constexpr const uint8_t effectId = FX_MODE_NOISEPAL;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

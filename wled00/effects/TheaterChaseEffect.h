@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Theater@!,Gap size,,,,Rainbow,,Theater;!,!;!;;o1=0,o3=1";
+    static constexpr const char metaData[] PROGMEM = "Theater@!,Gap size,,,,Rainbow,,Theater;!,!;!;;o1=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_THEATER_CHASE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

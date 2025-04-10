@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Twinkle@!,!;!,!;!;;m12=0"; //pixels
+    static constexpr const char metaData[] PROGMEM = "Twinkle@!,!;!,!;!;;m12=0"; //pixels
     static constexpr const uint8_t effectId = FX_MODE_TWINKLE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

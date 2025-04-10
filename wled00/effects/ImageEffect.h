@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Image@!,;;;12;sx=128";
+    static constexpr const char metaData[] PROGMEM = "Image@!,;;;12;sx=128";
     static constexpr const uint8_t effectId = FX_MODE_IMAGE;
 
     explicit ImageEffect(const EffectInformation& ei) : Base{ei, false} {}

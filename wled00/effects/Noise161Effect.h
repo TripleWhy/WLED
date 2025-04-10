@@ -10,7 +10,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Noise 1@!;!;!;;pal=20";
+    static constexpr const char metaData[] PROGMEM = "Noise 1@!;!;!;;pal=20";
     static constexpr const uint8_t effectId = FX_MODE_NOISE16_1;
 
     explicit Noise161Effect(const EffectInformation& ei) : Base{ei, false} {}

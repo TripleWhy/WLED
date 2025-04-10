@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Traffic Light@!,US style;,!;!";
+    static constexpr const char metaData[] PROGMEM = "Traffic Light@!,US style;,!;!";
     static constexpr const uint8_t effectId = FX_MODE_TRAFFIC_LIGHT;
 
     explicit TrafficLightEffect(const EffectInformation& ei) : Base{ei, false} {}

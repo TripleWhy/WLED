@@ -25,7 +25,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Freqwave@Speed,Sound effect,Low bin,High bin,Pre-amp;;;01f;m12=2,si=0";
+    static constexpr const char metaData[] PROGMEM = "Freqwave@Speed,Sound effect,Low bin,High bin,Pre-amp;;;01f;m12=2,si=0";
     static constexpr const uint8_t effectId = FX_MODE_FREQWAVE;
 
     explicit FreqwaveEffect(const EffectInformation& ei) : Base{ei, false} {}

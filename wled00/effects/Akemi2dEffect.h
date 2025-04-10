@@ -49,7 +49,7 @@ private:
     };
 
 public:
-    static constexpr const char* const metaData = "Akemi@Color speed,Dance;Head palette,Arms & Legs,Eyes & Mouth;Face palette;2f;si=0";
+    static constexpr const char metaData[] PROGMEM = "Akemi@Color speed,Dance;Head palette,Arms & Legs,Eyes & Mouth;Face palette;2f;si=0";
     static constexpr const uint8_t effectId = FX_MODE_2DAKEMI;
 
     explicit Akemi2dEffect(const EffectInformation& ei) : Base{ei, false} {}

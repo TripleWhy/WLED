@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Matrix@!,Spawning rate,Trail,,,Custom color;Spawn,Trail;;2";
+    static constexpr const char metaData[] PROGMEM = "Matrix@!,Spawning rate,Trail,,,Custom color;Spawn,Trail;;2";
     static constexpr const uint8_t effectId = FX_MODE_2DMATRIX;
 
     explicit Matrix2dEffect(const EffectInformation& ei) : Base{ei, false} {}

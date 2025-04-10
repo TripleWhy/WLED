@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<RainEffect, FireworksEffect>;
 
 public:
-    static constexpr const char* const metaData = "Rain@!,Spawning rate;!,!;!;12;ix=128,pal=0";
+    static constexpr const char metaData[] PROGMEM = "Rain@!,Spawning rate;!,!;!;12;ix=128,pal=0";
     static constexpr const uint8_t effectId = FX_MODE_RAIN;
 
     // explicit RainEffect(const EffectInformation& ei) : Base{ei, false} {}

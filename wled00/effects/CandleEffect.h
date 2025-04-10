@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Candle@!,!,,,,,,Multi;!,!;!;01;sx=96,ix=224,pal=0";
+    static constexpr const char metaData[] PROGMEM = "Candle@!,!,,,,,,Multi;!,!;!;01;sx=96,ix=224,pal=0";
     static constexpr const uint8_t effectId = FX_MODE_CANDLE;
 
     explicit CandleEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Strobe Mega@!,!,,,,Move;!,!;!;01;o1=0";
+    static constexpr const char metaData[] PROGMEM = "Strobe Mega@!,!,,,,Move;!,!;!;01;o1=0";
     static constexpr const uint8_t effectId = FX_MODE_MULTI_STROBE;
 
     explicit MultiStrobeEffect(const EffectInformation& ei) : Base{ei, false} {}

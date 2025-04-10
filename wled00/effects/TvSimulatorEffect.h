@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "TV Simulator@!,!;;!;01";
+    static constexpr const char metaData[] PROGMEM = "TV Simulator@!,!;;!;01";
     static constexpr const uint8_t effectId = FX_MODE_TV_SIMULATOR;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 

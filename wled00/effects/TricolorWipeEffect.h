@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Tri Wipe@!;1,2,3;!";
+    static constexpr const char metaData[] PROGMEM = "Tri Wipe@!;1,2,3;!";
     static constexpr const uint8_t effectId = FX_MODE_TRICOLOR_WIPE;
 
     explicit TricolorWipeEffect(const EffectInformation& ei) : Base{ei, false} {}

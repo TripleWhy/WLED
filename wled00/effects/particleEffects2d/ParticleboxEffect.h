@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Box@!,Particles,Tilt,Hardness,Size,Random,Washing Machine,Sloshing;;!;2;pal=53,ix=50,c3=1,o1=1";
+    static constexpr const char metaData[] PROGMEM = "PS Box@!,Particles,Tilt,Hardness,Size,Random,Washing Machine,Sloshing;;!;2;pal=53,ix=50,c3=1,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEBOX;
 
     explicit ParticleboxEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Colored Bursts@Speed,# of lines,,,Blur,Gradient,Smear,Dots;;!;2;c3=16";
+    static constexpr const char metaData[] PROGMEM = "Colored Bursts@Speed,# of lines,,,Blur,Gradient,Smear,Dots;;!;2;c3=16";
     static constexpr const uint8_t effectId = FX_MODE_2DCOLOREDBURSTS;
 
     explicit ColoredBursts2dEffect(const EffectInformation& ei) : Base{ei, false} {}

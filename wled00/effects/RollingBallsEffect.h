@@ -26,7 +26,7 @@ private:
     static constexpr unsigned maxNumBalls = 16; // 255/16 + 1
 
 public:
-    static constexpr const char* const metaData = "Rolling Balls@!,# of balls,,,,Collide,Overlay,Trails;!,!,!;!;1;m12=1";
+    static constexpr const char metaData[] PROGMEM = "Rolling Balls@!,# of balls,,,,Collide,Overlay,Trails;!,!,!;!;1;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_ROLLINGBALLS;
 
     explicit RollingBallsEffect(const EffectInformation& ei) : Base{ei, false} {}

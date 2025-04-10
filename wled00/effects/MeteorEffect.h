@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Meteor@!,Trail,,,,Gradient,,Smooth;;!;1";
+    static constexpr const char metaData[] PROGMEM = "Meteor@!,Trail,,,,Gradient,,Smooth;;!;1";
     static constexpr const uint8_t effectId = FX_MODE_METEOR;
 
     explicit MeteorEffect(const EffectInformation& ei) : Base{ei, false} {}

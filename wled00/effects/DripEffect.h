@@ -18,7 +18,7 @@ private:
     static constexpr int maxNumDrops = 4;
 
 public:
-    static constexpr const char* const metaData = "Drip@Gravity,# of drips,,,,,Overlay;!,!;!;;m12=1";
+    static constexpr const char metaData[] PROGMEM = "Drip@Gravity,# of drips,,,,,Overlay;!,!;!;;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_DRIP;
 
     explicit DripEffect(const EffectInformation& ei) : Base{ei, false} {}

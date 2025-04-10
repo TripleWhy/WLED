@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Chase Flash Rnd@!;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Chase Flash Rnd@!;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_CHASE_FLASH_RANDOM;
 
     explicit ChaseFlashRandomEffect(const EffectInformation& ei) : Base{ei, false} {}

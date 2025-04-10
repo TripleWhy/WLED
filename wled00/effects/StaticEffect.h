@@ -9,7 +9,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Solid";
+    static constexpr const char metaData[] PROGMEM = "Solid";
     static constexpr const uint8_t effectId = FX_MODE_STATIC;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d0;
 

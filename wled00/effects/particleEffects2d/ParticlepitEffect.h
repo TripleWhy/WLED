@@ -20,7 +20,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Ballpit@Speed,Intensity,Size,Hardness,Saturation,Cylinder,Walls,Ground;;!;2;pal=11,sx=100,ix=220,c1=120,c2=130,c3=31,o3=1";
+    static constexpr const char metaData[] PROGMEM = "PS Ballpit@Speed,Intensity,Size,Hardness,Saturation,Cylinder,Walls,Ground;;!;2;pal=11,sx=100,ix=220,c1=120,c2=130,c3=31,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEPIT;
 
     explicit ParticlepitEffect(const EffectInformation& ei) : Base{ei, false} {}

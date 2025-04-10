@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Wavesins@!,Brightness variation,Starting color,Range of colors,Color variation;!;!";
+    static constexpr const char metaData[] PROGMEM = "Wavesins@!,Brightness variation,Starting color,Range of colors,Color variation;!;!";
     static constexpr const uint8_t effectId = FX_MODE_WAVESINS;
 
     explicit WavesinsEffect(const EffectInformation& ei) : Base{ei, false} {}

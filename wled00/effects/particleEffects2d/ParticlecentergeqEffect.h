@@ -20,7 +20,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS GEQ Nova@Speed,Intensity,Rotation Speed,Color Change,Nozzle,,Direction;;!;2f;pal=13,ix=180,c1=0,c2=0,c3=8";
+    static constexpr const char metaData[] PROGMEM = "PS GEQ Nova@Speed,Intensity,Rotation Speed,Color Change,Nozzle,,Direction;;!;2f;pal=13,ix=180,c1=0,c2=0,c3=8";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLECIRCULARGEQ;
 
     explicit ParticlecentergeqEffect(const EffectInformation& ei) : Base{ei, false} {}

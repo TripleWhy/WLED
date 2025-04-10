@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Impact@Launches,!,Force,Hardness,Blur,Cylinder,Walls,Collide;;!;2;pal=0,sx=32,ix=85,c1=70,c2=130,c3=0,o3=1";
+    static constexpr const char metaData[] PROGMEM = "PS Impact@Launches,!,Force,Hardness,Blur,Cylinder,Walls,Collide;;!;2;pal=0,sx=32,ix=85,c1=70,c2=130,c3=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEIMPACT;
 
     explicit ParticleimpactEffect(const EffectInformation& ei) : Base{ei, false} {}

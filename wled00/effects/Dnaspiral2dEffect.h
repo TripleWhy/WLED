@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "DNA Spiral@Scroll speed,Y frequency,Blur,,,Smear;;!;2;c1=0";
+    static constexpr const char metaData[] PROGMEM = "DNA Spiral@Scroll speed,Y frequency,Blur,,,Smear;;!;2;c1=0";
     static constexpr const uint8_t effectId = FX_MODE_2DDNASPIRAL;
 
     explicit DnaSpiral2dEffect(const EffectInformation& ei) : Base{ei, false} {}

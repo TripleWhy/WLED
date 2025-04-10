@@ -18,7 +18,7 @@ private:
     static constexpr unsigned maxNumBalls = 16;
 
 public:
-    static constexpr const char* const metaData = "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1";
+    static constexpr const char metaData[] PROGMEM = "Bouncing Balls@Gravity,balls per line,,,lines,,Overlay;!,!,!;!;1;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_BOUNCINGBALLS;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2VStrips;
 

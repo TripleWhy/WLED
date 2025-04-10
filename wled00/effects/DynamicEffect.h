@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Dynamic@!,!,,,,Smooth;;!";
+    static constexpr const char metaData[] PROGMEM = "Dynamic@!,!,,,,Smooth;;!";
     static constexpr const uint8_t effectId = FX_MODE_DYNAMIC;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Waverly@Amplification,Sensitivity,,,,,Blur;;!;2v;ix=64,si=0";
+    static constexpr const char metaData[] PROGMEM = "Waverly@Amplification,Sensitivity,,,,,Blur;;!;2v;ix=64,si=0";
     static constexpr const uint8_t effectId = FX_MODE_2DWAVERLY;
 
     explicit Waverly2dEffect(const EffectInformation& ei) : Base{ei, false} {}

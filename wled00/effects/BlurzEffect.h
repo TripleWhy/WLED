@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Blurz@Fade rate,Blur;!,Color mix;!;1f;m12=0,si=0";
+    static constexpr const char metaData[] PROGMEM = "Blurz@Fade rate,Blur;!,Color mix;!;1f;m12=0,si=0";
     static constexpr const uint8_t effectId = FX_MODE_BLURZ;
 
     explicit BlurzEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -12,7 +12,7 @@ private:
     using Base = BaseEffect<Self, ColorWipeEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Wipe@!,!;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Wipe@!,!;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_COLOR_WIPE;
 
     explicit constexpr ColorWipeEffect(const EffectInformation& ei)

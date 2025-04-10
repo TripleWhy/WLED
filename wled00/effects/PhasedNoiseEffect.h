@@ -10,7 +10,7 @@ private:
     using Base = BaseEffect<Self, PhasedEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Phased Noise@!,!;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Phased Noise@!,!;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_PHASEDNOISE;
 
     explicit PhasedNoiseEffect(const EffectInformation& ei) : Base{ei, true} {}

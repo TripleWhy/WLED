@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Pixelwave@!,Sensitivity;!,!;!;1v;ix=64,m12=2,si=0";
+    static constexpr const char metaData[] PROGMEM = "Pixelwave@!,Sensitivity;!,!;!;1v;ix=64,m12=2,si=0";
     static constexpr const uint8_t effectId = FX_MODE_PIXELWAVE;
 
     explicit PixelwaveEffect(const EffectInformation& ei) : Base{ei, false} {}

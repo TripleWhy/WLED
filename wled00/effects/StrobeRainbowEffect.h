@@ -12,7 +12,7 @@ private:
     using Base = BaseEffect<Self, BlinkEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Strobe Rainbow@!;,!;!;01";
+    static constexpr const char metaData[] PROGMEM = "Strobe Rainbow@!;,!;!;01";
     static constexpr const uint8_t effectId = FX_MODE_STROBE_RAINBOW;
 
     explicit constexpr StrobeRainbowEffect(const EffectInformation& ei)

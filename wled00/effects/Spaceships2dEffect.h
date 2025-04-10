@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Spaceships@!,Blur,,,,Smear;;!;2";
+    static constexpr const char metaData[] PROGMEM = "Spaceships@!,Blur,,,,Smear;;!;2";
     static constexpr const uint8_t effectId = FX_MODE_2DSPACESHIPS;
 
     explicit Spaceships2dEffect(const EffectInformation& ei) : Base{ei, false} {}

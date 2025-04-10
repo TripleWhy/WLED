@@ -41,7 +41,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Dancing Shadows@!,# of shadows;!;!";
+    static constexpr const char metaData[] PROGMEM = "Dancing Shadows@!,# of shadows;!;!";
     static constexpr const uint8_t effectId = FX_MODE_DANCING_SHADOWS;
 
     explicit DancingShadowsEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -26,7 +26,7 @@ private:
 #endif
 
 public:
-    static constexpr const char* const metaData = "Ripple@!,Waves,Blur,,,Rainbow,Overlay;,!;!;12;c1=0";
+    static constexpr const char metaData[] PROGMEM = "Ripple@!,Waves,Blur,,,Rainbow,Overlay;,!;!;12;c1=0";
     static constexpr const uint8_t effectId = FX_MODE_RIPPLE;
 
     explicit RippleEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Heartbeat@!,!;!,!;!;01;m12=1";
+    static constexpr const char metaData[] PROGMEM = "Heartbeat@!,!;!,!;!;01;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_HEARTBEAT;
 
     explicit HeartbeatEffect(const EffectInformation& ei) : Base{ei, false} {}

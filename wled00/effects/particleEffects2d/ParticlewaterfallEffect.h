@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Waterfall@Speed,Intensity,Variation,Collide,Position,Cylinder,Walls,Ground;;!;2;pal=9,sx=15,ix=200,c1=32,c2=160,o3=1";
+    static constexpr const char metaData[] PROGMEM = "PS Waterfall@Speed,Intensity,Variation,Collide,Position,Cylinder,Walls,Ground;;!;2;pal=9,sx=15,ix=200,c1=32,c2=160,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEWATERFALL;
 
     explicit ParticlewaterfallEffect(const EffectInformation& ei) : Base{ei, false} {}

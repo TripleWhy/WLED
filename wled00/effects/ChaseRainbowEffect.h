@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, ChaseEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Chase Rainbow@!,Width;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Chase Rainbow@!,Width;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_CHASE_RAINBOW;
 
     explicit constexpr ChaseRainbowEffect(const EffectInformation& ei)

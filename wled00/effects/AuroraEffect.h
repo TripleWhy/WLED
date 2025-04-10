@@ -114,7 +114,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Aurora@!,!;1,2,3;!;;sx=24,pal=50";
+    static constexpr const char metaData[] PROGMEM = "Aurora@!,!;1,2,3;!;;sx=24,pal=50";
     static constexpr const uint8_t effectId = FX_MODE_AURORA;
 
     explicit AuroraEffect(const EffectInformation& ei) : Base{ei, false} {}

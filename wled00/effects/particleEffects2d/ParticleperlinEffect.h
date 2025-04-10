@@ -18,7 +18,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Fuzzy Noise@Speed,Particles,Bounce,Friction,Scale,Cylinder,Smear,Collide;;!;2;pal=64,sx=50,ix=200,c1=130,c2=30,c3=5,o3=1";
+    static constexpr const char metaData[] PROGMEM = "PS Fuzzy Noise@Speed,Particles,Bounce,Friction,Scale,Cylinder,Smear,Collide;;!;2;pal=64,sx=50,ix=200,c1=130,c2=30,c3=5,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEPERLIN;
 
     explicit ParticleperlinEffect(const EffectInformation& ei) : Base{ei, false} {}

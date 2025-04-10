@@ -22,7 +22,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Halloween Eyes@Eye off time,Eye on time,,,,,Overlay;!,!;!;12";
+    static constexpr const char metaData[] PROGMEM = "Halloween Eyes@Eye off time,Eye on time,,,,,Overlay;!,!;!;12";
     static constexpr const uint8_t effectId = FX_MODE_HALLOWEEN_EYES;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2VStrips;
 

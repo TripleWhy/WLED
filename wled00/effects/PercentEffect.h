@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Percent@,% of fill,,,,One color;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Percent@,% of fill,,,,One color;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_PERCENT;
 
     explicit PercentEffect(const EffectInformation& ei) : Base{ei, false} {}

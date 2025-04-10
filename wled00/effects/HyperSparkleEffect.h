@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Sparkle+@!,!,,,,Move,Overlay;Bg,Fx;!;;m12=0";
+    static constexpr const char metaData[] PROGMEM = "Sparkle+@!,!,,,,Move,Overlay;Bg,Fx;!;;m12=0";
     static constexpr const uint8_t effectId = FX_MODE_HYPER_SPARKLE;
 
     explicit HyperSparkleEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, SpotsEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Spots Fade@Spread,Width,,,,,Overlay;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Spots Fade@Spread,Width,,,,,Overlay;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_SPOTS_FADE;
 
     using Base::Base;

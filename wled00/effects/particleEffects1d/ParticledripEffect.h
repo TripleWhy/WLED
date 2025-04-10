@@ -21,7 +21,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS DripDrop@Speed,!,Splash,Blur,Gravity,Rain,PushSplash,Smooth;,!;!;1;pal=0,sx=150,ix=25,c1=220,c2=30,c3=21";
+    static constexpr const char metaData[] PROGMEM = "PS DripDrop@Speed,!,Splash,Blur,Gravity,Rain,PushSplash,Smooth;,!;!;1;pal=0,sx=150,ix=25,c1=220,c2=30,c3=21";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEDRIP;
 
     explicit ParticledripEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Pixels@Fade rate,# of pixels;!,!;!;1v;m12=0,si=0";
+    static constexpr const char metaData[] PROGMEM = "Pixels@Fade rate,# of pixels;!,!;!;1v;m12=0,si=0";
     static constexpr const uint8_t effectId = FX_MODE_PIXELS;
 
     explicit PixelsEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Rotozoomer@!,Scale,,,,Alt;;!;2;pal=54";
+    static constexpr const char metaData[] PROGMEM = "Rotozoomer@!,Scale,,,,Alt;;!;2;pal=54";
     static constexpr const uint8_t effectId = FX_MODE_2DPLASMAROTOZOOM;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2;
 

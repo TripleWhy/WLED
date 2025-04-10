@@ -23,7 +23,7 @@ private:
     static constexpr unsigned numOscillators = 3;
 
 public:
-    static constexpr const char* const metaData = "Oscillate";
+    static constexpr const char metaData[] PROGMEM = "Oscillate";
     static constexpr const uint8_t effectId = FX_MODE_OSCILLATE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

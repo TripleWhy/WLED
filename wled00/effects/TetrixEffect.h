@@ -23,7 +23,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2VStrips>>;
 
 public:
-    static constexpr const char* const metaData = "Tetrix@!,Width,,,,One color;!,!;!;;sx=0,ix=0,pal=11,m12=1";
+    static constexpr const char metaData[] PROGMEM = "Tetrix@!,Width,,,,One color;!,!;!;;sx=0,ix=0,pal=11,m12=1";
     static constexpr const uint8_t effectId = FX_MODE_TETRIX;
 
     explicit TetrixEffect(const EffectInformation& ei) : Base{ei, true} {}

@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Ghost Rider@Speed,Spiral,Blur,Color Cycle,Spread,AgeColor,Walls;;!;2;pal=1,sx=70,ix=0,c1=220,c2=30,c3=21,o1=1";
+    static constexpr const char metaData[] PROGMEM = "PS Ghost Rider@Speed,Spiral,Blur,Color Cycle,Spread,AgeColor,Walls;;!;2;pal=1,sx=70,ix=0,c1=220,c2=30,c3=21,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEGHOSTRIDER;
 
     explicit ParticleghostriderEffect(const EffectInformation& ei) : Base{ei, false} {}

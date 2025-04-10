@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Freqpixels@Fade rate,Starting color and # of pixels;!,!,;!;1f;m12=0,si=0";
+    static constexpr const char metaData[] PROGMEM = "Freqpixels@Fade rate,Starting color and # of pixels;!,!,;!;1f;m12=0,si=0";
     static constexpr const uint8_t effectId = FX_MODE_FREQPIXELS;
 
     explicit FreqpixelsEffect(const EffectInformation& ei) : Base{ei, false} {}

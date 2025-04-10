@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Noisemeter@Fade rate,Width;!,!;!;1v;ix=128,m12=2,si=0";
+    static constexpr const char metaData[] PROGMEM = "Noisemeter@Fade rate,Width;!,!;!;1v;ix=128,m12=2,si=0";
     static constexpr const uint8_t effectId = FX_MODE_NOISEMETER;
 
     explicit NoisemeterEffect(const EffectInformation& ei) : Base{ei, false} {}

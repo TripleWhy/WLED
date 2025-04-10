@@ -24,7 +24,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2VStrips>>;
 
 public:
-    static constexpr const char* const metaData = "Popcorn@!,!,,,,,Overlay;!,!,!;!;;m12=1";
+    static constexpr const char metaData[] PROGMEM = "Popcorn@!,!,,,,,Overlay;!,!,!;!;;m12=1";
     static constexpr const uint8_t effectId = FX_MODE_POPCORN;
 
     explicit PopcornEffect(const EffectInformation& ei) : Base{ei, false} {}

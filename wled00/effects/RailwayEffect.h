@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Railway@!,Smoothness;1,2;!;;pal=3";
+    static constexpr const char metaData[] PROGMEM = "Railway@!,Smoothness;1,2;!;;pal=3";
     static constexpr const uint8_t effectId = FX_MODE_RAILWAY;
 
     explicit RailwayEffect(const EffectInformation& ei) : Base{ei, false} {}

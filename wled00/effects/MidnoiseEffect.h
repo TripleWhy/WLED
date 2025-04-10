@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Midnoise@Fade rate,Max. length;!,!;!;1v;ix=128,m12=1,si=0";
+    static constexpr const char metaData[] PROGMEM = "Midnoise@Fade rate,Max. length;!,!;!;1v;ix=128,m12=1,si=0";
     static constexpr const uint8_t effectId = FX_MODE_MIDNOISE;
 
     explicit MidnoiseEffect(const EffectInformation& ei) : Base{ei, false} {}

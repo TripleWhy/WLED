@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, GradientEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Gradient@!,Spread;!,!;!;;ix=16";
+    static constexpr const char metaData[] PROGMEM = "Gradient@!,Spread;!,!;!;;ix=16";
     static constexpr const uint8_t effectId = FX_MODE_GRADIENT;
 
     explicit constexpr GradientEffect(const EffectInformation& ei)

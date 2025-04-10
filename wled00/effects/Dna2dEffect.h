@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "DNA@Scroll speed,Blur,,,,Smear;;!;2;ix=0";
+    static constexpr const char metaData[] PROGMEM = "DNA@Scroll speed,Blur,,,,Smear;;!;2;ix=0";
     static constexpr const uint8_t effectId = FX_MODE_2DDNA;
 
     explicit Dna2dEffect(const EffectInformation& ei) : Base{ei, false} {}

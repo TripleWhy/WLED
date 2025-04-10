@@ -20,7 +20,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Vortex@Rotation Speed,Particle Speed,Arms,Flip,Nozzle,Smear,Direction,Random Flip;;!;2;pal=27,c1=200,c2=0,c3=0";
+    static constexpr const char metaData[] PROGMEM = "PS Vortex@Rotation Speed,Particle Speed,Arms,Flip,Nozzle,Smear,Direction,Random Flip;;!;2;pal=27,c1=200,c2=0,c3=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEVORTEX;
 
     explicit ParticlevortexEffect(const EffectInformation& ei) : Base{ei, false} {}

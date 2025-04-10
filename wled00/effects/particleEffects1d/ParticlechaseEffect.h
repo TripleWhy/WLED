@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Chase@!,Density,Size,Hue,Blur,,,Position Color;,!;!;1;pal=11,sx=50,c2=5,c3=0";
+    static constexpr const char metaData[] PROGMEM = "PS Chase@!,Density,Size,Hue,Blur,,,Position Color;,!;!;1;pal=11,sx=50,c2=5,c3=0";
     static constexpr const uint8_t effectId = FX_MODE_PS_CHASE;
 
     explicit ParticlechaseEffect(const EffectInformation& ei) : Base{ei, false} {}

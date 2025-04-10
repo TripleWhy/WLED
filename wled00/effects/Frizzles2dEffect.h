@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Frizzles@X frequency,Y frequency,Blur,,,Smear;;!;2";
+    static constexpr const char metaData[] PROGMEM = "Frizzles@X frequency,Y frequency,Blur,,,Smear;;!;2";
     static constexpr const uint8_t effectId = FX_MODE_2DFRIZZLES;
 
     explicit Frizzles2dEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Sunrise@Time [min],Width;;!;;pal=35,sx=60";
+    static constexpr const char metaData[] PROGMEM = "Sunrise@Time [min],Width;;!;;pal=35,sx=60";
     static constexpr const uint8_t effectId = FX_MODE_SUNRISE;
 
     explicit SunriseEffect(const EffectInformation& ei) : Base{ei, false} {}

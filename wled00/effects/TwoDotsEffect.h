@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Two Dots@!,Dot size,,,,,Overlay;1,2,Bg;!";
+    static constexpr const char metaData[] PROGMEM = "Two Dots@!,Dot size,,,,,Overlay;1,2,Bg;!";
     static constexpr const uint8_t effectId = FX_MODE_TWO_DOTS;
 
     explicit TwoDotsEffect(const EffectInformation& ei) : Base{ei, false} {}

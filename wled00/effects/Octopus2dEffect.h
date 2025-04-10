@@ -21,7 +21,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Octopus@!,,Offset X,Offset Y,Legs,fasttan;;!;2;";
+    static constexpr const char metaData[] PROGMEM = "Octopus@!,,Offset X,Offset Y,Legs,fasttan;;!;2;";
     static constexpr const uint8_t effectId = FX_MODE_2DOCTOPUS;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d2;
 

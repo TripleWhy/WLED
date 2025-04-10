@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "DJ Light@Speed;;;01f;m12=2,si=0";
+    static constexpr const char metaData[] PROGMEM = "DJ Light@Speed;;;01f;m12=2,si=0";
     static constexpr const uint8_t effectId = FX_MODE_DJLIGHT;
 
     explicit DjLightEffect(const EffectInformation& ei) : Base{ei, false} {}

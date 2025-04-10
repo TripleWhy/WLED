@@ -22,7 +22,7 @@ private:
     static constexpr int crcBufferLen = 2; //(coordinate.width + coordinate.height)*71/100; // roughly sqrt(2)/2 for better repetition detection (Ewowi)
 
 public:
-    static constexpr const char* const metaData = "Game Of Life@!;!,!;!;2";
+    static constexpr const char metaData[] PROGMEM = "Game Of Life@!;!,!;!;2";
     static constexpr const uint8_t effectId = FX_MODE_2DGAMEOFLIFE;
 
     explicit Gameoflife2dEffect(const EffectInformation& ei) : Base{ei, false} {}

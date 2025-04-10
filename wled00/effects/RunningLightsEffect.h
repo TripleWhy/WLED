@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Running@!,Width,,,,Rainbow,Dual,Saw;L,!,R;!";
+    static constexpr const char metaData[] PROGMEM = "Running@!,Width,,,,Rainbow,Dual,Saw;L,!,R;!";
     static constexpr const uint8_t effectId = FX_MODE_RUNNING_LIGHTS;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

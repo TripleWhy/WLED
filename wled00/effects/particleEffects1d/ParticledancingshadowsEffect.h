@@ -21,7 +21,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS Dancing Shadows@Speed,!,Blur,Color Cycle,,Smear,Position Color,Smooth;,!;!;1;sx=100,ix=180,c1=0,c2=0";
+    static constexpr const char metaData[] PROGMEM = "PS Dancing Shadows@Speed,!,Blur,Color Cycle,,Smear,Position Color,Smooth;,!;!;1;sx=100,ix=180,c1=0,c2=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEDANCINGSHADOWS;
 
     explicit ParticledancingshadowsEffect(const EffectInformation& ei) : Base{ei, false} {}

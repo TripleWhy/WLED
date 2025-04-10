@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self>;
 
 public:
-    static constexpr const char* const metaData = "Sparkle Dark@!,!,,,,Move,Overlay;Bg,Fx;!;;m12=0";
+    static constexpr const char metaData[] PROGMEM = "Sparkle Dark@!,!,,,,Move,Overlay;Bg,Fx;!;;m12=0";
     static constexpr const uint8_t effectId = FX_MODE_FLASH_SPARKLE;
     static constexpr const EffectDimensionality dimensionality = EffectDimensionality::d1;
 

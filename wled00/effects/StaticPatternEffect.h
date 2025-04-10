@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Solid Pattern@Fg size,Bg size;Fg,!;!;;pal=0";
+    static constexpr const char metaData[] PROGMEM = "Solid Pattern@Fg size,Bg size;Fg,!;!;;pal=0";
     static constexpr const uint8_t effectId = FX_MODE_STATIC_PATTERN;
 
     explicit StaticPatternEffect(const EffectInformation& ei) : Base{ei, false} {}

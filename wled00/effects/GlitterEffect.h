@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Glitter@!,!,,,,,Overlay;,,Glitter color;!;;pal=11,m12=0";
+    static constexpr const char metaData[] PROGMEM = "Glitter@!,!,,,,,Overlay;,,Glitter color;!;;pal=11,m12=0";
     static constexpr const uint8_t effectId = FX_MODE_GLITTER;
 
     explicit GlitterEffect(const EffectInformation& ei) : Base{ei, false} {}

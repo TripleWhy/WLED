@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Chase Flash@!,,,,,Animate BG;Bg,Fx;!;;o1=0";
+    static constexpr const char metaData[] PROGMEM = "Chase Flash@!,,,,,Animate BG;Bg,Fx;!;;o1=0";
     static constexpr const uint8_t effectId = FX_MODE_CHASE_FLASH;
 
     explicit ChaseFlashEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -15,7 +15,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Hiphotic@X scale,Y scale,,,Speed;!;!;2";
+    static constexpr const char metaData[] PROGMEM = "Hiphotic@X scale,Y scale,,,Speed;!;!;2";
     static constexpr const uint8_t effectId = FX_MODE_2DHIPHOTIC;
 
     explicit Hiphotic2dEffect(const EffectInformation& ei) : Base{ei, false} {}

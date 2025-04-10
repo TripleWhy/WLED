@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2VStrips>>;
 
 public:
-    static constexpr const char* const metaData = "Fireworks@,Frequency;!,!;!;12;ix=192,pal=11";
+    static constexpr const char metaData[] PROGMEM = "Fireworks@,Frequency;!,!;!;12;ix=192,pal=11";
     static constexpr const uint8_t effectId = FX_MODE_FIREWORKS;
 
     explicit FireworksEffect(const EffectInformation& ei) : Base{ei, false} {}

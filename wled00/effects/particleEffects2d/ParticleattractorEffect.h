@@ -19,7 +19,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Attractor@Mass,Particles,Size,Collide,Friction,AgeColor,Move,Swallow;;!;2;pal=9,sx=100,ix=82,c1=2,c2=0";
+    static constexpr const char metaData[] PROGMEM = "PS Attractor@Mass,Particles,Size,Collide,Friction,AgeColor,Move,Swallow;;!;2;pal=9,sx=100,ix=82,c1=2,c2=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEATTRACTOR;
 
     explicit ParticleattractorEffect(const EffectInformation& ei) : Base{ei, false} {}

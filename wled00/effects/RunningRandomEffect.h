@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Stream@!,Zone size;;!";
+    static constexpr const char metaData[] PROGMEM = "Stream@!,Zone size;;!";
     static constexpr const uint8_t effectId = FX_MODE_RUNNING_RANDOM;
 
     explicit RunningRandomEffect(const EffectInformation& ei) : Base{ei, false} {}

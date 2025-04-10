@@ -11,7 +11,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Juggle@!,Trail;;!;;sx=64,ix=128";
+    static constexpr const char metaData[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128";
     static constexpr const uint8_t effectId = FX_MODE_JUGGLE;
 
     explicit JuggleEffect(const EffectInformation& ei) : Base{ei, false} {}

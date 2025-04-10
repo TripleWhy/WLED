@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Lighthouse@!,Fade rate;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Lighthouse@!,Fade rate;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_COMET;
 
     explicit CometEffect(const EffectInformation& ei) : Base{ei, false} {}

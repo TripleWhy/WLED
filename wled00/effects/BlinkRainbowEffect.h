@@ -12,7 +12,7 @@ private:
     using Base = BaseEffect<Self, BlinkEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
+    static constexpr const char metaData[] PROGMEM = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
     static constexpr const uint8_t effectId = FX_MODE_BLINK_RAINBOW;
 
     explicit constexpr BlinkRainbowEffect(const EffectInformation& ei)

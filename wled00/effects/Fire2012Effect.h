@@ -38,7 +38,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2VStrips>>;
 
 public:
-    static constexpr const char* const metaData = "Fire 2012@Cooling,Spark rate,,2D Blur,Boost;;!;1;pal=35,sx=64,ix=160,m12=1,c2=128";
+    static constexpr const char metaData[] PROGMEM = "Fire 2012@Cooling,Spark rate,,2D Blur,Boost;;!;1;pal=35,sx=64,ix=160,m12=1,c2=128";
     static constexpr const uint8_t effectId = FX_MODE_FIRE_2012;
 
     explicit Fire2012Effect(const EffectInformation& ei) : Base{ei, false} {}

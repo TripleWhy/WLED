@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Plasma@Phase,!;!;!";
+    static constexpr const char metaData[] PROGMEM = "Plasma@Phase,!;!;!";
     static constexpr const uint8_t effectId = FX_MODE_PLASMA;
 
     explicit PlasmaEffect(const EffectInformation& ei) : Base{ei, false} {}

@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Sinelon@!,Trail,,,,Rainbow,Dual;!,!,!;!";
+    static constexpr const char metaData[] PROGMEM = "Sinelon@!,Trail,,,,Rainbow,Dual;!,!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_SINELON;
 
     explicit SinelonEffect(const EffectInformation& ei) : Base{ei, false} {}

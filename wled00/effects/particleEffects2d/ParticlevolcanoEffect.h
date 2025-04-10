@@ -20,7 +20,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "PS Volcano@Speed,Intensity,Move,Bounce,Spread,AgeColor,Walls,Collide;;!;2;pal=35,sx=100,ix=190,c1=0,c2=160,c3=6,o1=1";
+    static constexpr const char metaData[] PROGMEM = "PS Volcano@Speed,Intensity,Move,Bounce,Spread,AgeColor,Walls,Collide;;!;2;pal=35,sx=100,ix=190,c1=0,c2=160,c3=6,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEVOLCANO;
 
     explicit ParticlevolcanoEffect(const EffectInformation& ei) : Base{ei, false} {}

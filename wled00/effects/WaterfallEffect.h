@@ -16,7 +16,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Waterfall@!,Adjust color,Select bin,Volume (min);!,!;!;01f;c2=0,m12=2,si=0";
+    static constexpr const char metaData[] PROGMEM = "Waterfall@!,Adjust color,Select bin,Volume (min);!,!;!;01f;c2=0,m12=2,si=0";
     static constexpr const uint8_t effectId = FX_MODE_WATERFALL;
 
     explicit WaterfallEffect(const EffectInformation& ei) : Base{ei, false} {}

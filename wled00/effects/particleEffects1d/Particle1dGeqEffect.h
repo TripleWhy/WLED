@@ -17,7 +17,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "PS GEQ 1D@Speed,!,Size,Blur,,,,;,!;!;1f;pal=0,sx=50,ix=200,c1=0,c2=0,c3=0,o1=1,o2=1";
+    static constexpr const char metaData[] PROGMEM = "PS GEQ 1D@Speed,!,Size,Blur,,,,;,!;!;1f;pal=0,sx=50,ix=200,c1=0,c2=0,c3=0,o1=1,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS1DGEQ;
 
     explicit Particle1dGeqEffect(const EffectInformation& ei) : Base{ei, false} {}

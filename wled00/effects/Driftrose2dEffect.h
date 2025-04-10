@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
 public:
-    static constexpr const char* const metaData = "Drift Rose@Fade,Blur,,,,Smear;;!;2;pal=11";
+    static constexpr const char metaData[] PROGMEM = "Drift Rose@Fade,Blur,,,,Smear;;!;2;pal=11";
     static constexpr const uint8_t effectId = FX_MODE_2DDRIFTROSE;
 
     explicit Driftrose2dEffect(const EffectInformation& ei) : Base{ei, false} {}

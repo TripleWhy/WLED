@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "ICU@!,!,,,,,Overlay;!,!;!";
+    static constexpr const char metaData[] PROGMEM = "ICU@!,!,,,,,Overlay;!,!;!";
     static constexpr const uint8_t effectId = FX_MODE_ICU;
 
     explicit IcuEffect(const EffectInformation& ei) : Base{ei, false} {}

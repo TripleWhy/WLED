@@ -13,7 +13,7 @@ private:
     using Base = BaseEffect<Self, GradientEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Loading@!,Fade;!,!;!;;ix=16";
+    static constexpr const char metaData[] PROGMEM = "Loading@!,Fade;!,!;!;;ix=16";
     static constexpr const uint8_t effectId = FX_MODE_LOADING;
 
     explicit constexpr LoadingEffect(const EffectInformation& ei)

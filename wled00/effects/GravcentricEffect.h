@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, GravcenterEffectBase>;
 
 public:
-    static constexpr const char* const metaData = "Gravcentric@Rate of fall,Sensitivity;!,!;!;1v;ix=128,m12=3,si=0";
+    static constexpr const char metaData[] PROGMEM = "Gravcentric@Rate of fall,Sensitivity;!,!;!;1v;ix=128,m12=3,si=0";
     static constexpr const uint8_t effectId = FX_MODE_GRAVCENTRIC;
 
     explicit GravcentricEffect(const EffectInformation& ei) : Base{ei, 1} {}

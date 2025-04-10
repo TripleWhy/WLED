@@ -24,7 +24,7 @@ private:
     static constexpr unsigned maxRipples = 16;
 
 public:
-    static constexpr const char* const metaData = "Ripple Peak@Fade rate,Max # of ripples,Select bin,Volume (min);!,!;!;1v;c2=0,m12=0,si=0";
+    static constexpr const char metaData[] PROGMEM = "Ripple Peak@Fade rate,Max # of ripples,Select bin,Volume (min);!,!;!;1v;c2=0,m12=0,si=0";
     static constexpr const uint8_t effectId = FX_MODE_RIPPLEPEAK;
 
     explicit RipplepeakEffect(const EffectInformation& ei) : Base{ei, false} {}

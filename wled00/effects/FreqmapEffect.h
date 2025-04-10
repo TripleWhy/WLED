@@ -14,7 +14,7 @@ private:
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
 public:
-    static constexpr const char* const metaData = "Freqmap@Fade rate,Starting color;!,!;!;1f;m12=0,si=0";
+    static constexpr const char metaData[] PROGMEM = "Freqmap@Fade rate,Starting color;!,!;!;1f;m12=0,si=0";
     static constexpr const uint8_t effectId = FX_MODE_FREQMAP;
 
     explicit FreqmapEffect(const EffectInformation& ei) : Base{ei, false} {}
