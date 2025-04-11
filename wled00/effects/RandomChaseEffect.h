@@ -29,31 +29,31 @@ public:
         }
 
         if (SEGENV.call == 0) {
-            step = RGBW32(random8(), random8(), random8(), 0);
-            aux0 = random16();
+            step = RGBW32(prng.random8(), prng.random8(), prng.random8(), 0);
+            aux0 = prng.random16();
         }
-        unsigned prevSeed = random16_get_seed(); // save seed so we can restore it at the end of the function
+        unsigned prevSeed = prng.getSeed(); // save seed so we can restore it at the end of the function
         uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed));
         uint32_t it = strip.now / cycleTime;
         uint32_t color = step;
-        random16_set_seed(aux0);
+        prng.setSeed(aux0);
 
         const int width = static_cast<int>(coordinate.width);
         for (int i = width -1; i >= 0; i--) {
-            uint8_t r = random8(6) != 0 ? (color >> 16 & 0xFF) : random8();
-            uint8_t g = random8(6) != 0 ? (color >> 8  & 0xFF) : random8();
-            uint8_t b = random8(6) != 0 ? (color       & 0xFF) : random8();
+            uint8_t r = prng.random8(6) != 0 ? (color >> 16 & 0xFF) : prng.random8();
+            uint8_t g = prng.random8(6) != 0 ? (color >> 8  & 0xFF) : prng.random8();
+            uint8_t b = prng.random8(6) != 0 ? (color       & 0xFF) : prng.random8();
             color = RGBW32(r, g, b, 0);
             buffer.setPixelColor(i, color);
             if (i == width -1 && aux1 != (it & 0xFFFFU)) { //new first color in next frame
                 step = color;
-                aux0 = random16_get_seed();
+                aux0 = prng.getSeed();
             }
         }
 
         aux1 = it & 0xFFFF;
 
-        random16_set_seed(prevSeed); // restore original seed so other effects can use "random" PRNG
+        prng.setSeed(prevSeed); // restore original seed so other effects can use "random" PRNG
         return true;
     }
 

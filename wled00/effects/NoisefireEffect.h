@@ -35,7 +35,7 @@ public:
         if (SEGENV.call == 0) buffer.fill(BLACK);
 
         for (unsigned i = 0; i < coordinate.width; i++) {
-            unsigned index = inoise8(i*SEGMENT.speed/64,strip.now*SEGMENT.speed/64*coordinate.width/255);  // X location is constant, but we move along the Y at the rate of millis(). By Andrew Tuline.
+            unsigned index = perlin8(i*SEGMENT.speed/64,strip.now*SEGMENT.speed/64*coordinate.width/255);  // X location is constant, but we move along the Y at the rate of millis(). By Andrew Tuline.
             index = (255 - i*256/coordinate.width) * index/(256-SEGMENT.intensity);                       // Now we need to scale index so that it gets blacker as we get close to one of the ends.
                                                                                                                                                                                     // This is a simple y=mx+b equation that's been scaled. index/128 is another scaling.
 

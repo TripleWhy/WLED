@@ -29,7 +29,7 @@ public:
             unsigned real_x = (i + shift_x) * scale;                  // the x position of the noise field swings @ 17 bpm
             unsigned real_y = (i + shift_y) * scale;                  // the y position becomes slowly incremented
             uint32_t real_z = step;                            // the z position becomes quickly incremented
-            unsigned noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
+            unsigned noise = perlin16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
             unsigned index = sin8_t(noise * 3);                         // map LED color based on noise data
 
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));

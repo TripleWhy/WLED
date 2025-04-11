@@ -85,7 +85,7 @@ public:
             if (SEGMENT.call % 10 == 0)
                 aux1++; // move in noise y direction so noise does not repeat as often
             // add wind force to all particles
-            int8_t windspeed = ((int16_t)(inoise8(aux0, aux1) - 127) * SEGMENT.custom2) >> 7;
+            int8_t windspeed = ((int16_t)(perlin8(aux0, aux1) - 127) * SEGMENT.custom2) >> 7;
             PartSys->applyForce(windspeed, 0);
         }
         step++;
@@ -94,7 +94,7 @@ public:
             if (SEGMENT.call % map(firespeed, 0, 255, 4, 15) == 0) {
                 for (i = 0; i < PartSys->usedParticles; i++) {
                     if (PartSys->particles[i].y < PartSys->maxY / 4) { // do not apply turbulance everywhere -> bottom quarter seems a good balance
-                        int32_t curl = ((int32_t)inoise8(PartSys->particles[i].x, PartSys->particles[i].y, step << 4) - 127);
+                        int32_t curl = ((int32_t)perlin8(PartSys->particles[i].x, PartSys->particles[i].y, step << 4) - 127);
                         PartSys->particles[i].vx += (curl * (firespeed + 10)) >> 9;
                     }
                 }

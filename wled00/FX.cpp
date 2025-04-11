@@ -13,6 +13,7 @@
 #include "wled.h"
 #include "FX.h"
 #include "fcn_declare.h"
+#include "colors.h"
 #include <memory>
 
 #include "effects/Akemi2dEffect.h"

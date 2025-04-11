@@ -18,15 +18,11 @@
 
 #include <vector>
 #include "wled.h"
-
 #include "const.h"
 #include "bus_manager.h"
+#include "colors.h"
 #include "effects/Effect.h"
 #include "memory/CircularAllocator.h"
-
-#define FASTLED_INTERNAL //remove annoying pragma messages
-#define USE_GET_MILLISECOND_TIMER
-#include "FastLED.h"
 
 #define DEFAULT_BRIGHTNESS (uint8_t)127
 #define DEFAULT_MODE       (uint8_t)0
@@ -44,10 +40,12 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
+/*
 //color mangling macros
 #ifndef RGBW32
 #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
 #endif
+**/
 
 extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 extern byte realtimeMode;           // used in getMappedPixelIndex()
@@ -478,7 +476,7 @@ typedef struct Segment {
       uint16_t      _dur;
       // -> here is one byte of padding
       Transition(uint16_t dur=750)
-        : _palT(CRGBPalette16(CRGB::Black))
+        : _palT(CRGBPalette16())
         , _prevPaletteBlends(0)
         , _start(millis())
         , _dur(dur)
@@ -744,7 +742,7 @@ typedef struct Segment {
     inline void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0, bool saturate = false) { addPixelColor(x, RGBW32(r,g,b,w), saturate); }
     inline void addPixelColorXY(int x, int y, CRGB c, bool saturate = false)         { addPixelColor(x, RGBW32(c.r,c.g,c.b,0), saturate); }
     inline void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)            { fadePixelColor(x, fade); }
-    //inline void box_blur(unsigned i, bool vertical, fract8 blur_amount) {}
+    //inline void box_blur(unsigned i, bool vertical, uint8_t blur_amount) {}
     inline void blur2D(uint8_t blur_x, uint8_t blur_y, bool smear = false) {}
     inline void moveX(int delta, bool wrap = false) {}
     inline void moveY(int delta, bool wrap = false) {}

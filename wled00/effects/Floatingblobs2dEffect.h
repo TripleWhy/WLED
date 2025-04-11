@@ -52,7 +52,7 @@ public:
 
         // Bounce balls around
         for (size_t i = 0; i < Amount; i++) {
-            if (step < strip.now) color[i] = add8(color[i], 4); // slowly change color
+            if (step < strip.now) color[i] = color[i] + 4; // slowly change color
             // change radius if needed
             if (grow[i]) {
                 // enlarge radius until it is >= 4

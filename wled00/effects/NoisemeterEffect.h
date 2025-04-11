@@ -38,7 +38,7 @@ public:
         if (maxLen > coordinate.width) maxLen = coordinate.width;
 
         for (unsigned i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
-            uint8_t index = inoise8(i*volumeSmth+aux0, aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
+            uint8_t index = perlin8(i*volumeSmth+aux0, aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
 

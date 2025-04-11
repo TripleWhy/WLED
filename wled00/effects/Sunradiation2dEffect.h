@@ -41,7 +41,7 @@ public:
         uint8_t someVal = SEGMENT.speed/4;             // Was 25.
         for (int j = 0; j < (rows + 2); j++) {
             for (int i = 0; i < (cols + 2); i++) {
-                byte col = (inoise8_raw(i * someVal, j * someVal, t)) / 2;
+                byte col = ((int16_t)perlin8(i * someVal, j * someVal, t) - 127) >> 2; // about +/- 32
                 bump[index++] = col;
             }
         }

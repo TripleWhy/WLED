@@ -27,8 +27,8 @@ public:
         }
 
         CRGBW col, prev;
-        fract8 fadeUpAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-strip.getBrightness();
-        fract8 fadeDownAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>3) : 68-strip.getBrightness();
+        uint8_t fadeUpAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-strip.getBrightness();
+        uint8_t fadeDownAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>3) : 68-strip.getBrightness();
         for (unsigned i = 0; i < coordinate.width; i++) {
             CRGBW cur = buffer.getPixelColor(i);
             prev = cur;

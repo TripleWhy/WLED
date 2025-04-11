@@ -76,8 +76,8 @@ public:
                 aux0 -= increment;
 
             if (SEGMENT.check1) { // random, use perlin noise
-                xgravity = ((int16_t)inoise8(aux0) - 127);
-                ygravity = ((int16_t)inoise8(aux0 + 10000) - 127);
+                xgravity = ((int16_t)perlin8(aux0) - 127);
+                ygravity = ((int16_t)perlin8(aux0 + 10000) - 127);
                 // scale the gravity force
                 xgravity = (xgravity * SEGMENT.custom1) / 128;
                 ygravity = (ygravity * SEGMENT.custom1) / 128;

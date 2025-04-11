@@ -34,14 +34,14 @@ public:
         else aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
 
         // Set up the background color, "bg".
-        bg = CRGB(SEGCOLOR(1));
+        bg = SEGCOLOR(1);
         unsigned bglight = bg.getAverageLight();
         if (bglight > 64) {
-            bg.nscale8_video(16); // very bright, so scale to 1/16th
+            bg = color_fade(bg, 16, true); // very bright, so scale to 1/16th
         } else if (bglight > 16) {
-            bg.nscale8_video(64); // not that bright, so scale to 1/4th
+            bg = color_fade(bg, 64, true); // not that bright, so scale to 1/4th
         } else {
-            bg.nscale8_video(86); // dim, scale to 1/3rd.
+            bg = color_fade(bg, 86, true); // dim, scale to 1/3rd.
         }
 
         backgroundBrightness = bg.getAverageLight();
@@ -61,18 +61,18 @@ public:
         // We now have the adjusted 'clock' for this pixel, now we call
         // the function that computes what color the pixel should be based
         // on the "brightness = f( time )" idea.
-        CRGB c = twinklefox_one_twinkle(myclock30, myunique8, cat);
+        CRGBW c = twinklefox_one_twinkle(myclock30, myunique8, cat);
 
         unsigned cbright = c.getAverageLight();
         int deltabright = cbright - backgroundBrightness;
-        if (deltabright >= 32 || (!bg)) {
+        if (deltabright >= 32 || (bg==0)) {
             // If the new pixel is significantly brighter than the background color,
             // use the new color.
             return RGBW32(c.r, c.g, c.b, 0);
         } else if (deltabright > 0) {
             // If the new pixel is just slightly brighter than the background color,
             // mix a blend of the new color and the background color
-            return color_blend(RGBW32(bg.r, bg.g, bg.b, 0), RGBW32(c.r, c.g, c.b, 0), uint8_t(deltabright * 8));
+            return color_blend(bg, c, uint8_t(deltabright * 8));
         } else {
             // if the new pixel is not at all brighter than the background color,
             // just use the background color.
@@ -85,7 +85,7 @@ private:
     //
     //  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
     //  Colors are chosen from a palette. Read more about this effect using the link above!
-    CRGB twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
+    CRGBW twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
     {
         // Overall twinkle speed (changed)
         unsigned ticks = ms / aux0;
@@ -120,7 +120,7 @@ private:
         }
 
         unsigned hue = slowcycle8 - salt;
-        CRGB c;
+        CRGBW c;
         if (bright > 0) {
             c = ColorFromPalette(SEGPALETTE, hue, bright, NOBLEND);
             if (!SEGMENT.check1) {
@@ -135,7 +135,7 @@ private:
                 }
             }
         } else {
-            c = CRGB::Black;
+            c = 0; // black
         }
         return c;
     }
@@ -144,7 +144,7 @@ private:
     const bool cat;
 
     uint16_t PRNG16{};
-    CRGB bg{};
+    CRGBW bg{};
     unsigned backgroundBrightness{};
     uint16_t aux0{};
 };

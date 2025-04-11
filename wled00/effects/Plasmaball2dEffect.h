@@ -31,10 +31,10 @@ public:
         buffer.fadeToBlackBy(SEGMENT.custom1>>2);
         uint_fast32_t t = (strip.now * 8) / (256 - SEGMENT.speed);  // optimized to avoid float
         for (int i = 0; i < cols; i++) {
-            unsigned thisVal = inoise8(i * 30, t, t);
+            unsigned thisVal = perlin8(i * 30, t, t);
             unsigned thisMax = map(thisVal, 0, 255, 0, cols-1);
             for (int j = 0; j < rows; j++) {
-                unsigned thisVal_ = inoise8(t, j * 30, t);
+                unsigned thisVal_ = perlin8(t, j * 30, t);
                 unsigned thisMax_ = map(thisVal_, 0, 255, 0, rows-1);
                 int x = (i + thisMax_ - cols / 2);
                 int y = (j + thisMax - cols / 2);

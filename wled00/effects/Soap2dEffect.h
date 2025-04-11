@@ -115,7 +115,7 @@ private:
                 else                         PixelA = ColorFromPalette(SEGPALETTE, ~noisePixels[indxA].noise3d*3);
                 if ((zF >= 0) && (zF < tCR)) PixelB = noisePixels[indxB].pixel;
                 else                         PixelB = ColorFromPalette(SEGPALETTE, ~noisePixels[indxB].noise3d*3);
-                ledsbuff[j] = (PixelA.nscale8(ease8InOutApprox(255 - fraction))) + (PixelB.nscale8(ease8InOutApprox(fraction)));
+                ledsbuff[j] = (PixelA.nscale8(ease8InOutCubic(255 - fraction))) + (PixelB.nscale8(ease8InOutCubic(fraction)));
             }
             for (int j = 0; j < tCR; j++) {
                 CRGB c = ledsbuff[j];

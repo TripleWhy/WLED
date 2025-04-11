@@ -54,7 +54,7 @@ public:
                 uint8_t rate = j * 255 / steps;
                 byte dx = lerp8by8(x1, y1, rate);
                 byte dy = lerp8by8(x2, y2, rate);
-                //buffer.setPixelColor(dx, dy, grad ? color.nscale8_video(255-rate) : color); // use addPixelColorXY for different look
+                //buffer.setPixelColor(dx, dy, grad ?  color_fade(color, (255-rate), true) : color); // use addPixelColorXY for different look
                 buffer.addPixelColor(dx, dy, color); // use setPixelColorXY for different look
                 if (grad)
                     buffer.fadePixelColor(dx, dy, rate);

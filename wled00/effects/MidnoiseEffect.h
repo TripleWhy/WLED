@@ -37,7 +37,7 @@ public:
         if (maxLen >coordinate.width/2) maxLen = coordinate.width/2;
 
         for (unsigned i=(coordinate.width/2-maxLen); i<(coordinate.width/2+maxLen); i++) {
-            uint8_t index = inoise8(i*volumeSmth+xdist, ydist+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
+            uint8_t index = perlin8(i*volumeSmth+xdist, ydist+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
 

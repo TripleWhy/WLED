@@ -31,11 +31,11 @@ public:
         float speed = 0.25f * (1+(SEGMENT.speed>>6));
 
         // get some 2 random moving points
-        int x2 = map(inoise8(strip.now * speed, 25355, 685), 0, 255, 0, cols-1);
-        int y2 = map(inoise8(strip.now * speed, 355, 11685), 0, 255, 0, rows-1);
+        int x2 = map(perlin8(strip.now * speed, 25355, 685), 0, 255, 0, cols-1);
+        int y2 = map(perlin8(strip.now * speed, 355, 11685), 0, 255, 0, rows-1);
 
-        int x3 = map(inoise8(strip.now * speed, 55355, 6685), 0, 255, 0, cols-1);
-        int y3 = map(inoise8(strip.now * speed, 25355, 22685), 0, 255, 0, rows-1);
+        int x3 = map(perlin8(strip.now * speed, 55355, 6685), 0, 255, 0, cols-1);
+        int y3 = map(perlin8(strip.now * speed, 25355, 22685), 0, 255, 0, rows-1);
 
         // and one Lissajou function
         int x1 = beatsin8_t(23 * speed, 0, cols-1);

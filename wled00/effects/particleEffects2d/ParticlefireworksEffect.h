@@ -70,7 +70,7 @@ public:
                     else if (PartSys->sources[j].source.vy < 0) { // rocket is exploded and time is up (ttl=0 and negative speed), relaunch it
                         PartSys->sources[j].source.y = PS_P_RADIUS; // start from bottom
                         PartSys->sources[j].source.x = (PartSys->maxX >> 2) + hw_random(PartSys->maxX >> 1); // centered half
-                        PartSys->sources[j].source.vy = (SEGMENT.custom3) + random16(SEGMENT.custom1 >> 3) + 5; // rocket speed TODO: need to adjust for segment height
+                        PartSys->sources[j].source.vy = (SEGMENT.custom3) + hw_random16(SEGMENT.custom1 >> 3) + 5; // rocket speed TODO: need to adjust for segment height
                         PartSys->sources[j].source.vx = hw_random16(7) - 3; // not perfectly straight up
                         PartSys->sources[j].source.sat = 30; // low saturation -> exhaust is off-white
                         PartSys->sources[j].source.ttl = hw_random16(SEGMENT.custom1) + (SEGMENT.custom1 >> 1); // set fuse time
@@ -114,7 +114,7 @@ public:
                 emitparticles = hw_random16(SEGMENT.intensity >> 2) + (SEGMENT.intensity >> 2) + 5; // defines the size of the explosion
                 #endif
 
-                if (random16() & 1) { // 50% chance for circular explosion
+                if (hw_random() & 1) { // 50% chance for circular explosion
                     circularexplosion = true;
                     speed = 2 + hw_random16(3) + ((SEGMENT.intensity >> 6));
                     currentspeed = speed;
@@ -140,7 +140,7 @@ public:
                         counter = 0;
                         speed += 3 + ((SEGMENT.intensity >> 6)); // increase speed to form a second wave
                         PartSys->sources[j].source.hue += hueincrement; // new color for next circle
-                        PartSys->sources[j].source.sat = min((uint16_t)150, random16());
+                        PartSys->sources[j].source.sat = min((uint16_t)150, hw_random16());
                     }
                     angle += angleincrement; // set angle for next particle
                 }

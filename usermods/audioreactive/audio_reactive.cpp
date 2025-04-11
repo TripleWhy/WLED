@@ -869,7 +869,7 @@ class AudioReactive : public Usermod {
       const int   AGC_preset = (soundAgc > 0)? (soundAgc-1): 0; // make sure the _compiler_ knows this value will not change while we are inside the function
 
       #ifdef WLED_DISABLE_SOUND
-        micIn = inoise8(millis(), millis());          // Simulated analog read
+        micIn = perlin8(millis(), millis());          // Simulated analog read
         micDataReal = micIn;
       #else
         #ifdef ARDUINO_ARCH_ESP32
@@ -1994,12 +1994,12 @@ CRGB AudioReactive::getCRGBForBand(int x, int pal) {
     case 2:
       b = map(x, 0, 255, 0, NUM_GEQ_CHANNELS/2); // convert palette position to lower half of freq band
       hsv = CHSV(fftResult[b], 255, x);
-      hsv2rgb_rainbow(hsv, value);  // convert to R,G,B
+      value = hsv;  // convert to R,G,B
       break;
     case 1:
       b = map(x, 1, 255, 0, 10); // convert palette position to lower half of freq band
       hsv = CHSV(fftResult[b], 255, map(fftResult[b], 0, 255, 30, 255));  // pick hue
-      hsv2rgb_rainbow(hsv, value);  // convert to R,G,B
+      value = hsv;  // convert to R,G,B
       break;
     default:
       if (x == 1) {

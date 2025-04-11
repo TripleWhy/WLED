@@ -17,10 +17,10 @@ private:
         uint8_t posX, posY, aimX, aimY, hue;
         int8_t deltaX, deltaY, signX, signY, error;
         void aimed(uint16_t w, uint16_t h) {
-            //random16_set_seed(millis());
-            aimX   = random8(0, w);
-            aimY   = random8(0, h);
-            hue    = random8();
+            //prng.setSeed(millis());
+            aimX   = prng.random8(0, w);
+            aimY   = prng.random8(0, h);
+            hue    = prng.random8();
             deltaX = abs(aimX - posX);
             deltaY = abs(aimY - posY);
             signX  = posX < aimX ? 1 : -1;
@@ -50,10 +50,10 @@ public:
         const byte n = MIN(MAX_BEES, (rows * cols) / 256 + 1);
 
         if (SEGENV.call == 0) {
-            random16_set_seed(strip.now);
+            prng.setSeed(strip.now);
             for (size_t i = 0; i < n; i++) {
-                bee[i].posX = random8(0, cols);
-                bee[i].posY = random8(0, rows);
+                bee[i].posX = prng.random8(0, cols);
+                bee[i].posY = prng.random8(0, rows);
                 bee[i].aimed(cols, rows);
             }
         }

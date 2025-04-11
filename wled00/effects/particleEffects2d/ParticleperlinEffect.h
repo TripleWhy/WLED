@@ -67,11 +67,11 @@ public:
             uint32_t scale = 16 - ((31 - SEGMENT.custom3) >> 1);
             uint16_t xnoise = PartSys->particles[i].x / scale; // position in perlin noise, scaled by slider
             uint16_t ynoise = PartSys->particles[i].y / scale;
-            int16_t baseheight = inoise8(xnoise, ynoise, aux0); // noise value at particle position
+            int16_t baseheight = perlin8(xnoise, ynoise, aux0); // noise value at particle position
             PartSys->particles[i].hue = baseheight; // color particles to perlin noise value
             if (SEGMENT.call % 8 == 0) { // do not apply the force every frame, is too chaotic
-                int8_t xslope = (baseheight + (int16_t)inoise8(xnoise - 10, ynoise, aux0));
-                int8_t yslope = (baseheight + (int16_t)inoise8(xnoise, ynoise - 10, aux0));
+                int8_t xslope = (baseheight + (int16_t)perlin8(xnoise - 10, ynoise, aux0));
+                int8_t yslope = (baseheight + (int16_t)perlin8(xnoise, ynoise - 10, aux0));
                 PartSys->applyForce(i, xslope, yslope);
             }
         }

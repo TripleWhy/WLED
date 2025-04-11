@@ -47,7 +47,7 @@ public:
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
-        const unsigned index = inoise8(i*scale, aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
+        const unsigned index = perlin8(i*scale, aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
         return ColorFromPalette(palettes[0], index, 255, LINEARBLEND);  // Use my own palette.
     }
 

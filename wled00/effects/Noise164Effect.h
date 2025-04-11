@@ -23,7 +23,7 @@ public:
 
         uint32_t stp = (strip.now * SEGMENT.speed) >> 7;
         for (unsigned i = 0; i < coordinate.width; i++) {
-            int index = inoise16(uint32_t(i) << 12, stp);
+            int index = perlin16(uint32_t(i) << 12, stp);
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
         return true;

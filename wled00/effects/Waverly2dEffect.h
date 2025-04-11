@@ -35,10 +35,10 @@ public:
 
         long t = strip.now / 2;
         for (int i = 0; i < cols; i++) {
-            unsigned thisVal = (1 + SEGMENT.intensity/64) * inoise8(i * 45 , t , t)/2;
+            unsigned thisVal = (1 + SEGMENT.intensity/64) * perlin8(i * 45 , t , t)/2;
             // use audio if available
             if (um_data) {
-                thisVal /= 32; // reduce intensity of inoise8()
+                thisVal /= 32; // reduce intensity of perlin8()
                 thisVal *= volumeSmth;
             }
             int thisMax = map(thisVal, 0, 512, 0, rows);

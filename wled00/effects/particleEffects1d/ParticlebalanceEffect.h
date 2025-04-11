@@ -67,9 +67,9 @@ public:
             int32_t increment = (SEGMENT.speed >> 6) + 1;
             aux0 += increment;
             if (SEGMENT.check3) // random, use perlin noise
-                xgravity = ((int16_t)inoise8(aux0) - 128);
+                xgravity = ((int16_t)perlin8(aux0) - 128);
             else // sinusoidal
-                xgravity = (int16_t)cos8(aux0) - 128;//((int32_t)(SEGMENT.custom3 << 2) * cos8(aux0)
+                xgravity = (int16_t)cos8_t(aux0) - 128;//((int32_t)(SEGMENT.custom3 << 2) * cos8(aux0)
             // scale the force
             xgravity = (xgravity * ((SEGMENT.custom3+1) << 2)) / 128; // xgravity: -127 to +127
             PartSys->applyForce(xgravity);

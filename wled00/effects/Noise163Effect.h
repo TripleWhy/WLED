@@ -29,7 +29,7 @@ public:
             uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
             uint32_t real_y = (i + shift_y) * scale;                  // based on the precalculated positions
             uint32_t real_z = step*8;
-            unsigned noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
+            unsigned noise = perlin16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
             unsigned index = sin8_t(noise * 3);                         // map led color based on noise data
 
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, noise));

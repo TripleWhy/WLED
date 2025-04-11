@@ -57,7 +57,7 @@ public:
         uint32_t baseBin = SEGMENT.custom3 >> 1; // 0 - 15 map(SEGMENT.custom3, 0, 31, 0, 14);
 
         loudness = fftResult[baseBin];// + fftResult[baseBin + 1];
-        int mids = sqrt16((int)fftResult[5] + (int)fftResult[6] + (int)fftResult[7] + (int)fftResult[8] + (int)fftResult[9] + (int)fftResult[10]); // average the mids, bin 5 is ~500Hz, bin 10 is ~2kHz (see audio_reactive.h)
+        int mids = sqrt32_bw((int)fftResult[5] + (int)fftResult[6] + (int)fftResult[7] + (int)fftResult[8] + (int)fftResult[9] + (int)fftResult[10]); // average the mids, bin 5 is ~500Hz, bin 10 is ~2kHz (see audio_reactive.h)
         if (baseBin > 12)
             loudness = loudness << 2; // double loudness for high frequencies (better detecion)
 
@@ -80,7 +80,7 @@ public:
                 else PartSys->particles[i].ttl = 0;
             }
             if (SEGMENT.check1) // modulate colors by mid frequencies
-                PartSys->particles[i].hue += (mids * inoise8(PartSys->particles[i].x << 2, SEGMENT.step << 2)) >> 9; // color by perlin noise from mid frequencies
+                PartSys->particles[i].hue += (mids * perlin8(PartSys->particles[i].x << 2, SEGMENT.step << 2)) >> 9; // color by perlin noise from mid frequencies
         }
 
         if (loudness > threshold) {

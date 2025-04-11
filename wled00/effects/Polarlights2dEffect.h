@@ -42,7 +42,7 @@ public:
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
                 step++;
-                uint8_t palindex = qsub8(inoise8((step%2) + x * _scale, y * 16 + step % 16, step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
+                uint8_t palindex = qsub8(perlin8((step%2) + x * _scale, y * 16 + step % 16, step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
                 uint8_t palbrightness = palindex;
                 if(SEGMENT.check1) palindex = 255 - palindex; //flip palette
                 buffer.setPixelColor(x, y, SEGMENT.color_from_palette(palindex, false, false, 255, palbrightness));

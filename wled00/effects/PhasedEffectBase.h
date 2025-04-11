@@ -34,7 +34,7 @@ public:
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         unsigned i = coordinate.getXAbsolute();
         if (moder)
-            modVal = (inoise8(i*10 + i*10) /16);                     // Let's randomize our mod length with some Perlin noise.
+            modVal = (perlin8(i*10 + i*10) /16);                     // Let's randomize our mod length with some Perlin noise.
         unsigned val = (i+1) * allfreq;                              // This sets the frequency of the waves. The +1 makes sure that led 0 is used.
         if (modVal == 0)
             modVal = 1;

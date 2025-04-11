@@ -68,7 +68,7 @@ public:
         }
         else if(mode == 2) { //Gravimeter
             for (int i=0; i<tempsamp; i++) {
-                uint8_t index = inoise8(i*segmentSampleAvg+strip.now, 5000+i*segmentSampleAvg);
+                uint8_t index = perlin8(i*segmentSampleAvg+strip.now, 5000+i*segmentSampleAvg);
                 buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
             }
             if (topLED > 0) {
@@ -90,7 +90,7 @@ public:
         }
         else { //Gravcenter
             for (int i=0; i<tempsamp; i++) {
-                uint8_t index = inoise8(i*segmentSampleAvg+strip.now, 5000+i*segmentSampleAvg);
+                uint8_t index = perlin8(i*segmentSampleAvg+strip.now, 5000+i*segmentSampleAvg);
                 buffer.setPixelColor(i+coordinate.width/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
                 buffer.setPixelColor(coordinate.width/2-i-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
             }
