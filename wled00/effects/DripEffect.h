@@ -23,14 +23,17 @@ public:
 
     explicit DripEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (!SEGMENT.check2)
             buffer.fill(SEGCOLOR(1));
 
         for (unsigned stripNr=0; stripNr<coordinate.height; stripNr++)
             runStrip(coordinate, stripNr, &drops[stripNr*maxNumDrops]);
+        return true;
     }
 
 private:

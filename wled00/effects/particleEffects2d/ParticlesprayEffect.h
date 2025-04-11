@@ -23,8 +23,10 @@ public:
 
     explicit ParticlesprayEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem2D *PartSys = nullptr;
         const uint8_t hardness = 200; // collision hardness is fixed
@@ -101,6 +103,7 @@ public:
         #endif
 
         PartSys->update(); // update and render
+        return true;
     }
 
 private:

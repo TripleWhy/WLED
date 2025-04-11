@@ -19,8 +19,10 @@ public:
 
     explicit FreqmapEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         // Start frequency = 60 Hz and log10(60) = 1.78
         // End frequency = MAX_FREQUENCY in Hz and lo10(MAX_FREQUENCY) = MAX_FREQ_LOG10
@@ -44,6 +46,7 @@ public:
         uint8_t bright = (uint8_t)my_magnitude;
 
         buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), bright));
+        return true;
     }
 
 private:

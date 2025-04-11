@@ -22,8 +22,10 @@ public:
 
     explicit Particlefireworks1dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem1D *PartSys = nullptr;
         uint8_t *forcecounter;
@@ -125,6 +127,7 @@ public:
             if (PartSys->particles[i].ttl > 10) PartSys->particles[i].ttl -= 10; //ttl is linked to brightness, this allows to use higher brightness but still a short spark lifespan
             else PartSys->particles[i].ttl = 0;
         }
+        return true;
     }
 
 private:

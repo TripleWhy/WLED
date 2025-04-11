@@ -18,7 +18,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         scale = 15 + (SEGMENT.intensity >> 2); //default was 30
 
         unsigned changePaletteMs = 4000 + SEGMENT.speed *10; //between 4 - 6.5sec
@@ -42,6 +42,7 @@ public:
 
         // In the original effect, aux0 was 0 in the first frame, here it is incremented one frame earlier.
         aux0 += beatsin8_t(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

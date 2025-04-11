@@ -12,8 +12,10 @@ private:
 public:
     explicit SpotsEffectBase(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate, uint16_t threshold) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate, uint16_t threshold) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (!SEGMENT.check2)
             buffer.fill(SEGCOLOR(1));
@@ -36,6 +38,7 @@ public:
                 }
             }
         }
+        return true;
     }
 
 private:

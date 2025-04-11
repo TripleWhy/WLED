@@ -20,8 +20,10 @@ public:
 
     explicit PixelsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         um_data_t *um_data;
         if (!UsermodManager::getUMData(&um_data, USERMOD_ID_AUDIOREACTIVE)) {
@@ -37,6 +39,7 @@ public:
             unsigned segLoc = hw_random16(coordinate.width);                    // 16 bit for larger strands of LED's.
             buffer.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(myVals[i%32]+i*4, false, PALETTE_SOLID_WRAP, 0), uint8_t(volumeSmth)));
         }
+        return true;
     }
 
 private:

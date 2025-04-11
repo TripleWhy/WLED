@@ -17,7 +17,7 @@ public:
     // explicit RainEffect(const EffectInformation& ei) : Base{ei, false} {}
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const unsigned width  = coordinate.width;
         const unsigned height = coordinate.height;
         step += FRAMETIME;
@@ -39,7 +39,10 @@ public:
             if (oldSparkIndex >= width*height) oldSparkIndex = 0;
         }
 
-        Base::nextFrameImpl(coordinate);
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
+        return true;
     }
 };
 

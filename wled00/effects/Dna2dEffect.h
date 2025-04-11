@@ -20,8 +20,10 @@ public:
 
     explicit Dna2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -32,6 +34,7 @@ public:
             buffer.setPixelColor(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4+128), ColorFromPalette(SEGPALETTE, i*5+128+strip.now/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
         }
         buffer.blur(SEGMENT.intensity / (8 - (SEGMENT.check1 * 2)), SEGMENT.check1);
+        return true;
     }
 
 private:

@@ -22,8 +22,10 @@ public:
 
     explicit ParticlesparklerEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem1D *PartSys = nullptr;
         uint32_t numSparklers;
@@ -86,6 +88,7 @@ public:
             if (PartSys->particles[i].ttl > (64 - (SEGMENT.intensity >> 2))) PartSys->particles[i].ttl -= (64 - (SEGMENT.intensity >> 2)); //ttl is linked to brightness, this allows to use higher brightness but still a short spark lifespan
             else PartSys->particles[i].ttl = 0;
         }
+        return true;
     }
 
 private:

@@ -19,8 +19,10 @@ public:
 
     explicit PlasmoidEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         um_data_t *um_data = getAudioData();
         float   volumeSmth   = *(float*)  um_data->u_data[0];
@@ -42,6 +44,7 @@ public:
 
             buffer.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0), thisbright));
         }
+        return true;
     }
 
 private:

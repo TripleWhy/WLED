@@ -24,8 +24,10 @@ public:
 
     explicit ParticleattractorEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem2D *PartSys = nullptr;
         PSsettings2D sourcesettings;
@@ -113,6 +115,7 @@ public:
             PartSys->applyFriction(2);
         PartSys->particleMoveUpdate(PartSys->sources[0].source, PartSys->sources[0].sourceFlags, &sourcesettings); // move the source
         PartSys->update(); // update and render
+        return true;
     }
 
 private:

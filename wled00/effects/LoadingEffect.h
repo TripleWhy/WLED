@@ -20,8 +20,4 @@ public:
         : Base{ei, true}
     {
     }
-
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
-    }
 };

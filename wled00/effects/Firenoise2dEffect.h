@@ -20,8 +20,10 @@ public:
 
     explicit Firenoise2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -41,6 +43,7 @@ public:
                 buffer.setPixelColor(j, i, ColorFromPalette(pal, min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
             } // for i
         } // for j
+        return true;
     }
 
 private:

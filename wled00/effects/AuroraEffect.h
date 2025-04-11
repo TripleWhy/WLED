@@ -119,20 +119,19 @@ public:
 
     explicit AuroraEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         //Intensity slider changed or first call
         if(previousIntensity != SEGMENT.intensity || SEGENV.call == 0) {
             wavecount = map(SEGMENT.intensity, 0, 255, 2, W_MAX_COUNT);
             previousIntensity = SEGMENT.intensity;
 
-            waves.resize(wavecount);
-            if (waves.size() != wavecount) {
-                waves.clear();
-                return;
+            if (!resizeVector(waves, wavecount)) {
+                return false;
             }
-            waves.shrink_to_fit();
 
             for (int i = 0; i < wavecount; i++) {
                 waves[i].init(coordinate.width, CRGB(SEGMENT.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
@@ -169,6 +168,7 @@ public:
 
             buffer.setPixelColor(i, RGBW32(mixedRgb.r, mixedRgb.g, mixedRgb.b,0));
         }
+        return true;
     }
 
 private:

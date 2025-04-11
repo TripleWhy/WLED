@@ -20,8 +20,10 @@ public:
 
     explicit Hiphotic2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -32,6 +34,7 @@ public:
                 buffer.setPixelColor(x, y, SEGMENT.color_from_palette(sin8_t(cos8_t(x * SEGMENT.speed/16 + a / 3) + sin8_t(y * SEGMENT.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
             }
         }
+        return true;
     }
 
 private:

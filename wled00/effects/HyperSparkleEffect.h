@@ -19,8 +19,10 @@ public:
 
     explicit HyperSparkleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
         uint32_t it = strip.now / cycleTime;
@@ -42,6 +44,7 @@ public:
           flashTimestamp = strip.now;
           flashPauseDuration = 255-SEGMENT.speed;
         }
+        return true;
     }
 
 private:

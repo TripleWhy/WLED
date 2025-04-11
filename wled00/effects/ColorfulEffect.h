@@ -18,8 +18,10 @@ public:
 
     explicit ColorfulEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned numColors = 4; //3, 4, or 5
         uint32_t cols[9]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC};
@@ -56,6 +58,7 @@ public:
         {
             for (unsigned j = 0; j < numColors; j++) buffer.setPixelColor(i + j, cols[aux0 + j]);
         }
+        return true;
     }
 
 private:

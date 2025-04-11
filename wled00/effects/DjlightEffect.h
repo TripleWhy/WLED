@@ -18,8 +18,10 @@ public:
 
     explicit DjLightEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                          // Written by ??? Adapted by Will Tatam.
         // No need to prevent from executing on single led strips, only mid will be set (mid = 0)
         const int mid = coordinate.width / 2;
@@ -43,6 +45,7 @@ public:
             for (int i = coordinate.width - 1; i > mid; i--) buffer.setPixelColor(i, buffer.getPixelColor(i-1)); // move to the left
             for (int i = 0; i < mid; i++)                    buffer.setPixelColor(i, buffer.getPixelColor(i+1)); // move to the right
         }
+        return true;
     }
 
 private:

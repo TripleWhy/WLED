@@ -23,8 +23,10 @@ public:
 
     explicit ExplodingFireworksEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -37,10 +39,8 @@ public:
         int maxSparks = maxData / sizeof(Spark); //ESP8266: max. 21/42/85 sparks/seg, ESP32: max. 53/106/213 sparks/seg
 
         unsigned numSparks = min(5 + ((rows*cols) >> 1), maxSparks);
-        sparks.resize(numSparks);
-        if (sparks.size() != numSparks) {
-            sparks.clear();
-            return;
+        if (!resizeVector(sparks, numSparks)) {
+            return false;
         }
         sparks.shrink_to_fit();
 
@@ -150,6 +150,8 @@ public:
                 aux0 = 0; //back to flare
             }
         }
+
+        return false;
     }
 
 private:

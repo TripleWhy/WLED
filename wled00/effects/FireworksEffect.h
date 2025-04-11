@@ -19,8 +19,10 @@ public:
 
     explicit FireworksEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const uint16_t width  = SEGMENT.is2D() ? coordinate.width : coordinate.width;
         const uint16_t height = coordinate.height;
@@ -55,6 +57,7 @@ public:
                 sparkIndex = index;        // remember where spark occurred
             }
         }
+        return true;
     }
 
 protected:

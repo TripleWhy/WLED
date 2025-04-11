@@ -23,8 +23,10 @@ public:
 
     explicit ParticlepinballEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem1D *PartSys = nullptr;
 
@@ -123,6 +125,7 @@ public:
         }
 
         PartSys->update(); // update and render
+        return true;
     }
 
 private:

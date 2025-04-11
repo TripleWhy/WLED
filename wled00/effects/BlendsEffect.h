@@ -20,14 +20,11 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         pixelLen = coordinate.width > UINT8_MAX ? UINT8_MAX : coordinate.width;
-        pixels.resize(pixelLen);
-        if (pixels.size() != pixelLen) {
-            pixels.clear();
-            return;
+        if (!resizeVector(pixels, pixelLen)) {
+            return false;
         }
-        pixels.shrink_to_fit();
 
         uint8_t blendSpeed = map(SEGMENT.intensity, 0, UINT8_MAX, 10, 128);
         unsigned shift = (strip.now * ((SEGMENT.speed >> 3) +1)) >> 8;
@@ -36,6 +33,7 @@ public:
             pixels[i] = color_blend(pixels[i], SEGMENT.color_from_palette(shift + quadwave8((i + 1) * 16), false, PALETTE_SOLID_WRAP, 255), blendSpeed);
             shift += 3;
         }
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

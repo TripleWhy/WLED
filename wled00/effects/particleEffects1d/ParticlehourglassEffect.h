@@ -22,8 +22,10 @@ public:
 
     explicit ParticlehourglassEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem1D *PartSys = nullptr;
         constexpr int positionOffset = PS_P_RADIUS_1D / 2;; // resting position offset
@@ -148,6 +150,7 @@ public:
             aux1--; // countdown
 
         PartSys->update(); // update and render
+        return true;
     }
 
 private:

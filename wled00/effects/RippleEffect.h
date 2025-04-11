@@ -31,14 +31,14 @@ public:
 
     explicit RippleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned maxRipples = min(1 + (int)(coordinate.width >> 2), MAX_RIPPLES);  // 56 max for 16 segment ESP8266
-        ripples.resize(maxRipples);
-        if (ripples.size() != maxRipples) {
-            ripples.clear();
-            return;
+        if (!resizeVector(ripples, maxRipples)) {
+            return false;
         }
         ripples.shrink_to_fit();
 
@@ -87,6 +87,7 @@ public:
             }
         }
         buffer.blur(SEGMENT.custom1>>1);
+        return true;
     }
 
 private:

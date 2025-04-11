@@ -19,8 +19,10 @@ public:
 
     explicit ChunchunEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         buffer.fadeOut(254); // add a bit of trail
         unsigned counter = strip.now * (6 + (SEGMENT.speed >> 4));
@@ -35,6 +37,7 @@ public:
             bird = constrain(bird, 0U, coordinate.width-1U);
             buffer.setPixelColor(bird, SEGMENT.color_from_palette((i * 255)/ numBirds, false, false, 0)); // no palette wrapping
         }
+        return true;
     }
 
 private:

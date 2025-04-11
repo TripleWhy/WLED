@@ -18,12 +18,14 @@ public:
 
     explicit AndroidEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         // nextExecutionTimestamp rolls over before strip.now does
         if (strip.now < nextExecutionTimestamp) {
-            return;
+            return false;
         }
         nextExecutionTimestamp = strip.now + (3 + ((8 * (uint32_t)(255 - SEGMENT.speed)) / coordinate.width));
 
@@ -68,6 +70,7 @@ public:
             }
         }
         step = a;
+        return true;
     }
 
 private:

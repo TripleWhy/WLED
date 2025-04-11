@@ -19,7 +19,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
         it = strip.now / cycleTime;
 
@@ -32,6 +32,7 @@ public:
             flashTimestamp = strip.now;
             flashPauseDuration = 255-SEGMENT.speed;
         }
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

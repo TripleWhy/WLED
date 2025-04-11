@@ -18,13 +18,14 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
         uint32_t perc = strip.now % cycleTime;
         int prog = (perc * 65535) / cycleTime;
         size = 1 + ((SEGMENT.intensity * coordinate.width) >> 9);
         int ledIndex = (prog * ((coordinate.width *2) - size *2)) >> 16;
         led_offset = static_cast<unsigned>(std::abs(ledIndex - (static_cast<int>(coordinate.width) - static_cast<int>(size))));
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

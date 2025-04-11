@@ -20,8 +20,10 @@ public:
 
     explicit Pulser2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -33,6 +35,7 @@ public:
         buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
 
         buffer.blur(SEGMENT.intensity>>4);
+        return true;
     }
 
 private:

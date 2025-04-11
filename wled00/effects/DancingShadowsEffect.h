@@ -46,19 +46,18 @@ public:
 
     explicit DancingShadowsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned numSpotlights = map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
         bool initialize = previousSpotlightCount != numSpotlights;
         previousSpotlightCount = numSpotlights;
 
-        spotlights.resize(numSpotlights);
-        if (spotlights.size() != numSpotlights) {
-            spotlights.clear();
-            return;
+        if (!resizeVector(spotlights, numSpotlights)) {
+            return false;
         }
-        spotlights.shrink_to_fit();
 
         buffer.fill(BLACK);
 
@@ -161,6 +160,8 @@ public:
                 }
             }
         }
+
+        return true;
     }
 
 private:

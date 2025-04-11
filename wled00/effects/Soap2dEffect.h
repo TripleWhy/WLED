@@ -27,14 +27,16 @@ public:
 
     explicit Soap2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
         if (!resizeVector(noisePixels, coordinate.width * coordinate.height)) {
-            return;
+            return false;
         }
 
         const uint32_t scale32_x = 160000U/cols;
@@ -66,6 +68,7 @@ public:
 
         soapPixels(coordinate, true ); // rows
         soapPixels(coordinate, false); // cols
+        return true;
     }
 
 private:

@@ -20,19 +20,18 @@ public:
 
     explicit Geq2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int NUM_BANDS = map(SEGMENT.custom1, 0, 255, 1, 16);
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        previousBarHeight.resize(coordinate.width);
-        if (previousBarHeight.size() != coordinate.width) {
-            previousBarHeight.clear();
-            return;
+        if (!resizeVector(previousBarHeight, coordinate.width)) {
+            return false;
         }
-        previousBarHeight.shrink_to_fit();
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
@@ -69,6 +68,7 @@ public:
 
             if (rippleTime && previousBarHeight[x]>0) previousBarHeight[x]--;    //delay/ripple effect
         }
+        return true;
     }
 
 private:

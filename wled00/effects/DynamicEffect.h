@@ -19,13 +19,10 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        colorIndexes.resize(coordinate.width);
-        if (colorIndexes.size() != coordinate.width) {
-            colorIndexes.clear();
-            return;
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!resizeVector(colorIndexes, coordinate.width)) {
+            return false;
         }
-        colorIndexes.shrink_to_fit();
 
         if(SEGENV.call == 0) {
             for (unsigned i = 0; i < coordinate.width; i++) colorIndexes[i] = hw_random8();
@@ -40,6 +37,8 @@ public:
             }
             step = it;
         }
+
+        return false;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

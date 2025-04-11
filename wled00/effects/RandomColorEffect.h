@@ -19,7 +19,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         uint32_t cycleTime = 200 + (255 - SEGMENT.speed)*50;
         uint32_t it = strip.now / cycleTime;
         uint32_t rem = strip.now % cycleTime;
@@ -43,6 +43,7 @@ public:
         }
 
         color = color_blend(SEGMENT.color_wheel(previousColorWheelIndex), SEGMENT.color_wheel(colorWheelIndex), uint8_t(fade));
+        return true;
     }
 
     constexpr uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

@@ -18,8 +18,10 @@ public:
 
     explicit FreqmatrixEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                     // Freqmatrix. By Andreas Pleschung.
         // No need to prevent from executing on single led strips, we simply change pixel 0 each time and avoid the shift
         um_data_t *um_data = getAudioData();
@@ -63,6 +65,7 @@ public:
             // if coordinate.width equals 1 this loop won't execute
             for (int i = coordinate.width - 1; i > 0; i--) buffer.setPixelColor(i, buffer.getPixelColor(i-1)); //move to the left
         }
+        return true;
     }
 
 private:

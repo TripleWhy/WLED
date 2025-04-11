@@ -15,8 +15,10 @@ public:
 
     explicit TwinkleupEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                      // A very short twinkle routine with fade-in and dual controls. By Andrew Tuline.
         unsigned prevSeed = random16_get_seed();      // save seed so we can restore it at the end of the function
         random16_set_seed(535);                       // The randomizer needs to be re-set each time through the loop in order for the same 'random' numbers to be the same each time through.
@@ -29,6 +31,7 @@ public:
         }
 
         random16_set_seed(prevSeed); // restore original seed so other effects can use "random" PRNG
+        return true;
     }
 
 private:

@@ -19,8 +19,10 @@ public:
 
     explicit BlurzEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
@@ -42,6 +44,7 @@ public:
             step = 1;
             buffer.blur(SEGMENT.intensity); // note: blur > 210 results in a alternating pattern, this could be fixed by mapping but some may like it (very old bug)
         }
+        return true;
     }
 
 private:

@@ -18,8 +18,10 @@ public:
 
     explicit RocktavesEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                      // Rocktaves. Same note from each octave is same colour.    By: Andrew Tuline
         um_data_t *um_data = getAudioData();
         float   FFT_MajorPeak = *(float*)  um_data->u_data[4];
@@ -46,6 +48,7 @@ public:
         unsigned i = map(beatsin8_t(8+octCount*4, 0, 255, 0, octCount*8), 0, 255, 0, coordinate.width-1);
         i = constrain(i, 0U, coordinate.width-1U);
         buffer.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette((uint8_t)frTemp, false, PALETTE_SOLID_WRAP, 0), volTemp));
+        return true;
     }
 
 private:

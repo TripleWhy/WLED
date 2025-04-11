@@ -19,7 +19,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const bool animate = SEGMENT.check1;
         const bool theatre = SEGMENT.check3;
         width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
@@ -36,6 +36,7 @@ public:
             nextCounter = (nextCounter +1) % (theatre ? width : (width<<1));
             step = it;
         }
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

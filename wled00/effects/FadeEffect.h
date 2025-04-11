@@ -18,9 +18,10 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         unsigned counter = (strip.now * ((SEGMENT.speed >> 3) +10));
         lum = triwave16(counter) >> 8;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

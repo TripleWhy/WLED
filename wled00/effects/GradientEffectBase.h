@@ -21,7 +21,7 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         uint16_t counter = strip.now * ((SEGMENT.speed >> 2) + 1);
         pp = (counter * coordinate.width) >> 16;
         if (SEGENV.call == 0)
@@ -30,6 +30,7 @@ public:
         //if (brd < 1) brd = 1;
         p1 = pp-coordinate.width;
         p2 = pp+coordinate.width;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

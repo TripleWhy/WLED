@@ -18,8 +18,10 @@ public:
 
     explicit SinewaveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                              // Adjustable sinewave. By Andrew Tuline
         //#define qsuba(x, b)  ((x>b)?x-b:0)               // Analog Unsigned subtraction macro. if result <0, then => 0
 
@@ -33,6 +35,7 @@ public:
             //setPixCol(i, i*colorIndex/255, pixBri);
             buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
         }
+        return true;
     }
 
 private:

@@ -18,12 +18,14 @@ public:
 
     explicit FireFlickerEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t cycleTime = 40 + (255 - SEGMENT.speed);
         uint32_t it = strip.now / cycleTime;
-        if (step == it) return;
+        if (step == it) return true;
 
         byte w = (SEGCOLOR(0) >> 24);
         byte r = (SEGCOLOR(0) >> 16);
@@ -41,6 +43,7 @@ public:
         }
 
         step = it;
+        return true;
     }
 
 private:

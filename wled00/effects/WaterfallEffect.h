@@ -21,8 +21,10 @@ public:
 
     explicit WaterfallEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         um_data_t *um_data    = getAudioData();
         uint8_t samplePeak    = *(uint8_t*)um_data->u_data[3];
@@ -61,6 +63,7 @@ public:
                 buffer.setPixelColor(i, buffer.getPixelColor(i+1)); // shift left
             }
         }
+        return true;
     }
 
 private:

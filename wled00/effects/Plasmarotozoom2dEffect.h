@@ -21,12 +21,12 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
         if (!resizeVector(plasma, coordinate.width)) {
-            return;
+            return false;
         }
 
         unsigned ms = strip.now/15;
@@ -48,6 +48,7 @@ public:
         a -= 0.03f + float(SEGENV.speed-128)*0.0002f;  // rotation speed
         if(a < -6283.18530718f)
             a += 6283.18530718f; // 1000*2*PI, protect sin/cos from very large input float values (will give wrong results)
+        return true;
     }
 
     void nextRowImpl(const EffectCoordinate& coordinate) {

@@ -18,8 +18,10 @@ public:
 
     explicit RunningRandomEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed));
         uint32_t it = strip.now / cycleTime;
@@ -49,6 +51,7 @@ public:
         }
 
         aux1 = it;
+        return true;
     }
 
 private:

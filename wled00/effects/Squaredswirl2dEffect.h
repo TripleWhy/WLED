@@ -22,8 +22,10 @@ public:
 
     explicit Squaredswirl2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -44,6 +46,7 @@ public:
         buffer.addPixelColor(i, m, ColorFromPalette(SEGPALETTE, strip.now/29, 255, LINEARBLEND));
         buffer.addPixelColor(j, n, ColorFromPalette(SEGPALETTE, strip.now/41, 255, LINEARBLEND));
         buffer.addPixelColor(k, p, ColorFromPalette(SEGPALETTE, strip.now/73, 255, LINEARBLEND));
+        return true;
     }
 
 private:

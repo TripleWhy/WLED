@@ -16,14 +16,17 @@ public:
 
     explicit Noise164Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t stp = (strip.now * SEGMENT.speed) >> 7;
         for (unsigned i = 0; i < coordinate.width; i++) {
             int index = inoise16(uint32_t(i) << 12, stp);
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
+        return true;
     }
 
 private:

@@ -20,20 +20,19 @@ public:
 
     explicit Matrix2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
         const auto XY = [&](int x, int y) { return (x%cols) + (y%rows) * cols; };
 
         unsigned dataSize = (coordinate.width+7) >> 3; //1 bit per LED for trails
-        data.resize(dataSize);
-        if (data.size() != dataSize) {
-            data.clear();
-            return;
+        if (!resizeVector(data, dataSize)) {
+            return false;
         }
-        data.shrink_to_fit();
 
         if (SEGENV.call == 0) {
             buffer.fill(BLACK);
@@ -87,6 +86,7 @@ public:
                 bitSet(data[index], bitNum);
             }
         }
+        return true;
     }
 
 private:

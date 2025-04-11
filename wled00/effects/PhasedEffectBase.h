@@ -21,13 +21,14 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         allfreq = 16;                                          // Base frequency.
         cutOff = (255-SEGMENT.intensity);                      // You can change the number of pixels.  AKA INTENSITY (was 192).
         modVal = 5;//SEGMENT.fft1/8+1;                         // You can change the modulus. AKA FFT1 (was 5).
 
         index = strip.now/64;                                  // Set color rotation speed
         phase += SEGMENT.speed/32.0;                           // You can change the speed of the wave. AKA SPEED (was .4)
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

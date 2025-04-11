@@ -28,7 +28,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const unsigned maxWidth = strip.isMatrix ? coordinate.width : coordinate.width;
         const unsigned HALLOWEEN_EYE_SPACE = MAX(2, strip.isMatrix ? coordinate.width>>4: coordinate.width>>5);
         unsigned HALLOWEEN_EYE_WIDTH = HALLOWEEN_EYE_SPACE/2;
@@ -138,6 +138,7 @@ public:
             }
             startTime = strip.now;
         }
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

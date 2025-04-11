@@ -15,8 +15,10 @@ public:
 
     explicit Noise163Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned scale = 800;                                       // the "zoom factor" for the noise
         step += (1 + SEGMENT.speed);
@@ -32,6 +34,7 @@ public:
 
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, noise));
         }
+        return true;
     }
 
 private:

@@ -18,7 +18,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         unsigned var = 0;
         unsigned counter = (strip.now * ((SEGMENT.speed >> 3) +10)) & 0xFFFFU;
         counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
@@ -28,6 +28,7 @@ public:
         }
 
         lum = 30 + var;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

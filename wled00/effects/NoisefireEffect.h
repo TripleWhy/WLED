@@ -19,8 +19,10 @@ public:
 
     explicit NoisefireEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                      // Noisefire. By Andrew Tuline.
         CRGBPalette16 myPal = CRGBPalette16(CHSV(0,255,2),    CHSV(0,255,4),    CHSV(0,255,8), CHSV(0, 255, 8),  // Fire palette definition. Lower value = darker.
                                                                                 CHSV(0, 255, 16), CRGB::Red,        CRGB::Red,     CRGB::Red,
@@ -39,6 +41,7 @@ public:
 
             buffer.setPixelColor(i, ColorFromPalette(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
         }
+        return true;
     }
 
 private:

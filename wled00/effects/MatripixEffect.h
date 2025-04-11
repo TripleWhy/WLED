@@ -20,8 +20,10 @@ public:
 
     explicit MatripixEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         um_data_t *um_data = getAudioData();
         int volumeRaw    = *(int16_t*)um_data->u_data[1];
@@ -38,6 +40,7 @@ public:
             }
             buffer.setPixelColor(k, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0), pixBri));
         }
+        return true;
     }
 
 private:

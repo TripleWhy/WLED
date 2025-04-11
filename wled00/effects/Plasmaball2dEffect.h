@@ -20,8 +20,10 @@ public:
 
     explicit Plasmaball2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -48,6 +50,7 @@ public:
             }
         }
         buffer.blur(SEGMENT.custom2>>5);
+        return true;
     }
 
 private:

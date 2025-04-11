@@ -16,8 +16,8 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate, (255 - SEGMENT.speed) << 8);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        return Base::nextFrameImpl(coordinate, (255 - SEGMENT.speed) << 8);
     }
 
 private:

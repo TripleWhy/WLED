@@ -21,13 +21,15 @@ public:
 
     explicit MultiCometEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t cycleTime = 10 + (uint32_t)(255 - SEGMENT.speed);
         uint32_t it = strip.now / cycleTime;
         if (step == it)
-            return;
+            return true;
 
         buffer.fadeOut(SEGMENT.intensity/2 + 128);
 
@@ -50,6 +52,7 @@ public:
         }
 
         step = it;
+        return true;
     }
 
 private:

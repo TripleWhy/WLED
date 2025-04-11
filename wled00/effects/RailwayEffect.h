@@ -16,8 +16,10 @@ public:
 
     explicit RailwayEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned dur = (256 - SEGMENT.speed) * 40;
         uint16_t rampdur = (dur * SEGMENT.intensity) >> 8;
@@ -43,6 +45,7 @@ public:
             }
         }
         step += FRAMETIME;
+        return true;
     }
 
 private:

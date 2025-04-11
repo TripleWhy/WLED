@@ -37,8 +37,10 @@ public:
 
     explicit StarburstEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned maxData = FAIR_DATA_PER_SEG; //ESP8266: 256 ESP32: 640
         {
@@ -54,10 +56,8 @@ public:
         if (numStars > maxStars)
             numStars = maxStars;
 
-        stars.resize(numStars);
-        if (stars.size() != numStars) {
-            stars.clear();
-            return;
+        if (!resizeVector(stars, numStars)) {
+            return false;
         }
         stars.shrink_to_fit();
 
@@ -159,6 +159,7 @@ public:
                 }
             }
         }
+        return true;
     }
 
 private:

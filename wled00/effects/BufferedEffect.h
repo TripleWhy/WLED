@@ -524,12 +524,9 @@ protected:
         const unsigned height = Segment::getEffectHeight<dimensionality>();
         const size_t length = width * height;
 
-        buffer.pixels.resize(length); // don't initialize the buffer with specific values
-        if (buffer.pixels.size() != length) {
-            buffer.pixels.clear();
+        if (!resizeVector(buffer.pixels, length)) {
             return;
         }
-        buffer.pixels.shrink_to_fit();
 
         for (unsigned y = 0u; y < height; ++y) {
             for (unsigned x = 0u; x < width; ++x) {
@@ -539,14 +536,8 @@ protected:
     }
 
 public:
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        const size_t length = coordinate.width * coordinate.height;
-        buffer.pixels.resize(length, 0u);
-        if (buffer.pixels.size() != length) {
-            buffer.pixels.clear();
-            return;
-        }
-        buffer.pixels.shrink_to_fit();
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        return resizeVector(buffer.pixels, coordinate.width * coordinate.height);
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

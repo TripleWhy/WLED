@@ -27,13 +27,13 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const int cols = coordinate.width;
         const int rows = coordinate.height;
         const uint8_t mapp = 180 / MAX(cols,rows);
 
         if (!resizeVector(rMap, coordinate.width * coordinate.height)) {
-            return;
+            return false;
         }
 
         // re-init if SEGMENT dimensions or offset changed
@@ -57,6 +57,7 @@ public:
         }
 
         step += SEGMENT.speed / 32 + 1;  // 1-4 range
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

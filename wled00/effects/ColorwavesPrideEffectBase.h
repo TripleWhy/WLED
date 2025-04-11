@@ -19,7 +19,7 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         unsigned duration = 10 + SEGMENT.speed;
 
         uint8_t sat8 = isPride2015 ? beatsin88_t(87, 220, 250) : 255;
@@ -59,6 +59,7 @@ public:
                 buffer.blendPixelColor(i, SEGMENT.color_from_palette(hue8, false, PALETTE_SOLID_WRAP, 0, bri8), 128);
             }
         }
+        return true;
     }
 
 private:

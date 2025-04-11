@@ -21,7 +21,7 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate, SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0));
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        return Base::nextFrameImpl(coordinate, SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0));
     }
 };

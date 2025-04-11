@@ -18,8 +18,10 @@ public:
 
     explicit LarsonScannerEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
 
         const unsigned speed  = FRAMETIME * map(SEGMENT.speed, 0, 255, 96, 2); // map into useful range
@@ -27,13 +29,13 @@ public:
 
         buffer.fadeOut(255-SEGMENT.intensity);
 
-        if (step > strip.now) return;  // we have a pause
+        if (step > strip.now) return true;  // we have a pause
 
         unsigned index = aux1 + pixels;
         // are we slow enough to use frames per pixel?
         if (pixels == 0) {
             const unsigned frames = speed / coordinate.width; // how many frames per 1 pixel
-            if (step++ < frames) return;
+            if (step++ < frames) return true;
             step = 0;
             index++;
         }
@@ -62,6 +64,7 @@ public:
             }
             aux1 = index;
         }
+        return true;
     }
 
 private:

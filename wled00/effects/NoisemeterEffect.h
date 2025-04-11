@@ -18,8 +18,10 @@ public:
 
     explicit NoisemeterEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                     // Noisemeter. By Andrew Tuline.
 
         um_data_t *um_data = getAudioData();
@@ -42,6 +44,7 @@ public:
 
         aux0+=beatsin8_t(5,0,10);
         aux1+=beatsin8_t(4,0,10);
+        return true;
     }
 
 private:

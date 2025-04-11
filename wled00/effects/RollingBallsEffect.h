@@ -31,8 +31,10 @@ public:
 
     explicit RollingBallsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         // number of balls based on intensity setting to max of 16 (cycles colors)
         // non-chosen color is a random color
@@ -108,6 +110,7 @@ public:
             balls[i].lastBounceUpdate = strip.now;
             balls[i].height = thisHeight;
         }
+        return true;
     }
 
 private:

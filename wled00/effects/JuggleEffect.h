@@ -16,8 +16,10 @@ public:
 
     explicit JuggleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         buffer.fadeToBlackBy(192 - (3*SEGMENT.intensity/4));
         CRGB fastled_col;
@@ -29,6 +31,7 @@ public:
             buffer.setPixelColor(index, RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0));
             dothue += 32;
         }
+        return true;
     }
 
 private:

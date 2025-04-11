@@ -20,8 +20,10 @@ public:
 
     explicit Frizzles2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
 
         const int cols = coordinate.width;
@@ -34,6 +36,7 @@ public:
                                                             ColorFromPalette(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
         }
         buffer.blur(SEGMENT.custom1 >> (3 + SEGMENT.check1), SEGMENT.check1);
+        return true;
     }
 
 private:

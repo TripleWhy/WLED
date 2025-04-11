@@ -18,8 +18,10 @@ public:
 
     explicit FlowEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned counter = 0;
         if (SEGMENT.speed != 0)
@@ -48,6 +50,7 @@ public:
                 buffer.setPixelColor(pos + led, SEGMENT.color_from_palette(colorIndex, false, true, 255));
             }
         }
+        return true;
     }
 
 private:

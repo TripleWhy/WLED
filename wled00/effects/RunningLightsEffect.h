@@ -19,9 +19,10 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         x_scale = SEGMENT.intensity >> 2;
         counter = (strip.now * SEGMENT.speed) >> 9;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

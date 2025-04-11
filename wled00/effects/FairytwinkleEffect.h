@@ -20,19 +20,17 @@ private:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        flashers.resize(coordinate.width);
-        if (flashers.size() != coordinate.width) {
-            flashers.clear();
-            return;
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!resizeVector(flashers, coordinate.width)) {
+            return false;
         }
-        flashers.shrink_to_fit();
 
         now16 = strip.now & 0xFFFF;
         PRNG16 = 5100 + strip.getCurrSegmentId();
 
         riseFallTime = 400 + (255-SEGMENT.speed)*3;
         maxDur = riseFallTime/100 + ((255 - SEGMENT.intensity) >> 2) + 13 + ((255 - SEGMENT.intensity) >> 1);
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

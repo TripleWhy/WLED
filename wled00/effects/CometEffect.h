@@ -18,8 +18,10 @@ public:
 
     explicit CometEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned counter = (strip.now * ((SEGMENT.speed >>2) +1)) & 0xFFFF;
         unsigned index = (counter * coordinate.width) >> 16;
@@ -38,6 +40,7 @@ public:
             }
         }
         aux0 = index++;
+        return true;
     }
 
 private:

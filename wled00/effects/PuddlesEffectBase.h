@@ -20,8 +20,10 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned size = 0;
         uint8_t fadeVal = map(SEGMENT.speed, 0, 255, 224, 254);
@@ -53,6 +55,7 @@ public:
         for (unsigned i=0; i<size; i++) {                           // Flash the LED's.
             buffer.setPixelColor(pos+i, SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
         }
+        return true;
     }
 
 private:

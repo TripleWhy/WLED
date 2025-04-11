@@ -18,8 +18,10 @@ public:
 
     explicit TwoDotsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned delay = 1 + (FRAMETIME<<3) / coordinate.width;  // longer segments should change faster
         uint32_t it = strip.now / map(SEGMENT.speed, 0, 255, delay<<4, delay);
@@ -35,6 +37,7 @@ public:
             buffer.setPixelColor(indexR, color1);
             buffer.setPixelColor(indexB, color2);
         }
+        return true;
     }
 
 private:

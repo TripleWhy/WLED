@@ -20,7 +20,7 @@ enum class EffectDimensionality : uint8_t {
 // Kinda emulates a v-table without needing an actual v-table.
 struct EffectInformation {
     using MakeEffectFunction    = SegmentAllocator<Effect>::unique_ptr (*)();
-    using NextFrameFunction     = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
+    using NextFrameFunction     = bool     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using NextRowFunction       = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
     using GetPixelColorFunction = uint32_t (*)(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor);
 
@@ -44,8 +44,8 @@ public:
     constexpr EffectDimensionality getDimensionality() const {
         return info.dimensionality;
     }
-    constexpr void nextFrame(const EffectCoordinate& coordinate) {
-        info.nextFrame(this, coordinate);
+    constexpr bool nextFrame(const EffectCoordinate& coordinate) {
+        return info.nextFrame(this, coordinate);
     }
     constexpr void nextRow(const EffectCoordinate& coordinate) {
         info.nextRow(this, coordinate);
@@ -98,8 +98,8 @@ public:
         return SegmentAllocator<Effect>::unique_ptr(static_cast<Effect*>(t.release()));
     }
 
-    static void nextFrame(Effect* effect, const EffectCoordinate& coordinate) {
-        static_cast<T*>(effect)->nextFrameImpl(coordinate);
+    static bool nextFrame(Effect* effect, const EffectCoordinate& coordinate) {
+        return static_cast<T*>(effect)->nextFrameImpl(coordinate);
     }
 
     static void nextRow(Effect* effect, const EffectCoordinate& coordinate) {

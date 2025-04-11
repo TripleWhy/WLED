@@ -23,8 +23,10 @@ public:
 
     explicit RandomChaseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (SEGENV.call == 0) {
             step = RGBW32(random8(), random8(), random8(), 0);
@@ -52,6 +54,7 @@ public:
         aux1 = it & 0xFFFF;
 
         random16_set_seed(prevSeed); // restore original seed so other effects can use "random" PRNG
+        return true;
     }
 
 private:

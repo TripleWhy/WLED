@@ -15,8 +15,10 @@ public:
 
     explicit TriStaticPatternEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned segSize = (SEGMENT.intensity >> 5) +1;
         unsigned currSeg = 0;
@@ -36,6 +38,7 @@ public:
                 currSegCount = 0;
             }
         }
+        return true;
     }
 
 private:

@@ -19,8 +19,10 @@ public:
 
     explicit PixelwaveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (SEGENV.call == 0) {
             buffer.fill(BLACK);
@@ -39,6 +41,7 @@ public:
             for (unsigned i = coordinate.width - 1; i > coordinate.width/2; i--) buffer.setPixelColor(i, buffer.getPixelColor(i-1)); //move to the left
             for (unsigned i = 0; i < coordinate.width/2; i++)          buffer.setPixelColor(i, buffer.getPixelColor(i+1)); // move to the right
         }
+        return true;
     }
 
 private:

@@ -23,8 +23,10 @@ public:
 
     explicit ParticlewaterfallEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem2D *PartSys = nullptr;
         uint8_t numSprays;
@@ -88,6 +90,7 @@ public:
             PartSys->applyFriction(1); // add just a tiny amount of friction to help smooth things
 
         PartSys->update();   // update and render
+        return true;
     }
 
 private:

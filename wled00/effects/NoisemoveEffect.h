@@ -18,8 +18,10 @@ public:
 
     explicit NoisemoveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                      // Noisemove.    By: Andrew Tuline
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
@@ -34,6 +36,7 @@ public:
             locn = map(locn, 7500, 58000, 0, coordinate.width-1);           // Map that to the length of the strand, and ensure we don't go over.
             buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i*64, false, PALETTE_SOLID_WRAP, 0), uint8_t(fftResult[i % 16]*4)));
         }
+        return true;
     }
 
 private:

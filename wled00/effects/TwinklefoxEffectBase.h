@@ -22,7 +22,7 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         // "PRNG16" is the pseudorandom number generator
         // It MUST be reset to the same starting value each time
         // this function is called, so that the sequence of 'random'
@@ -45,6 +45,7 @@ public:
         }
 
         backgroundBrightness = bg.getAverageLight();
+        return true;
     }
 
 

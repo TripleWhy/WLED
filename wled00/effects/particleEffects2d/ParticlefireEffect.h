@@ -23,8 +23,10 @@ public:
 
     explicit ParticlefireEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem2D *PartSys = nullptr;
         uint32_t i; // index variable
@@ -106,6 +108,7 @@ public:
         }
 
         PartSys->updateFire(SEGMENT.intensity, false); // update and render the fire
+        return true;
     }
 
 private:

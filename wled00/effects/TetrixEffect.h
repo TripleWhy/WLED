@@ -28,18 +28,18 @@ public:
 
     explicit TetrixEffect(const EffectInformation& ei) : Base{ei, true} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-      Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+      if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
-      drops.resize(coordinate.height);
-      if (drops.size() != coordinate.height) {
-        drops.clear();
-        return;
+      if (!resizeVector(drops, coordinate.height)) {
+          return false;
       }
-      drops.shrink_to_fit();
 
       for (unsigned y=0; y < coordinate.height; ++y)
-        runStrip(y, coordinate.width, &drops[y]);
+          runStrip(y, coordinate.width, &drops[y]);
+      return true;
     }
 
 private:

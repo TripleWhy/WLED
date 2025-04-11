@@ -1417,7 +1417,9 @@ inline void serviceLoop(Segment &seg, Effect* const effect) {
   const unsigned h = Segment::getEffectHeight<dimensionality>();
   EffectCoordinate coordinate{w, h};
 
-  effect->nextFrame(coordinate);
+  if (!effect->nextFrame(coordinate)) {
+    return;
+  }
 
   for (unsigned y = 0u; y < h; y++) {
     coordinate.setYAbsolute(y);

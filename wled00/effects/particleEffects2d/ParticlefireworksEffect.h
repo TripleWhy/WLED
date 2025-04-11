@@ -25,8 +25,10 @@ public:
 
     explicit ParticlefireworksEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem2D *PartSys = nullptr;
         uint32_t numRockets;
@@ -159,6 +161,7 @@ public:
             }
         }
         PartSys->update(); // update and render
+        return true;
     }
 
 private:

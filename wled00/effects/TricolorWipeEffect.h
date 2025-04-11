@@ -18,8 +18,10 @@ public:
 
     explicit TricolorWipeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t cycleTime = 1000 + (255 - SEGMENT.speed)*200;
         uint32_t perc = strip.now % cycleTime;
@@ -51,6 +53,7 @@ public:
                 buffer.setPixelColor(i, SEGCOLOR(0));
             }
         }
+        return true;
     }
 
 private:

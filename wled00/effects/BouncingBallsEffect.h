@@ -24,7 +24,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         numBalls = (SEGMENT.intensity * (maxNumBalls - 1)) / 255 + 1; // minimum 1 ball
         strips = std::min(static_cast<unsigned>(SEGMENT.custom3), coordinate.height);
         useBackgroundColor = !SEGMENT.check2;
@@ -43,16 +43,14 @@ public:
             }
         }
 
-        const size_t ballsVectorSize = maxNumBalls * strips; //TODO reduce to actual ball count instead of max ball count?
-        balls.resize(ballsVectorSize);
-        if (balls.size() != ballsVectorSize) {
-            balls.clear();
-            return;
+        if (!resizeVector(balls, maxNumBalls * strips)) { //TODO reduce to actual ball count instead of max ball count?
+            return false;
         }
-        balls.shrink_to_fit();
 
         for (unsigned stripNr = 0; stripNr < strips; ++stripNr)
             runVirtualStrip(stripNr, coordinate.width, &balls[stripNr * maxNumBalls]);
+
+        return true;
     }
 
     void nextRowImpl(const EffectCoordinate& coordinate) {

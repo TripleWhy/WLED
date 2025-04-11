@@ -29,7 +29,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (SEGENV.call == 0)
         {
             oscillators[0] = {(uint16_t)(coordinate.width/4),   (uint8_t)(coordinate.width/8),  1, 1};
@@ -58,6 +58,7 @@ public:
         }
 
         step = it;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

@@ -18,8 +18,10 @@ public:
 
     explicit TrafficLightEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         for (unsigned i=0; i < coordinate.width; i++)
             buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
@@ -42,6 +44,7 @@ public:
             if (aux0 > 3) aux0 = 0;
             step = strip.now;
         }
+        return true;
     }
 
 private:

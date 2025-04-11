@@ -20,10 +20,11 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         hl = coordinate.width * 10 / 13;
         hue = strip.now / (SEGMENT.speed+1);
         t = strip.now / (SEGMENT.intensity/8+1);
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

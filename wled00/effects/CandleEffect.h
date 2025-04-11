@@ -19,18 +19,16 @@ public:
 
     explicit CandleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         bool multi = SEGMENT.check3 && coordinate.width;
         if (multi) {
             const unsigned dataSize = max(1, (int)coordinate.width -1) *3; //max. 1365 pixels (ESP8266)
-            data.resize(dataSize);
-            if (data.size() != dataSize) {
-                data.clear();
+            if (!resizeVector(data, dataSize)) {
                 multi = false;
-            } else {
-                data.shrink_to_fit();
             }
         }
 
@@ -96,6 +94,8 @@ public:
                 aux0 = s; aux1 = s_target; step = fadeStep;
             }
         }
+
+        return true;
     }
 
 private:

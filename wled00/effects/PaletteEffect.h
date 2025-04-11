@@ -39,7 +39,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const bool isMatrix = strip.isMatrix;
         const int cols = SEG_W;
         const int rows = isMatrix ? SEG_H : strip.getActiveSegmentsNum();
@@ -68,6 +68,7 @@ public:
         // This scale computation here only considers one dimension. You can think of it like the rectangle is always scaled so that
         // the left and right most points always match the left and right side of the display.
         scale = std::abs(sinTheta) + (std::abs(cosTheta) * maxYOut / maxXOut);
+        return true;
     }
 
     constexpr void nextRowImpl(const EffectCoordinate& coordinate) {

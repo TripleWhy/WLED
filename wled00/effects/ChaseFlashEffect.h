@@ -19,12 +19,14 @@ public:
 
     explicit ChaseFlashEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         // nextExecutionTimestamp rolls over before strip.now does
         if (strip.now < nextExecutionTimestamp) {
-            return;
+            return true;
         }
 
         unsigned flash_step = SEGENV.call % ((FLASH_COUNT * 2) + 1);
@@ -52,6 +54,7 @@ public:
             step = (step + 1) % coordinate.width;
         }
         nextExecutionTimestamp = strip.now + delay;
+        return true;
     }
 
 private:

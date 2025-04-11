@@ -29,8 +29,10 @@ public:
 
     explicit PopcornEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         //allocate segment data
         unsigned strips = coordinate.height;
@@ -38,12 +40,9 @@ public:
         if (usablePopcorns * strips * sizeof(Spark) > FAIR_DATA_PER_SEG)
             usablePopcorns = FAIR_DATA_PER_SEG / (strips * sizeof(Spark)) + 1; // at least 1 popcorn per vstrip
 
-        popcorn.resize(usablePopcorns); // on a matrix 64x64 this could consume a little less than 27kB when Bar expansion is used
-        if (popcorn.size() != usablePopcorns) {
-            popcorn.clear();
-            return;
+        if (!resizeVector(popcorn, usablePopcorns)) { // on a matrix 64x64 this could consume a little less than 27kB when Bar expansion is used
+            return false;
         }
-        popcorn.shrink_to_fit();
 
         bool hasCol2 = SEGCOLOR(2);
         if (!SEGMENT.check2)
@@ -51,6 +50,7 @@ public:
 
         for (unsigned stripNr=0; stripNr<strips; stripNr++)
             runStrip(coordinate, stripNr, &popcorn[stripNr * usablePopcorns], usablePopcorns);
+        return true;
     }
 
 private:

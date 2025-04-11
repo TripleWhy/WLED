@@ -18,8 +18,10 @@ public:
 
     explicit SinelonEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const bool rainbow = SEGMENT.check1;
         const bool dual    = SEGMENT.check2;
@@ -51,6 +53,7 @@ public:
             }
             aux0 = pos;
         }
+        return true;
     }
 
 private:

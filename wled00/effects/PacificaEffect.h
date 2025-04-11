@@ -38,8 +38,10 @@ public:
 
     explicit PacificaEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t nowOld = strip.now;
 
@@ -111,6 +113,7 @@ public:
         }
 
         strip.now = nowOld;
+        return true;
     }
 
 private:

@@ -16,8 +16,10 @@ public:
 
     explicit LakeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned sp = SEGMENT.speed/10;
         int wave1 = beatsin8_t(sp +2, -64,64);
@@ -30,6 +32,7 @@ public:
             uint8_t lum = (index > wave3) ? index - wave3 : 0;
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, false, 0, lum));
         }
+        return true;
     }
 
 private:

@@ -19,9 +19,10 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         speed = tristate_square8(strip.now >> 7, 90, 15);
         step += (speed * 2048) / (512 - SEGMENT.speed);
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

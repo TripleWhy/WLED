@@ -16,16 +16,15 @@ public:
 
     explicit ColortwinkleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned dataSize = (coordinate.width+7) >> 3; //1 bit per LED
-        data.resize(dataSize);
-        if (data.size() != dataSize) {
-            data.clear();
-            return;
+        if (!resizeVector(data, dataSize)) {
+            return false;
         }
-        data.shrink_to_fit();
 
         CRGBW col, prev;
         fract8 fadeUpAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-strip.getBrightness();
@@ -71,6 +70,8 @@ public:
                 }
             }
         }
+
+        return true;
     }
 
 private:

@@ -23,7 +23,7 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
         uint32_t perc = strip.now % cycleTime;
         unsigned prog = (perc * 65535) / cycleTime;
@@ -64,6 +64,7 @@ public:
         rem = (prog * coordinate.width) * 2; //mod 0xFFFF
         rem /= (SEGMENT.intensity +1);
         if (rem > 255) rem = 255;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

@@ -15,8 +15,10 @@ public:
 
     explicit Fillnoise8Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (SEGENV.call == 0) step = hw_random();
         for (unsigned i = 0; i < coordinate.width; i++) {
@@ -24,6 +26,7 @@ public:
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
         step += beatsin8_t(SEGMENT.speed, 1, 6); //10,1,4
+        return true;
     }
 
 private:

@@ -23,7 +23,7 @@ public:
     {
     }
 
-    void nextFrameImpl(uint32_t color1, uint32_t color2) {
+    bool nextFrameImpl(uint32_t color1, uint32_t color2) {
         uint32_t cycleTime = (255 - SEGMENT.speed)*20;
         uint32_t onTime = FRAMETIME;
         if (!strobe) onTime += ((cycleTime * SEGMENT.intensity) >> 8);
@@ -41,6 +41,7 @@ public:
 
         color = on ? color1 : color2;
         usePalette = (do_palette && (color == color1));
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

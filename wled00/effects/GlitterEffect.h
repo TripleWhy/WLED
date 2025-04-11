@@ -16,8 +16,10 @@ public:
 
     explicit GlitterEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (!SEGMENT.check2) { // use "* Color 1" palette for solid background (replacing "Solid glitter")
             unsigned counter = 0;
@@ -32,6 +34,7 @@ public:
             }
         }
         if (SEGMENT.intensity > hw_random8()) buffer.setPixelColor(hw_random16(coordinate.width), SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);
+        return true;
     }
 
 private:

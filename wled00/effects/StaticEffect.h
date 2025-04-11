@@ -15,7 +15,8 @@ public:
 
     using Base::Base;
 
-    constexpr void nextFrameImpl(const EffectCoordinate& coordinate) {
+    constexpr bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

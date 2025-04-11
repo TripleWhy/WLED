@@ -43,17 +43,16 @@ public:
 
     explicit Fire2012Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const unsigned strips = coordinate.height;
         const unsigned heatSize = strips * coordinate.width;
-        heat.resize(heatSize);
-        if (heat.size() != heatSize) {
-            heat.clear();
-            return;
+        if (!resizeVector(heat, heatSize)) {
+            return false;
         }
-        heat.shrink_to_fit();
 
         const uint32_t it = strip.now >> 5; //div 32
 
@@ -69,6 +68,7 @@ public:
 
         if (it != step)
             step = it;
+        return true;
     }
 
 private:

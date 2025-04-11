@@ -19,8 +19,10 @@ public:
 
     explicit PercentEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
 
         unsigned percent = SEGMENT.intensity;
@@ -65,6 +67,7 @@ public:
             if (aux1 > size) aux1 -= size; else aux1 = 0;
             if (aux1 < active_leds) aux1 = active_leds;
         }
+        return true;
     }
 
 private:

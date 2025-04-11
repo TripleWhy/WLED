@@ -21,7 +21,7 @@ public:
 
     using Base::Base;
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
         int nr, ng, nb, r, g, b, i, hue;
         uint8_t  sat, bri, j;
 
@@ -112,6 +112,7 @@ public:
         }
 
         color = RGBW32(r >> 8, g >> 8, b >> 8, 0);  // Quantize to 8-bit
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

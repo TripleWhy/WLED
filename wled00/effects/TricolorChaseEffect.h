@@ -18,8 +18,10 @@ public:
 
     explicit TricolorChaseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t cycleTime = 50 + ((255 - SEGMENT.speed)<<1);
         uint32_t it = strip.now / cycleTime;  // iterator
@@ -35,6 +37,7 @@ public:
 
             buffer.setPixelColor(coordinate.width - i -1, color);
         }
+        return true;
     }
 
 private:

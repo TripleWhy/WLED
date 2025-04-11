@@ -16,8 +16,10 @@ public:
 
     explicit LightningEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned ledstart = hw_random16(coordinate.width);               // Determine starting location of flash
         unsigned ledlen = 1 + hw_random16(coordinate.width -ledstart);   // Determine length of flash (not to go beyond NUM_LEDS-1)
@@ -55,6 +57,7 @@ public:
                 step = strip.now;
             }
         }
+        return true;
     }
 
 private:

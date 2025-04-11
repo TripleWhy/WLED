@@ -20,8 +20,10 @@ public:
 
     explicit Sindots2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -40,6 +42,7 @@ public:
             buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
         }
         buffer.blur(SEGMENT.custom2 >> (3 + SEGMENT.check1), SEGMENT.check1);
+        return true;
     }
 
 private:

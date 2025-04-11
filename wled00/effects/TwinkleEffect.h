@@ -20,8 +20,10 @@ public:
 
     explicit TwinkleEffect(const EffectInformation& ei) : Base{ei, true} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         buffer.fadeOut(224);
 
@@ -46,6 +48,7 @@ public:
             unsigned j = p >> 16;
             buffer.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
         }
+        return true;
     }
 
 private:

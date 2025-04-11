@@ -18,8 +18,10 @@ public:
 
     explicit SunriseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         //speed 0 - static sun
         //speed 1 - 60: sunrise time in minutes
@@ -61,6 +63,7 @@ public:
             buffer.setPixelColor(i, c);
             buffer.setPixelColor(coordinate.width - i - 1, c);
         }
+        return true;
     }
 
 private:

@@ -19,8 +19,10 @@ public:
 
     explicit DissolveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const uint32_t color = SEGMENT.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0);
 
@@ -54,6 +56,7 @@ public:
         } else {
             step++;
         }
+        return true;
     }
 
 private:

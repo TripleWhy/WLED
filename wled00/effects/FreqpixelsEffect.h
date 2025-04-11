@@ -22,8 +22,10 @@ public:
 
     explicit FreqpixelsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
                                     // Freqpixel. By Andrew Tuline.
         um_data_t *um_data = getAudioData();
         float FFT_MajorPeak = *(float*)um_data->u_data[4];
@@ -45,6 +47,7 @@ public:
             unsigned locn = hw_random16(0,coordinate.width);
             buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
         }
+        return true;
     }
 
 private:

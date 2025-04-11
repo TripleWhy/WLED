@@ -18,15 +18,14 @@ public:
 
     explicit MeteorEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
-
-        trail.resize(coordinate.width);
-        if (trail.size() != coordinate.width) {
-            trail.clear();
-            return;
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
         }
-        trail.shrink_to_fit();
+
+        if (!resizeVector(trail, coordinate.width)) {
+            return false;
+        }
 
         const bool meteorSmooth = SEGMENT.check3;
         const unsigned meteorSize = 1 + coordinate.width / 20; // 5%
@@ -86,6 +85,7 @@ public:
         }
 
         step += SEGMENT.speed +1;
+        return true;
     }
 
 private:

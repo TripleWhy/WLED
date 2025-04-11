@@ -20,8 +20,10 @@ public:
 
     explicit Drift2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
@@ -41,6 +43,7 @@ public:
             if (SEGMENT.check1) buffer.setPixelColor(colsCenter + myCos, rowsCenter + mySin, ColorFromPalette(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
         }
         buffer.blur(SEGMENT.intensity>>(3 - SEGMENT.check2), SEGMENT.check2);
+        return true;
     }
 
 private:

@@ -19,8 +19,10 @@ public:
 
     explicit MidnoiseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         um_data_t *um_data = getAudioData();
         float   volumeSmth   = *(float*)  um_data->u_data[0];
@@ -41,6 +43,7 @@ public:
 
         xdist=xdist+beatsin8_t(5,0,10);
         ydist=ydist+beatsin8_t(4,0,10);
+        return true;
     }
 
 private:

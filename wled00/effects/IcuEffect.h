@@ -18,12 +18,14 @@ public:
 
     explicit IcuEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         // nextExecutionTimestamp rolls over before strip.now does
         if (strip.now < nextExecutionTimestamp) {
-            return;
+            return true;
         }
 
         unsigned dest = step & 0xFFFF;
@@ -42,11 +44,11 @@ public:
                 buffer.setPixelColor(dest, SEGCOLOR(1));
                 buffer.setPixelColor(dest + coordinate.width/space, SEGCOLOR(1));
                 nextExecutionTimestamp = strip.now + 200;
-                return;
+                return true;
             }
             aux0 = hw_random16(coordinate.width-coordinate.width/space);
             nextExecutionTimestamp = strip.now + 1000 + hw_random16(2000);
-            return;
+            return true;
         }
 
         if(aux0 > step) {
@@ -61,6 +63,7 @@ public:
         buffer.setPixelColor(dest + coordinate.width/space, col);
 
         nextExecutionTimestamp = strip.now + SPEED_FORMULA_L;
+        return true;
     }
 
 private:

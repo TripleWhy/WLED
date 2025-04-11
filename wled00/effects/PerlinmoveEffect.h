@@ -22,8 +22,10 @@ public:
 
     explicit PerlinmoveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         buffer.fadeOut(255-SEGMENT.custom1);
         for (int i = 0; i < SEGMENT.intensity/16 + 1; i++) {
@@ -31,6 +33,7 @@ public:
             unsigned pixloc = map(locn, 50*256, 192*256, 0, coordinate.width-1);                                            // Map that to the length of the strand, and ensure we don't go over.
             buffer.setPixelColor(pixloc, SEGMENT.color_from_palette(pixloc%255, false, PALETTE_SOLID_WRAP, 0));
         }
+        return true;
     }
 
 private:

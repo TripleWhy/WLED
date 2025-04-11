@@ -23,7 +23,7 @@ public:
     {
     }
 
-    void nextFrameImpl(const EffectCoordinate& coordinate, uint32_t c1, uint32_t c2, uint32_t c3) {
+    bool nextFrameImpl(const EffectCoordinate& coordinate, uint32_t c1, uint32_t c2, uint32_t c3) {
         color1 = c1;
         color2 = c2;
         color3 = c3;
@@ -48,6 +48,7 @@ public:
         if (b > coordinate.width) b -= coordinate.width;
         uint16_t c = b + size;
         if (c > coordinate.width) c -= coordinate.width;
+        return true;
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

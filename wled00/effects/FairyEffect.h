@@ -30,8 +30,10 @@ public:
 
     explicit FairyEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         //set every pixel to a 'random' color from palette (using seed so it doesn't change between frames)
         uint16_t PRNG16 = 5100 + strip.getCurrSegmentId();
@@ -41,16 +43,13 @@ public:
         }
 
         //amount of flasher pixels depending on intensity (0: none, 255: every LED)
-        if (SEGMENT.intensity == 0) return;
+        if (SEGMENT.intensity == 0) return true;
         unsigned flasherDistance = ((255 - SEGMENT.intensity) / 28) +1; //1-10
         unsigned numFlashers = (coordinate.width / flasherDistance) +1;
 
-        flashers.resize(numFlashers);
-        if (flashers.size() != numFlashers) {
-            flashers.clear();
-            return;
+        if (!resizeVector(flashers, numFlashers)) {
+            return false;
         }
-        flashers.shrink_to_fit();
 
         unsigned now16 = strip.now & 0xFFFF;
 
@@ -105,6 +104,7 @@ public:
                 }
             }
         }
+        return true;
     }
 
 private:

@@ -16,14 +16,17 @@ public:
 
     explicit BpmEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         uint32_t stp = (strip.now / 20) & 0xFF;
         uint8_t beat = beatsin8_t(SEGMENT.speed, 64, 255);
         for (unsigned i = 0; i < coordinate.width; i++) {
             buffer.setPixelColor(i, SEGMENT.color_from_palette(stp + (i * 2), false, PALETTE_SOLID_WRAP, 0, beat - stp + (i * 10)));
         }
+        return true;
     }
 
 private:

@@ -20,8 +20,10 @@ public:
 
     explicit TricolorFadeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         unsigned counter = strip.now * ((SEGMENT.speed >> 3) +1);
         uint16_t prog = (counter * 768) >> 16;
@@ -55,6 +57,7 @@ public:
             }
             buffer.setPixelColor(i, color);
         }
+        return true;
     }
 
 private:

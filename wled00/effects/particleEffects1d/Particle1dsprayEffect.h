@@ -22,8 +22,10 @@ public:
 
     explicit Particle1dsprayEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         ParticleSystem1D *PartSys = nullptr;
 
@@ -66,6 +68,7 @@ public:
             PartSys->particleFlags[i].reversegrav = PartSys->sources[0].sourceFlags.reversegrav; // update gravity direction
         }
         PartSys->update(); // update and render
+        return true;
     }
 
 private:

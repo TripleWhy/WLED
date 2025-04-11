@@ -25,8 +25,10 @@ public:
 
     explicit ParticlevortexEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    void nextFrameImpl(const EffectCoordinate& coordinate) {
-        Base::nextFrameImpl(coordinate);
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
 
         if (coordinate.width == 1)
             return mode_static();
@@ -130,6 +132,7 @@ public:
             }
         }
         PartSys->update(); //update all particles and render to frame
+        return true;
     }
 
 private:
