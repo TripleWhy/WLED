@@ -17,7 +17,7 @@
 #define WS2812FX_h
 
 #include <vector>
-#include "wled.h"
+// #include "wled.h"
 #include "const.h"
 #include "bus_manager.h"
 #include "colors.h"
@@ -72,32 +72,6 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 #define FPS_CALC_SHIFT 7 // bit shift for fixed point math
 
 #define NUM_COLORS       3 /* number of colors per segment */
-#define SEGCOLOR(x)      Segment::getCurrentColor(x)
-#define SEGPALETTE       Segment::getCurrentPalette()
-#define SEGLEN           Segment::vLength()
-#define SEG_W            Segment::vWidth()
-#define SEG_H            Segment::vHeight()
-#define SPEED_FORMULA_L  (5U + (50U*(255U - SEGMENT.speed))/SEGLEN)
-
-// some common colors
-#define RED        (uint32_t)0xFF0000
-#define GREEN      (uint32_t)0x00FF00
-#define BLUE       (uint32_t)0x0000FF
-#define WHITE      (uint32_t)0xFFFFFF
-#define BLACK      (uint32_t)0x000000
-#define YELLOW     (uint32_t)0xFFFF00
-#define CYAN       (uint32_t)0x00FFFF
-#define MAGENTA    (uint32_t)0xFF00FF
-#define PURPLE     (uint32_t)0x400080
-#define ORANGE     (uint32_t)0xFF3000
-#define PINK       (uint32_t)0xFF1493
-#define GREY       (uint32_t)0x808080
-#define GRAY       GREY
-#define DARKGREY   (uint32_t)0x333333
-#define DARKGRAY   DARKGREY
-#define ULTRAWHITE (uint32_t)0xFFFFFFFF
-#define DARKSLATEGRAY (uint32_t)0x2F4F4F
-#define DARKSLATEGREY DARKSLATEGRAY
 
 // segment options
 #define NO_OPTIONS   (uint16_t)0x0000

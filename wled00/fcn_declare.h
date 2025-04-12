@@ -4,6 +4,8 @@
 
 #include "colors.h"
 
+struct Segment;
+
 /*
  * All globally accessible functions are declared here
  */

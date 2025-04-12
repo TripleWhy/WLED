@@ -2,7 +2,6 @@
 
 #include <memory>
 #include "../memory/CircularAllocator.h"
-#include "../wled.h"
 #include "effectUtils.h"
 
 class Effect;

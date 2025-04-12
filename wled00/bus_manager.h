@@ -8,6 +8,7 @@
 
 #include "const.h"
 #include "pin_manager.h"
+#include <IPAddress.h>
 #include <vector>
 #include <memory>
 

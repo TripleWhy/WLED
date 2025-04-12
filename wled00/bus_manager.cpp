@@ -19,6 +19,7 @@
 #ifdef ESP8266
 #include "core_esp8266_waveform.h"
 #endif
+#include "colors.h"
 #include "const.h"
 #include "pin_manager.h"
 #include "bus_manager.h"

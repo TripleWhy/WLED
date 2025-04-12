@@ -1,5 +1,7 @@
 #include "wled.h"
+#include "colors.h"
 #include "fcn_declare.h"
+
 /*
   Color conversion & utility methods
 
@@ -12,6 +14,11 @@
   - when converting CRGB(W) to HSV32 and back, "hsv2rgb_spectrum" preserves the colors better than the _rainbow version
   - to manipulate an RGB color in HSV space, use the adjust_color function or the CRGBW.adjust_hue method
 */
+
+namespace {
+  // color
+  byte lastRandomIndex = 0;        // used to save last random color so the new one is not the same
+}
 
 /*
  * color blend function, based on FastLED blend function

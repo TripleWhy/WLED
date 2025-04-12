@@ -1,14 +1,37 @@
 #ifndef WLED_COLORS_H
 #define WLED_COLORS_H
 
+#include <Arduino.h>
+#include <cstdint>
+
 // note: some functions/structs have been copied from fastled library, modified and optimized for WLED
 
+// some common colors
+#define RED        (uint32_t)0xFF0000
+#define GREEN      (uint32_t)0x00FF00
+#define BLUE       (uint32_t)0x0000FF
+#define WHITE      (uint32_t)0xFFFFFF
+#define BLACK      (uint32_t)0x000000
+#define YELLOW     (uint32_t)0xFFFF00
+#define CYAN       (uint32_t)0x00FFFF
+#define MAGENTA    (uint32_t)0xFF00FF
+#define PURPLE     (uint32_t)0x400080
+#define ORANGE     (uint32_t)0xFF3000
+#define PINK       (uint32_t)0xFF1493
+#define GREY       (uint32_t)0x808080
+#define GRAY       GREY
+#define DARKGREY   (uint32_t)0x333333
+#define DARKGRAY   DARKGREY
+#define ULTRAWHITE (uint32_t)0xFFFFFFFF
+#define DARKSLATEGRAY (uint32_t)0x2F4F4F
+#define DARKSLATEGREY DARKSLATEGRAY
+
 // 32bit color mangling macros
-#define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
-#define R(c) (byte((c) >> 16))
-#define G(c) (byte((c) >> 8))
-#define B(c) (byte(c))
-#define W(c) (byte((c) >> 24))
+constexpr inline uint32_t RGBW32(uint8_t r, uint8_t g, uint8_t b, uint8_t w) { return uint32_t((w << 24) | (r << 16) | (g << 8) | (b)); }
+constexpr inline uint8_t R(uint32_t c) { return uint8_t((c) >> 16); }
+constexpr inline uint8_t G(uint32_t c) { return uint8_t((c) >> 8); }
+constexpr inline uint8_t B(uint32_t c) { return uint8_t((c)); }
+constexpr inline uint8_t W(uint32_t c) { return uint8_t((c) >> 24); }
 
 //forward declarations
 struct CRGB;

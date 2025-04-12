@@ -3,6 +3,13 @@
 #include <cstdint>
 #include "../wled_math.h"
 
+#define SEGCOLOR(x)      Segment::getCurrentColor(x)
+#define SEGPALETTE       Segment::getCurrentPalette()
+#define SEGLEN           Segment::vLength()
+#define SEG_W            Segment::vWidth()
+#define SEG_H            Segment::vHeight()
+#define SPEED_FORMULA_L  (5U + (50U*(255U - SEGMENT.speed))/SEGLEN)
+
 #define FRAMETIME        strip.getFrameTime()
 /* How much data bytes each segment should max allocate to leave enough space for other segments,
   assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */

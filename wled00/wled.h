@@ -601,9 +601,6 @@ WLED_GLOBAL unsigned long lastReconnectAttempt _INIT(0);
 WLED_GLOBAL bool interfacesInited _INIT(false);
 WLED_GLOBAL bool wasConnected _INIT(false);
 
-// color
-WLED_GLOBAL byte lastRandomIndex _INIT(0);        // used to save last random color so the new one is not the same
-
 // transitions
 WLED_GLOBAL uint8_t       blendingStyle            _INIT(0);      // effect blending/transitionig style
 WLED_GLOBAL bool          transitionActive         _INIT(false);
