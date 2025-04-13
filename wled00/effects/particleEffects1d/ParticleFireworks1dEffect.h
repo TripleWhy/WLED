@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particlefireworks1dEffect : public BaseEffect<Particlefireworks1dEffect, Particle1dEffect> {
+class ParticleFireworks1dEffect : public BaseEffect<ParticleFireworks1dEffect, Particle1dEffect> {
 private:
-    using Self = Particlefireworks1dEffect;
+    using Self = ParticleFireworks1dEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fireworks 1D@Gravity,Explosion,Firing side,Blur,Saturation,,Colorful,Smooth;,!;!;1;sx=150,c2=30,c3=31,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PSFIREWORKS1D;
 
-    explicit Particlefireworks1dEffect(const EffectInformation& ei)
+    explicit ParticleFireworks1dEffect(const EffectInformation& ei)
         : Base{ei, 4, 150, true}
     {
         PartSys.setKillOutOfBounds(true);

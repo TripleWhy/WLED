@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particlefire1dEffect : public BaseEffect<Particlefire1dEffect, Particle1dEffect> {
+class ParticleFire1dEffect : public BaseEffect<ParticleFire1dEffect, Particle1dEffect> {
 private:
-    using Self = Particlefire1dEffect;
+    using Self = ParticleFire1dEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fire 1D@!,!,Cooling,Blur;,!;!;1;pal=35,sx=100,ix=50,c1=80,c2=100,c3=28,o1=1,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PSFIRE1D;
 
-    explicit Particlefire1dEffect(const EffectInformation& ei)
+    explicit ParticleFire1dEffect(const EffectInformation& ei)
         : Base{ei, 5, 255, false}
     {
         PartSys.setKillOutOfBounds(true);

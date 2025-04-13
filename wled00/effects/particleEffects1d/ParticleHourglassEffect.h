@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlehourglassEffect : public BaseEffect<ParticlehourglassEffect, Particle1dEffect> {
+class ParticleHourglassEffect : public BaseEffect<ParticleHourglassEffect, Particle1dEffect> {
 private:
-    using Self = ParticlehourglassEffect;
+    using Self = ParticleHourglassEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Hourglass@Interval,!,Color,Blur,Gravity,Colorflip,Start,Fast Reset;,!;!;1;pal=34,sx=50,ix=200,c1=140,c2=80,c3=4,o1=1,o2=1,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PSHOURGLASS;
 
-    explicit ParticlehourglassEffect(const EffectInformation& ei)
+    explicit ParticleHourglassEffect(const EffectInformation& ei)
         : Base{ei, 0, 255, false}
     {
         PartSys.setBounce(true);

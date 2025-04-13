@@ -119,18 +119,18 @@
 #include "effects/PacificaEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/particleEffects1d/Particle1dGeqEffect.h"
-#include "effects/particleEffects1d/Particle1dsonicstreamEffect.h"
-#include "effects/particleEffects1d/Particle1dsprayEffect.h"
-#include "effects/particleEffects1d/ParticlebalanceEffect.h"
-#include "effects/particleEffects1d/ParticlechaseEffect.h"
-#include "effects/particleEffects1d/ParticledancingshadowsEffect.h"
-#include "effects/particleEffects1d/ParticledripEffect.h"
-#include "effects/particleEffects1d/Particlefire1dEffect.h"
-#include "effects/particleEffects1d/Particlefireworks1dEffect.h"
-#include "effects/particleEffects1d/ParticlehourglassEffect.h"
-#include "effects/particleEffects1d/ParticlepinballEffect.h"
-#include "effects/particleEffects1d/ParticlesparklerEffect.h"
-#include "effects/particleEffects1d/ParticlestarburstEffect.h"
+#include "effects/particleEffects1d/Particle1dSonicStreamEffect.h"
+#include "effects/particleEffects1d/Particle1dSprayEffect.h"
+#include "effects/particleEffects1d/ParticleBalanceEffect.h"
+#include "effects/particleEffects1d/ParticleChaseEffect.h"
+#include "effects/particleEffects1d/ParticleDancingShadowsEffect.h"
+#include "effects/particleEffects1d/ParticleDripEffect.h"
+#include "effects/particleEffects1d/ParticleFire1dEffect.h"
+#include "effects/particleEffects1d/ParticleFireworks1dEffect.h"
+#include "effects/particleEffects1d/ParticleHourglassEffect.h"
+#include "effects/particleEffects1d/ParticlePinballEffect.h"
+#include "effects/particleEffects1d/ParticleSparklerEffect.h"
+#include "effects/particleEffects1d/ParticleStarburstEffect.h"
 #include "effects/particleEffects2d/ParticleattractorEffect.h"
 #include "effects/particleEffects2d/ParticleblobsEffect.h"
 #include "effects/particleEffects2d/ParticleboxEffect.h"
@@ -483,16 +483,16 @@ static constexpr std::array<const EffectInformation*, MODE_COUNT> setupEffectDat
   assignEffectInfo(array, ParticleDripEffect::effectInformation);
   assignEffectInfo(array, ParticlePinballEffect::effectInformation); //potential replacement for: bouncing balls, rollingballs, popcorn
   assignEffectInfo(array, ParticleDancingShadowsEffect::effectInformation);
-  assignEffectInfo(array, ParticleFireworks1DEffect::effectInformation);
+  assignEffectInfo(array, ParticleFireworks1dEffect::effectInformation);
   assignEffectInfo(array, ParticleSparklerEffect::effectInformation);
   assignEffectInfo(array, ParticleHourglassEffect::effectInformation);
-  assignEffectInfo(array, Particle1DsprayEffect::effectInformation);
+  assignEffectInfo(array, Particle1dSprayEffect::effectInformation);
   assignEffectInfo(array, ParticleBalanceEffect::effectInformation);
   assignEffectInfo(array, ParticleChaseEffect::effectInformation);
   assignEffectInfo(array, ParticleStarburstEffect::effectInformation);
   assignEffectInfo(array, Particle1dGeqEffect::effectInformation);
-  assignEffectInfo(array, ParticleFire1DEffect::effectInformation);
-  assignEffectInfo(array, Particle1DsonicstreamEffect::effectInformation);
+  assignEffectInfo(array, ParticleFire1dEffect::effectInformation);
+  assignEffectInfo(array, Particle1dSonicStreamEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM1D
 
   return array;

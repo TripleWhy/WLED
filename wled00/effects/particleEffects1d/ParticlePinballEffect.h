@@ -11,16 +11,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlepinballEffect : public BaseEffect<ParticlepinballEffect, Particle1dEffect> {
+class ParticlePinballEffect : public BaseEffect<ParticlePinballEffect, Particle1dEffect> {
 private:
-    using Self = ParticlepinballEffect;
+    using Self = ParticlePinballEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Pinball@Speed,!,Size,Blur,Gravity,Collide,Rolling,Position Color;,!;!;1;pal=0,ix=220,c2=0,c3=8,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PSPINBALL;
 
-    explicit ParticlepinballEffect(const EffectInformation& ei)
+    explicit ParticlePinballEffect(const EffectInformation& ei)
         : Base{ei, 1, 128, true}
     {
         PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide (if enabled)

@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlesparklerEffect : public BaseEffect<ParticlesparklerEffect, Particle1dEffect> {
+class ParticleSparklerEffect : public BaseEffect<ParticleSparklerEffect, Particle1dEffect> {
 private:
-    using Self = ParticlesparklerEffect;
+    using Self = ParticleSparklerEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Sparkler@Move,!,Saturation,Blur,Sparklers,Slide,Bounce,Large;,!;!;1;pal=0,sx=255,c1=0,c2=0,c3=6";
     static constexpr const uint8_t effectId = FX_MODE_PSSPARKLER;
 
-    explicit ParticlesparklerEffect(const EffectInformation& ei)
+    explicit ParticleSparklerEffect(const EffectInformation& ei)
         : Base{ei, 16, 128 , true}
     {
     }

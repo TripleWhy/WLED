@@ -14,16 +14,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticledancingshadowsEffect : public BaseEffect<ParticledancingshadowsEffect, Particle1dEffect> {
+class ParticleDancingShadowsEffect : public BaseEffect<ParticleDancingShadowsEffect, Particle1dEffect> {
 private:
-    using Self = ParticledancingshadowsEffect;
+    using Self = ParticleDancingShadowsEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Dancing Shadows@Speed,!,Blur,Color Cycle,,Smear,Position Color,Smooth;,!;!;1;sx=100,ix=180,c1=0,c2=0";
     static constexpr const uint8_t effectId = FX_MODE_PSDANCINGSHADOWS;
 
-    explicit ParticledancingshadowsEffect(const EffectInformation& ei)
+    explicit ParticleDancingShadowsEffect(const EffectInformation& ei)
         : Base{ei, 1, 255, false}
     {
         PartSys.sources[0].maxLife = 1000; //set long life (kill out of bounds is done in custom way)

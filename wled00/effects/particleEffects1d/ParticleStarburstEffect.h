@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlestarburstEffect : public BaseEffect<ParticlestarburstEffect, Particle1dEffect> {
+class ParticleStarburstEffect : public BaseEffect<ParticleStarburstEffect, Particle1dEffect> {
 private:
-    using Self = ParticlestarburstEffect;
+    using Self = ParticleStarburstEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Starburst@Chance,Fragments,Size,Blur,Cooling,Gravity,Colorful,Push;,!;!;1;pal=52,sx=150,ix=150,c1=120,c2=0,c3=21";
     static constexpr const uint8_t effectId = FX_MODE_PSSTARBURST;
 
-    explicit ParticlestarburstEffect(const EffectInformation& ei)
+    explicit ParticleStarburstEffect(const EffectInformation& ei)
         : Base{ei, 1, 200, true}
     {
         PartSys.setKillOutOfBounds(true);

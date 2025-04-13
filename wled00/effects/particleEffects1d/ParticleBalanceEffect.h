@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlebalanceEffect : public BaseEffect<ParticlebalanceEffect, Particle1dEffect> {
+class ParticleBalanceEffect : public BaseEffect<ParticleBalanceEffect, Particle1dEffect> {
 private:
-    using Self = ParticlebalanceEffect;
+    using Self = ParticleBalanceEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS 1D Balance@!,!,Hardness,Blur,Tilt,Position Color,Wrap,Random;,!;!;1;pal=18,c2=0,c3=4,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PSBALANCE;
 
-    explicit ParticlebalanceEffect(const EffectInformation& ei)
+    explicit ParticleBalanceEffect(const EffectInformation& ei)
         : Base{ei, 1, 128, false}
     {
             //PartSys.setKillOutOfBounds(true);

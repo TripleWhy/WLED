@@ -10,16 +10,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particle1dsprayEffect : public BaseEffect<Particle1dsprayEffect, Particle1dEffect> {
+class Particle1dSprayEffect : public BaseEffect<Particle1dSprayEffect, Particle1dEffect> {
 private:
-    using Self = Particle1dsprayEffect;
+    using Self = Particle1dSprayEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Spray 1D@Speed(+/-),!,Position,Blur,Gravity(+/-),AgeColor,Bounce,Position Color;,!;!;1;sx=200,ix=220,c1=0,c2=0";
     static constexpr const uint8_t effectId = FX_MODE_PS1DSPRAY;
 
-    explicit Particle1dsprayEffect(const EffectInformation& ei)
+    explicit Particle1dSprayEffect(const EffectInformation& ei)
         : Base{ei, 1, 255, false}
     {
         PartSys.setKillOutOfBounds(true);

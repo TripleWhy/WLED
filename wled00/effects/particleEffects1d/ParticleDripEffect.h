@@ -14,16 +14,16 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticledripEffect : public BaseEffect<ParticledripEffect, Particle1dEffect> {
+class ParticleDripEffect : public BaseEffect<ParticleDripEffect, Particle1dEffect> {
 private:
-    using Self = ParticledripEffect;
+    using Self = ParticleDripEffect;
     using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS DripDrop@Speed,!,Splash,Blur,Gravity,Rain,PushSplash,Smooth;,!;!;1;pal=0,sx=150,ix=25,c1=220,c2=30,c3=21";
     static constexpr const uint8_t effectId = FX_MODE_PSDRIP;
 
-    explicit ParticledripEffect(const EffectInformation& ei)
+    explicit ParticleDripEffect(const EffectInformation& ei)
         : Base{ei, 4, 255, false}
     {
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
