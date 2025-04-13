@@ -39,17 +39,17 @@ public:
             if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES))
                 return mode_static(); // allocation failed
             #ifdef ESP8266
-            PartSys->setMotionBlur(180);
+            PartSys.setMotionBlur(180);
             #else
-            PartSys->setMotionBlur(130);
+            PartSys.setMotionBlur(130);
             #endif
-            for (i = 0; i < min(PartSys->numSources, (uint32_t)NUMBEROFSOURCES); i++) {
-                PartSys->sources[i].source.x = (PartSys->maxX + 1) >> 1; // center
-                PartSys->sources[i].source.y = (PartSys->maxY + 1) >> 1; // center
-                PartSys->sources[i].maxLife = 900;
-                PartSys->sources[i].minLife = 800;
+            for (i = 0; i < min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); i++) {
+                PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
+                PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
+                PartSys.sources[i].maxLife = 900;
+                PartSys.sources[i].minLife = 800;
             }
-            PartSys->setKillOutOfBounds(true);
+            PartSys.setKillOutOfBounds(true);
         }
         else
             PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
@@ -57,29 +57,29 @@ public:
         if (PartSys == nullptr)
             return mode_static(); // something went wrong, no data!
 
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        uint32_t spraycount = min(PartSys->numSources, (uint32_t)(1 + (SEGMENT.custom1 >> 5))); // number of sprays to display, 1-8
+        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        uint32_t spraycount = min(PartSys.numSources, (uint32_t)(1 + (SEGMENT.custom1 >> 5))); // number of sprays to display, 1-8
         #ifdef ESP8266
         for (i = 1; i < 4; i++) { // need static particles in the center to reduce blinking (would be black every other frame without this hack), just set them there fixed
-            int partindex = (int)PartSys->usedParticles - (int)i;
+            int partindex = (int)PartSys.usedParticles - (int)i;
             if (partindex >= 0) {
-                PartSys->particles[partindex].x = (PartSys->maxX + 1) >> 1; // center
-                PartSys->particles[partindex].y = (PartSys->maxY + 1) >> 1; // center
-                PartSys->particles[partindex].sat = 230;
-                PartSys->particles[partindex].ttl = 256; //keep alive
+                PartSys.particles[partindex].x = (PartSys.maxX + 1) >> 1; // center
+                PartSys.particles[partindex].y = (PartSys.maxY + 1) >> 1; // center
+                PartSys.particles[partindex].sat = 230;
+                PartSys.particles[partindex].ttl = 256; //keep alive
             }
         }
         #endif
 
         if (SEGMENT.check1)
-            PartSys->setSmearBlur(90); // enable smear blur
+            PartSys.setSmearBlur(90); // enable smear blur
         else
-            PartSys->setSmearBlur(0); // disable smear blur
+            PartSys.setSmearBlur(0); // disable smear blur
 
         // update colors of the sprays
         for (i = 0; i < spraycount; i++) {
                 uint32_t coloroffset = 0xFF / spraycount;
-                PartSys->sources[i].source.hue = coloroffset * i;
+                PartSys.sources[i].source.hue = coloroffset * i;
         }
 
         // set rotation direction and speed
@@ -123,15 +123,15 @@ public:
         if (SEGMENT.call % skip == 0) {
             j = hw_random16(spraycount); // start with random spray so all get a chance to emit a particle if maximum number of particles alive is reached.
             for (i = 0; i < spraycount; i++) { // emit one particle per spray (if available)
-                PartSys->sources[j].var = (SEGMENT.custom3 >> 1); //update speed variation
+                PartSys.sources[j].var = (SEGMENT.custom3 >> 1); //update speed variation
                 #ifdef ESP8266
                 if (SEGMENT.call & 0x01) // every other frame, do not emit to save particles
                 #endif
-                PartSys->angleEmit(PartSys->sources[j], aux0 + angleoffset * j, (SEGMENT.intensity >> 2)+1);
+                PartSys.angleEmit(PartSys.sources[j], aux0 + angleoffset * j, (SEGMENT.intensity >> 2)+1);
                 j = (j + 1) % spraycount;
             }
         }
-        PartSys->update(); //update all particles and render to frame
+        PartSys.update(); //update all particles and render to frame
         return true;
     }
 

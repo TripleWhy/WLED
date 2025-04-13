@@ -2,9 +2,8 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM1D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle1dEffect.h"
 
 /*
   Particle Replacement for original Dancing Shadows:
@@ -15,63 +14,53 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticledancingshadowsEffect : public BaseEffect<ParticledancingshadowsEffect, BufferedEffect<EffectDimensionality::d1>> {
+class ParticledancingshadowsEffect : public BaseEffect<ParticledancingshadowsEffect, Particle1dEffect> {
 private:
     using Self = ParticledancingshadowsEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
+    using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Dancing Shadows@Speed,!,Blur,Color Cycle,,Smear,Position Color,Smooth;,!;!;1;sx=100,ix=180,c1=0,c2=0";
-    static constexpr const uint8_t effectId = FX_MODE_PARTICLEDANCINGSHADOWS;
+    static constexpr const uint8_t effectId = FX_MODE_PSDANCINGSHADOWS;
 
-    explicit ParticledancingshadowsEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticledancingshadowsEffect(const EffectInformation& ei)
+        : Base{ei, 1, 255, false}
+    {
+        PartSys.sources[0].maxLife = 1000; //set long life (kill out of bounds is done in custom way)
+        PartSys.sources[0].minLife = PartSys.sources[0].maxLife;
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem1D *PartSys = nullptr;
-
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem1D(PartSys, 1)) // init, one source
-                return mode_static(); // allocation failed or is single pixel
-            PartSys->sources[0].maxLife = 1000; //set long life (kill out of bounds is done in custom way)
-            PartSys->sources[0].minLife = PartSys->sources[0].maxLife;
-        }
-        else {
-            PartSys = reinterpret_cast<ParticleSystem1D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-        }
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
         // Particle System settings
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        PartSys->setMotionBlur(SEGMENT.custom1);
+        PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
+        PartSys.setMotionBlur(SEGMENT.custom1);
         if (SEGMENT.check1)
-            PartSys->setSmearBlur(120); // enable smear blur
+            PartSys.setSmearBlur(120); // enable smear blur
         else
-            PartSys->setSmearBlur(0); // disable smear blur
-        PartSys->setParticleSize(SEGMENT.check3); // 1 or 2 pixel rendering
-        PartSys->setColorByPosition(SEGMENT.check2); // color fixed by position
-        PartSys->setUsedParticles(map(SEGMENT.intensity, 0, 255, 10, 255)); // set percentage of particles to use
+            PartSys.setSmearBlur(0); // disable smear blur
+        PartSys.setParticleSize(SEGMENT.check3); // 1 or 2 pixel rendering
+        PartSys.setColorByPosition(SEGMENT.check2); // color fixed by position
+        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 10, 255)); // set percentage of particles to use
 
         uint32_t deadparticles = 0;
         //kill out of bounds and moving away plus change color
-        for (uint32_t i = 0; i < PartSys->usedParticles; i++) {
-            if (((SEGMENT.call & 0x07) == 0) && PartSys->particleFlags[i].outofbounds) { //check if out of bounds particle move away from strip, only update every 8th frame
-                if ((int32_t)PartSys->particles[i].vx * PartSys->particles[i].x > 0) PartSys->particles[i].ttl = 0; //particle is moving away, kill it
+        for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
+            if (((SEGMENT.call & 0x07) == 0) && PartSys.particleFlags[i].outofbounds) { //check if out of bounds particle move away from strip, only update every 8th frame
+                if ((int32_t)PartSys.particles[i].vx * PartSys.particles[i].x > 0) PartSys.particles[i].ttl = 0; //particle is moving away, kill it
             }
-            PartSys->particleFlags[i].perpetual = true; //particles do not age
+            PartSys.particleFlags[i].perpetual = true; //particles do not age
             if (SEGMENT.call % (32 / (1 + (SEGMENT.custom2 >> 3))) == 0)
-                 PartSys->particles[i].hue += 2 + (SEGMENT.custom2 >> 5);
+                 PartSys.particles[i].hue += 2 + (SEGMENT.custom2 >> 5);
             //note: updating speed on the fly is not accurately possible, since it is unknown which particles are assigned to which spot
             if (aux0 != SEGMENT.speed) { //speed changed
                 //update all particle speed by setting them to current value
-                 PartSys->particles[i].vx = PartSys->particles[i].vx > 0 ? SEGMENT.speed >> 3 : -SEGMENT.speed >> 3;
+                 PartSys.particles[i].vx = PartSys.particles[i].vx > 0 ? SEGMENT.speed >> 3 : -SEGMENT.speed >> 3;
             }
-            if (PartSys->particles[i].ttl == 0) deadparticles++; // count dead particles
+            if (PartSys.particles[i].ttl == 0) deadparticles++; // count dead particles
         }
         aux0 = SEGMENT.speed;
 
@@ -85,14 +74,14 @@ public:
             int32_t position;
             //choose random start position, left and right from the segment
             if (hw_random() & 0x01) {
-                position = PartSys->maxXpixel;
+                position = coordinate.width - 1;
                 speed = -speed;
             }
             else
                 position = -width;
 
-            PartSys->sources[0].v = speed; //emitted particle speed
-            PartSys->sources[0].source.hue = hw_random8(); //random spotlight color
+            PartSys.sources[0].v = speed; //emitted particle speed
+            PartSys.sources[0].source.hue = hw_random8(); //random spotlight color
             for (int32_t i = 0; i < width; i++) {
                 if (width > 1) {
                     switch (type) {
@@ -128,14 +117,14 @@ public:
                 }
                 //emit particle
                 //set the particle source position:
-                PartSys->sources[0].source.x = position * PS_P_RADIUS_1D;
-                uint32_t partidx = PartSys->sprayEmit(PartSys->sources[0]);
-                PartSys->particles[partidx].ttl = ttl;
+                PartSys.sources[0].source.x = position * PS_P_RADIUS_1D;
+                uint32_t partidx = PartSys.sprayEmit(PartSys.sources[0]);
+                PartSys.particles[partidx].ttl = ttl;
                 position++; //do the next pixel
             }
         }
 
-        PartSys->update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

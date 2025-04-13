@@ -2,64 +2,56 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM1D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle1dEffect.h"
 
 /*
   Particle based 1D GEQ effect, each frequency bin gets an emitter, distributed over the strip
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particle1dGeqEffect : public BaseEffect<Particle1dGeqEffect, BufferedEffect<EffectDimensionality::d1>> {
+class Particle1dGeqEffect : public BaseEffect<Particle1dGeqEffect, Particle1dEffect> {
 private:
     using Self = Particle1dGeqEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
+    using Base = BaseEffect<Self, Particle1dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS GEQ 1D@Speed,!,Size,Blur,,,,;,!;!;1f;pal=0,sx=50,ix=200,c1=0,c2=0,c3=0,o1=1,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS1DGEQ;
 
-    explicit Particle1dGeqEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit Particle1dGeqEffect(const EffectInformation& ei)
+        : Base{ei, 16, 255, true}
+    {
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem1D *PartSys = nullptr;
         uint32_t numSources;
         uint32_t i;
 
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem1D(PartSys, 16, 255, 0, true)) // init, no additional data needed
-                return mode_static(); // allocation failed or is single pixel
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem1D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
         // Particle System settings
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        numSources = PartSys->numSources;
-        PartSys->setMotionBlur(SEGMENT.custom2); // anable motion blur
+        PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
+        numSources = PartSys.numSources;
+        PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
 
-        uint32_t spacing = PartSys->maxX / numSources;
+        uint32_t spacing = PartSys.maxX / numSources;
         for (i = 0; i < numSources; i++) {
-            PartSys->sources[i].source.hue = i * 16; // hw_random16();   //TODO: make adjustable, maybe even colorcycle?
-            PartSys->sources[i].var = SEGMENT.speed >> 2;
-            PartSys->sources[i].minLife = 180 + (SEGMENT.intensity >> 1);
-            PartSys->sources[i].maxLife = 240 + SEGMENT.intensity;
-            PartSys->sources[i].sat = 255;
-            PartSys->sources[i].size = SEGMENT.custom1;
-            PartSys->setParticleSize(SEGMENT.custom1);
-            PartSys->sources[i].source.x = (spacing >> 1) + spacing * i; //distribute evenly
+            PartSys.sources[i].source.hue = i * 16; // hw_random16();   //TODO: make adjustable, maybe even colorcycle?
+            PartSys.sources[i].var = SEGMENT.speed >> 2;
+            PartSys.sources[i].minLife = 180 + (SEGMENT.intensity >> 1);
+            PartSys.sources[i].maxLife = 240 + SEGMENT.intensity;
+            PartSys.sources[i].sat = 255;
+            PartSys.sources[i].size = SEGMENT.custom1;
+            PartSys.setParticleSize(SEGMENT.custom1);
+            PartSys.sources[i].source.x = (spacing >> 1) + spacing * i; //distribute evenly
         }
 
-        for (i = 0; i < PartSys->usedParticles; i++) {
-            if (PartSys->particles[i].ttl > 20) PartSys->particles[i].ttl -= 20; //ttl is linked to brightness, this allows to use higher brightness but still a short lifespan
-            else PartSys->particles[i].ttl = 0;
+        for (i = 0; i < PartSys.usedParticles; i++) {
+            if (PartSys.particles[i].ttl > 20) PartSys.particles[i].ttl -= 20; //ttl is linked to brightness, this allows to use higher brightness but still a short lifespan
+            else PartSys.particles[i].ttl = 0;
         }
 
         um_data_t *um_data = getAudioData();
@@ -86,11 +78,11 @@ public:
             }
 
             if (emitparticle)
-                PartSys->sprayEmit(PartSys->sources[bin]);
+                PartSys.sprayEmit(PartSys.sources[bin]);
         }
         //TODO: add color control?
 
-        PartSys->update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

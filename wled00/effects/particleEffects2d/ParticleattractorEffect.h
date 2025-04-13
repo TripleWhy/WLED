@@ -38,20 +38,20 @@ public:
         if (SEGMENT.call == 0) { // initialization
             if (!initParticleSystem2D(PartSys, 1, sizeof(PSparticle), true)) // init using 1 source and advanced particle settings
                 return mode_static(); // allocation failed or not 2D
-            PartSys->sources[0].source.hue = hw_random16();
-            PartSys->sources[0].source.vx = -7; // will collied with wall and get random bounce direction
-            PartSys->sources[0].sourceFlags.collide = true; // seeded particles will collide
-            PartSys->sources[0].sourceFlags.perpetual = true; //source does not age
+            PartSys.sources[0].source.hue = hw_random16();
+            PartSys.sources[0].source.vx = -7; // will collied with wall and get random bounce direction
+            PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide
+            PartSys.sources[0].sourceFlags.perpetual = true; //source does not age
             #ifdef ESP8266
-            PartSys->sources[0].maxLife = 200; // lifetime in frames (ESP8266 has less particles)
-            PartSys->sources[0].minLife = 30;
+            PartSys.sources[0].maxLife = 200; // lifetime in frames (ESP8266 has less particles)
+            PartSys.sources[0].minLife = 30;
             #else
-            PartSys->sources[0].maxLife = 350; // lifetime in frames
-            PartSys->sources[0].minLife = 50;
+            PartSys.sources[0].maxLife = 350; // lifetime in frames
+            PartSys.sources[0].minLife = 50;
             #endif
-            PartSys->sources[0].var = 4; // emiting variation
-            PartSys->setWallHardness(255);  //bounce forever
-            PartSys->setWallRoughness(200); //randomize wall bounce
+            PartSys.sources[0].var = 4; // emiting variation
+            PartSys.setWallHardness(255);  //bounce forever
+            PartSys.setWallRoughness(200); //randomize wall bounce
         }
         else {
             PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
@@ -61,42 +61,42 @@ public:
             return mode_static(); // something went wrong, no data!
 
         // Particle System settings
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        attractor = reinterpret_cast<PSparticle *>(PartSys->PSdataEnd);
+        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        attractor = reinterpret_cast<PSparticle *>(PartSys.PSdataEnd);
 
-        PartSys->setColorByAge(SEGMENT.check1);
-        PartSys->setParticleSize(SEGMENT.custom1 >> 1); //set size globally
-        PartSys->setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 190));
+        PartSys.setColorByAge(SEGMENT.check1);
+        PartSys.setParticleSize(SEGMENT.custom1 >> 1); //set size globally
+        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 190));
 
         if (SEGMENT.custom2 > 0) // collisions enabled
-            PartSys->enableParticleCollisions(true, map(SEGMENT.custom2, 1, 255, 120, 255)); // enable collisions and set particle collision hardness
+            PartSys.enableParticleCollisions(true, map(SEGMENT.custom2, 1, 255, 120, 255)); // enable collisions and set particle collision hardness
         else
-            PartSys->enableParticleCollisions(false);
+            PartSys.enableParticleCollisions(false);
 
         if (SEGMENT.call == 0) {
-            attractor->vx = PartSys->sources[0].source.vy; // set to spray movemement but reverse x and y
-            attractor->vy = PartSys->sources[0].source.vx;
+            attractor->vx = PartSys.sources[0].source.vy; // set to spray movemement but reverse x and y
+            attractor->vy = PartSys.sources[0].source.vx;
         }
 
         // set attractor properties
         attractor->ttl = 100; // never dies
         if (SEGMENT.check2) {
             if ((SEGMENT.call % 3) == 0) // move slowly
-                PartSys->particleMoveUpdate(*attractor, attractorFlags, &sourcesettings); // move the attractor
+                PartSys.particleMoveUpdate(*attractor, attractorFlags, &sourcesettings); // move the attractor
         }
         else {
-            attractor->x = PartSys->maxX >> 1; // set to center
-            attractor->y = PartSys->maxY >> 1;
+            attractor->x = PartSys.maxX >> 1; // set to center
+            attractor->y = PartSys.maxY >> 1;
         }
 
         if (SEGMENT.call % 5 == 0)
-            PartSys->sources[0].source.hue++;
+            PartSys.sources[0].source.hue++;
 
         aux0 += 256; // emitting angle, one full turn in 255 frames (0xFFFF is 360°)
         if (SEGMENT.call % 2 == 0) // alternate direction of emit
-            PartSys->angleEmit(PartSys->sources[0], aux0, 12);
+            PartSys.angleEmit(PartSys.sources[0], aux0, 12);
         else
-            PartSys->angleEmit(PartSys->sources[0], aux0 + 0x7FFF, 12); // emit at 180° as well
+            PartSys.angleEmit(PartSys.sources[0], aux0 + 0x7FFF, 12); // emit at 180° as well
         // apply force
         uint32_t strength = SEGMENT.speed;
         #ifdef USERMOD_AUDIOREACTIVE
@@ -106,15 +106,15 @@ public:
             strength = (SEGMENT.speed * volumeSmth) >> 8;
         }
         #endif
-        for (uint32_t i = 0; i < PartSys->usedParticles; i++) {
-            PartSys->pointAttractor(i, *attractor, strength, SEGMENT.check3);
+        for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
+            PartSys.pointAttractor(i, *attractor, strength, SEGMENT.check3);
         }
 
 
         if (SEGMENT.call % (33 - SEGMENT.custom3) == 0)
-            PartSys->applyFriction(2);
-        PartSys->particleMoveUpdate(PartSys->sources[0].source, PartSys->sources[0].sourceFlags, &sourcesettings); // move the source
-        PartSys->update(); // update and render
+            PartSys.applyFriction(2);
+        PartSys.particleMoveUpdate(PartSys.sources[0].source, PartSys.sources[0].sourceFlags, &sourcesettings); // move the source
+        PartSys.update(); // update and render
         return true;
     }
 

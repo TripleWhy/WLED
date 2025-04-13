@@ -38,15 +38,15 @@ public:
             if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES))  // init, request 16 sources
                 return mode_static(); // allocation failed or not 2D
 
-            numSprays = min(PartSys->numSources, (uint32_t)NUMBEROFSOURCES);
+            numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
             for (i = 0; i < numSprays; i++) {
-                PartSys->sources[i].source.x = (PartSys->maxX + 1) >> 1; // center
-                PartSys->sources[i].source.y = (PartSys->maxY + 1) >> 1; // center
-                PartSys->sources[i].source.hue = i * 16; // even color distribution
-                PartSys->sources[i].maxLife = 400;
-                PartSys->sources[i].minLife = 200;
+                PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
+                PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
+                PartSys.sources[i].source.hue = i * 16; // even color distribution
+                PartSys.sources[i].maxLife = 400;
+                PartSys.sources[i].minLife = 200;
             }
-            PartSys->setKillOutOfBounds(true);
+            PartSys.setKillOutOfBounds(true);
         }
         else
             PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
@@ -54,8 +54,8 @@ public:
         if (PartSys == nullptr)
             return mode_static(); // something went wrong, no data!
 
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        numSprays = min(PartSys->numSources, (uint32_t)NUMBEROFSOURCES);
+        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t *)um_data->u_data[2]; // 16 bins with FFT data, log mapped already, each band contains frequency amplitude 0-255
@@ -70,9 +70,9 @@ public:
         uint32_t j = hw_random16(numSprays); // start with random spray so all get a chance to emit a particle if maximum number of particles alive is reached.
         for (i = 0; i < numSprays; i++) {
             if (SEGMENT.call % (32 - (SEGMENT.custom2 >> 3)) == 0 && SEGMENT.custom2 > 0)
-                PartSys->sources[j].source.hue += 1 + (SEGMENT.custom2 >> 4);
+                PartSys.sources[j].source.hue += 1 + (SEGMENT.custom2 >> 4);
 
-            PartSys->sources[j].var = SEGMENT.custom3 >> 2;
+            PartSys.sources[j].var = SEGMENT.custom3 >> 2;
             int8_t emitspeed = 5 + (((uint32_t)fftResult[j] * ((uint32_t)SEGMENT.speed + 20)) >> 10); // emit speed according to loudness of band
             uint16_t emitangle = j * angleoffset + aux0;
 
@@ -85,11 +85,11 @@ public:
                     emitparticles = 1;
             }
             if (emitparticles)
-                PartSys->angleEmit(PartSys->sources[j], emitangle, emitspeed);
+                PartSys.angleEmit(PartSys.sources[j], emitangle, emitspeed);
 
             j = (j + 1) % numSprays;
         }
-        PartSys->update(); // update and render
+        PartSys.update(); // update and render
         return true;
     }
 

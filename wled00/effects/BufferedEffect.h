@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../FX.h"
+#include "../wled.h"
 #include "../src/font/console_font_4x6.h"
 #include "../src/font/console_font_5x12.h"
 #include "../src/font/console_font_5x8.h"
@@ -14,11 +15,20 @@
 // Don't use BufferedEffectBase directly, use BufferedEffect.
 
 class BufferedEffectBase : public Effect {
-protected:
+public:
     class PixelBufferBase {
         template<EffectDimensionality>
         friend class BufferedEffect;
     public:
+        explicit PixelBufferBase() = default;
+        explicit PixelBufferBase(size_t size) {
+            resizeVector(pixels, size);
+        }
+
+        inline bool isEmpty() const {
+            return pixels.empty();
+        }
+
         void fill(uint32_t color) {
             std::fill(pixels.begin(), pixels.end(), color);
         }
@@ -57,12 +67,22 @@ protected:
             }
         }
 
-        void fadeToBlackBy(uint8_t fadeBy) {
-            if (fadeBy == 0u)
+        void fade(uint8_t scale) {
+            if (scale == 0u)
                 return;   // optimization - no scaling to apply
 
             for (uint32_t& color : pixels) {
-                color = color_fade(color, 255 - fadeBy);
+                color = color_fade(color, scale);
+            }
+        }
+
+        inline void fadeToBlackBy(uint8_t fadeBy) {
+            fade(255 - fadeBy);
+        }
+
+        void add(uint32_t color, bool preserveCR = true) {
+            for (uint32_t& pixel : pixels) {
+                pixel = color_add(pixel, color, preserveCR);
             }
         }
 
@@ -107,9 +127,17 @@ protected:
 
 template<EffectDimensionality _dimensionality>
 class BufferedEffect : public BufferedEffectBase {
-protected:
+public:
     class PixelBuffer : public PixelBufferBase {
     public:
+        explicit constexpr PixelBuffer() = default;
+        explicit constexpr PixelBuffer(size_t length) : PixelBufferBase(length) {
+            static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+        }
+        explicit constexpr PixelBuffer(size_t width, size_t height) : PixelBufferBase(width * height) {
+            static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+        }
+
         inline void setPixelColor(unsigned x, uint32_t color) {
             static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
             setPixelColorLinear(x, color);
@@ -126,12 +154,12 @@ protected:
             setPixelColor(x, y, RGBW32(c.r,c.g,c.b,0));
         }
 
-        inline uint32_t getPixelColor(unsigned x) {
+        inline uint32_t getPixelColor(unsigned x) const {
             static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
             return getPixelColorLinear(x);
         }
 
-        inline uint32_t getPixelColor(unsigned x, unsigned y) {
+        inline uint32_t getPixelColor(unsigned x, unsigned y) const {
             static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
             return getPixelColorLinear(convertToLinear(x, y));
         }
@@ -178,7 +206,7 @@ protected:
          * blurs segment content, source: FastLED colorutils.cpp
          * Note: for blur_amount > 215 this function does not work properly (creates alternating pattern)
          */
-        void blur1d(uint8_t blur_amount, bool smear = false) {
+        void blur1d(uint8_t blur_amount, bool smear = false, unsigned start = 0, unsigned end = std::numeric_limits<unsigned>::max()) {
             static_assert(dimensionality == EffectDimensionality::d1, "This function is for 1D effects only.");
 
             if (blur_amount == 0) {
@@ -186,26 +214,30 @@ protected:
             }
             uint8_t keep = smear ? 255 : 255 - blur_amount;
             uint8_t seep = blur_amount >> 1;
-            unsigned vlength = Segment::getEffectWidth<dimensionality>();
             uint32_t carryover = BLACK;
             uint32_t lastnew;       // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration
             uint32_t last;
             uint32_t curnew = BLACK;
-            for (unsigned i = 0; i < vlength; i++) {
-            uint32_t cur = getPixelColor(i);
-            uint32_t part = color_fade(cur, seep);
-            curnew = color_fade(cur, keep);
-            if (i > 0) {
-                if (carryover) curnew = color_add(curnew, carryover);
-                uint32_t prev = color_add(lastnew, part);
-                // optimization: only set pixel if color has changed
-                if (last != prev) setPixelColor(i - 1, prev);
-            } else setPixelColor(i, curnew); // first pixel
-            lastnew = curnew;
-            last = cur; // save original value for comparison on next iteration
-            carryover = part;
+            end = std::min(end, pixels.size());
+            for (unsigned i = 0; i < end; i++) {
+                uint32_t cur = getPixelColor(i);
+                uint32_t part = color_fade(cur, seep);
+                curnew = color_fade(cur, keep);
+                if (i > 0) {
+                    if (carryover)
+                        curnew = color_add(curnew, carryover);
+                    uint32_t prev = color_add(lastnew, part);
+                    // optimization: only set pixel if color has changed
+                    if (last != prev)
+                        setPixelColor(i - 1, prev);
+                } else {
+                    setPixelColor(i, curnew); // first pixel
+                }
+                lastnew = curnew;
+                last = cur; // save original value for comparison on next iteration
+                carryover = part;
             }
-            setPixelColor(vlength - 1, curnew);
+            setPixelColor(end - 1, curnew);
         }
 
         // 2D blurring, can be asymmetrical

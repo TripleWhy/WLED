@@ -35,9 +35,9 @@ public:
             if (!initParticleSystem2D(PartSys, 1, 0, true)) // init with 1 source and advanced properties
                 return mode_static(); // allocation failed or not 2D
 
-            PartSys->setKillOutOfBounds(true); // should never happen, but lets make sure there are no stray particles
-            PartSys->setMotionBlur(230); // anable motion blur
-            PartSys->setBounceY(true);
+            PartSys.setKillOutOfBounds(true); // should never happen, but lets make sure there are no stray particles
+            PartSys.setMotionBlur(230); // anable motion blur
+            PartSys.setBounceY(true);
             aux0 = rand();
         }
         else
@@ -46,40 +46,40 @@ public:
         if (PartSys == nullptr)
             return mode_static(); // something went wrong, no data!
 
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        PartSys->setWrapX(SEGMENT.check1);
-        PartSys->setBounceX(!SEGMENT.check1);
-        PartSys->setWallHardness(SEGMENT.custom1); // wall hardness
-        PartSys->enableParticleCollisions(SEGMENT.check3, SEGMENT.custom1); // enable collisions and set particle collision hardness
-        PartSys->setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 128)); // min is 10%, max is 50%
-        PartSys->setSmearBlur(SEGMENT.check2 * 15); // enable 2D blurring (smearing)
+        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.setWrapX(SEGMENT.check1);
+        PartSys.setBounceX(!SEGMENT.check1);
+        PartSys.setWallHardness(SEGMENT.custom1); // wall hardness
+        PartSys.enableParticleCollisions(SEGMENT.check3, SEGMENT.custom1); // enable collisions and set particle collision hardness
+        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 128)); // min is 10%, max is 50%
+        PartSys.setSmearBlur(SEGMENT.check2 * 15); // enable 2D blurring (smearing)
 
         // apply 'gravity' from a 2D perlin noise map
         aux0 += 1 + (SEGMENT.speed >> 5); // noise z-position
         // update position in noise
-        for (i = 0; i < PartSys->usedParticles; i++) {
-            if (PartSys->particles[i].ttl == 0) { // revive dead particles (do not keep them alive forever, they can clump up, need to reseed)
-                PartSys->particles[i].ttl = hw_random16(500) + 200;
-                PartSys->particles[i].x = hw_random(PartSys->maxX);
-                PartSys->particles[i].y = hw_random(PartSys->maxY);
-                PartSys->particleFlags[i].collide = true; // particle colllides
+        for (i = 0; i < PartSys.usedParticles; i++) {
+            if (PartSys.particles[i].ttl == 0) { // revive dead particles (do not keep them alive forever, they can clump up, need to reseed)
+                PartSys.particles[i].ttl = hw_random16(500) + 200;
+                PartSys.particles[i].x = hw_random(PartSys.maxX);
+                PartSys.particles[i].y = hw_random(PartSys.maxY);
+                PartSys.particleFlags[i].collide = true; // particle colllides
             }
             uint32_t scale = 16 - ((31 - SEGMENT.custom3) >> 1);
-            uint16_t xnoise = PartSys->particles[i].x / scale; // position in perlin noise, scaled by slider
-            uint16_t ynoise = PartSys->particles[i].y / scale;
+            uint16_t xnoise = PartSys.particles[i].x / scale; // position in perlin noise, scaled by slider
+            uint16_t ynoise = PartSys.particles[i].y / scale;
             int16_t baseheight = perlin8(xnoise, ynoise, aux0); // noise value at particle position
-            PartSys->particles[i].hue = baseheight; // color particles to perlin noise value
+            PartSys.particles[i].hue = baseheight; // color particles to perlin noise value
             if (SEGMENT.call % 8 == 0) { // do not apply the force every frame, is too chaotic
                 int8_t xslope = (baseheight + (int16_t)perlin8(xnoise - 10, ynoise, aux0));
                 int8_t yslope = (baseheight + (int16_t)perlin8(xnoise, ynoise - 10, aux0));
-                PartSys->applyForce(i, xslope, yslope);
+                PartSys.applyForce(i, xslope, yslope);
             }
         }
 
         if (SEGMENT.call % (16 - (SEGMENT.custom2 >> 4)) == 0)
-            PartSys->applyFriction(2);
+            PartSys.applyFriction(2);
 
-        PartSys->update(); // update and render
+        PartSys.update(); // update and render
         return true;
     }
 

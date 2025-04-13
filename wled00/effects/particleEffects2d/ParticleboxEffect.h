@@ -34,8 +34,8 @@ public:
         if (SEGMENT.call == 0) { // initialization
             if (!initParticleSystem2D(PartSys, 1)) // init
                 return mode_static(); // allocation failed or not 2D
-            PartSys->setBounceX(true);
-            PartSys->setBounceY(true);
+            PartSys.setBounceX(true);
+            PartSys.setBounceY(true);
             aux0 = hw_random16(); // position in perlin noise
         }
         else
@@ -44,20 +44,20 @@ public:
         if (PartSys == nullptr)
             return mode_static(); // something went wrong, no data!
 
-        PartSys->updateSystem(); // update system properties (dimensions and data pointers)
-        PartSys->setParticleSize(SEGMENT.custom3<<3);
-        PartSys->setWallHardness(min(SEGMENT.custom2, (uint8_t)200)); // wall hardness is 200 or more
-        PartSys->enableParticleCollisions(true, max(2, (int)SEGMENT.custom2)); // enable collisions and set particle collision hardness
-        PartSys->setUsedParticles(map(SEGMENT.intensity, 0, 255, 2, 153)); // 1% - 60%
+        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.setParticleSize(SEGMENT.custom3<<3);
+        PartSys.setWallHardness(min(SEGMENT.custom2, (uint8_t)200)); // wall hardness is 200 or more
+        PartSys.enableParticleCollisions(true, max(2, (int)SEGMENT.custom2)); // enable collisions and set particle collision hardness
+        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 2, 153)); // 1% - 60%
         // add in new particles if amount has changed
-        for (i = 0; i < PartSys->usedParticles; i++) {
-            if (PartSys->particles[i].ttl < 260) { // initialize handed over particles and dead particles
-                PartSys->particles[i].ttl = 260; // full brigthness
-                PartSys->particles[i].x = hw_random16(PartSys->maxX);
-                PartSys->particles[i].y = hw_random16(PartSys->maxY);
-                PartSys->particles[i].hue = hw_random8(); // make it colorful
-                PartSys->particleFlags[i].perpetual = true; // never die
-                PartSys->particleFlags[i].collide = true; // all particles colllide
+        for (i = 0; i < PartSys.usedParticles; i++) {
+            if (PartSys.particles[i].ttl < 260) { // initialize handed over particles and dead particles
+                PartSys.particles[i].ttl = 260; // full brigthness
+                PartSys.particles[i].x = hw_random16(PartSys.maxX);
+                PartSys.particles[i].y = hw_random16(PartSys.maxY);
+                PartSys.particles[i].hue = hw_random8(); // make it colorful
+                PartSys.particleFlags[i].perpetual = true; // never die
+                PartSys.particleFlags[i].collide = true; // all particles colllide
                 break; // only spawn one particle per frame for less chaotic transitions
             }
         }
@@ -91,13 +91,13 @@ public:
                     ygravity = -ygravity;
             }
 
-            PartSys->applyForce(xgravity, ygravity);
+            PartSys.applyForce(xgravity, ygravity);
         }
 
         if ((SEGMENT.call & 0x0F) == 0) // every 16th frame
-            PartSys->applyFriction(1);
+            PartSys.applyFriction(1);
 
-        PartSys->update();   // update and render
+        PartSys.update();   // update and render
         return true;
     }
 
