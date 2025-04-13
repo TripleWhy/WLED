@@ -8,20 +8,29 @@
 #include <utility>
 #include <limits>
 
-// Memory block header - kept minimal
-struct BlockHeader {
-    std::size_t size;  // Size of the allocation including this header
-    bool free;         // Whether this block is free
-};
+#include <HardwareSerial.h>
 
 // Base circular buffer memory manager
 template<typename Tag>
 class CircularBufferMemoryManager {
 private:
+    struct BlockHeader {
+        std::uint16_t size; // Size of the allocation including this header
+        bool free;
+    };
+
+    static constexpr bool debugPrintFails             = false;
+    static constexpr bool debugPrintFailDetails       = false;
+    static constexpr bool debugPrintAllocaitons       = false;
+    static constexpr bool debugPrintAllocaitonDetails = false;
+
     static constexpr std::size_t bufferSize = Tag::size;
-    static inline std::array<uint8_t, bufferSize> buffer{};
-    static inline auto head = buffer.begin();
-    static inline auto tail = buffer.begin();
+    static_assert(bufferSize < std::numeric_limits<decltype(BlockHeader::size)>::max(), "BlockHeader is too short for this size.");
+    using Buffer = std::array<uint8_t, bufferSize>;
+    using BufferIterator = typename Buffer::iterator;
+    static inline Buffer buffer{};
+    static inline BufferIterator start{buffer.begin()};
+    static inline BufferIterator end  {buffer.begin()};
 
     static constexpr std::size_t alignment = alignof(std::max_align_t);
 
@@ -40,97 +49,154 @@ private:
         return header + 1;
     }
 
-    // Advance head as far as possible
-    static void advanceHead() {
-        while (head < tail) {
-            BlockHeader* header = reinterpret_cast<BlockHeader*>(head);
-            if (!header->free) {
-                break;  // Stop at first non-free block
-            }
-            // Advance head past this free block
-            head += header->size;
-
-            // Check if we've wrapped around or reached the end
-            if (head >= buffer.end()) {
-                head = buffer.begin();
-                tail = buffer.begin();  // Reset tail as well when we wrap
+    // Advance start as far as possible
+    static void advance() {
+        while (start != end) {
+            BlockHeader& header = reinterpret_cast<BlockHeader&>(*start);
+            if (!header.free) {
                 break;
             }
+            start += header.size;
+
+            if (start >= buffer.end()) {
+                start = buffer.begin();
+                break;
+            }
+        }
+        // if the buffer is now empty, reset it to the beginning to get a larger continuous area
+        if (start == end) {
+            start = buffer.begin();
+            end = buffer.begin();
         }
     }
 
 public:
+    static inline nullptr_t allocateFailed(std::size_t reqSize) {
+        if constexpr (debugPrintFails) {
+            Serial.printf("CircularBufferMemoryManager::allocate %u failed. free: %u, used: %u \n", reqSize, getFreeSpace(), getUsedSpace());
+            if constexpr (debugPrintFailDetails) {
+                printAllocationDetails();
+            }
+        }
+        return nullptr;
+    }
+
     // Allocate memory of specified size
     static void* allocate(std::size_t reqSize) {
+        if constexpr (debugPrintAllocaitons) {
+            Serial.printf("CircularBufferMemoryManager::allocate %u\n", reqSize);
+        }
         if (reqSize == 0) {
             return nullptr;
         }
 
         // Calculate total size needed with header and alignment
+        //TODO I believe this aligns the block header, but not the actual returned pointer.
         std::size_t totalSize = alignUp(sizeof(BlockHeader) + reqSize);
 
-        // First try: allocate at current tail position
-        if (tail + totalSize <= buffer.end()) {
-            // We have space at the end
-            BlockHeader* header = reinterpret_cast<BlockHeader*>(tail);
-            header->size = totalSize;
-            header->free = false;
+        BufferIterator reqStart;
+        BufferIterator reqEnd;
+        BufferIterator limit;
 
-            tail += totalSize;  // Move tail forward
-            return getUserPtr(header);
-        }
-
-        // Second try: If we don't have space at the end, try from beginning
-        // But only if head is not at the beginning
-        if (head != buffer.begin()) {
-            // Reset tail to beginning
-            uint8_t* oldTail = tail;
-            tail = buffer.begin();
-
-            // Check if we have space from beginning to head
-            if (tail + totalSize <= head) {
-                BlockHeader* header = reinterpret_cast<BlockHeader*>(tail);
-                header->size = totalSize;
-                header->free = false;
-
-                tail += totalSize;  // Move tail forward
-                return getUserPtr(header);
+        if (end >= start) {
+            limit = buffer.end();
+            reqStart = end;
+            reqEnd = (reqStart + totalSize);
+            if (reqEnd > limit) {
+                limit = start;
+                reqStart = buffer.begin();
+                reqEnd = (reqStart + totalSize);
+                if (reqEnd >= limit) {
+                    return allocateFailed(reqSize);
+                }
             }
-
-            // If allocation at beginning failed, restore tail
-            tail = oldTail;
+        } else {
+            limit = start;
+            reqStart = end;
+            reqEnd = (reqStart + totalSize);
+            if (reqEnd >= limit) {
+                return allocateFailed(reqSize);
+            }
         }
 
-        // Out of memory - can't allocate
-        return nullptr;
+        end = reqEnd;
+        BlockHeader* header = reinterpret_cast<BlockHeader*>(&*reqStart);
+        header->free = false;
+        if (buffer.end() - end < static_cast<int>(sizeof(BlockHeader))) {
+            header->size = buffer.end() - end;
+            end = buffer.end();
+        } else {
+            header->size = totalSize;
+
+            // insert dummy header to make block iteration work
+            // end != start at this point, and due to the alignment contraints, there *shuold* be engouh space for a full BlockHeader in the unused region
+            BlockHeader& dummy = reinterpret_cast<BlockHeader&>(*end);
+            dummy.size = buffer.end() - end;
+            dummy.free = true;
+        }
+
+        if constexpr (debugPrintAllocaitonDetails) {
+            printAllocationDetails();
+        }
+        return getUserPtr(header);
     }
 
     // Deallocate previously allocated memory
     static void deallocate(void* ptr) {
-        if (!ptr) return;
+        if constexpr (debugPrintAllocaitons) {
+            Serial.printf("CircularBufferMemoryManager::deallocate %p\n", ptr);
+        }
+        if (ptr == nullptr) {
+            return;
+        }
 
-        // Get the block header from the pointer
         BlockHeader* header = getHeader(ptr);
-
-        // Mark the block as free
         header->free = true;
 
-        // If this block is at the head, advance the head as far as possible
-        if (reinterpret_cast<uint8_t*>(header) == head) {
-            advanceHead();
+        if (reinterpret_cast<uint8_t*>(header) == &*start) {
+            advance();
+        }
+        if constexpr (debugPrintAllocaitonDetails) {
+            printAllocationDetails();
         }
     }
 
-    // Get the free space (approximate - doesn't account for fragmentation)
     static std::size_t getFreeSpace() {
-        if (head >= tail) {
-            return bufferSize - (head - tail);
+        if (start > end) {
+            return start - end;
+        } else {
+            return bufferSize - (end - start);
         }
-        return tail - head;
     }
 
     static std::size_t getUsedSpace() {
-        return (head - tail + bufferSize) % bufferSize;
+        return (end - start + bufferSize) % bufferSize;
+    }
+
+    static void printAllocationDetails() {
+        Serial.printf("buffer: %p - %p (%u)\n", &*buffer.cbegin(), &*buffer.cend(), buffer.cend() - buffer.cbegin());
+        Serial.printf("start: %p (%u)\n", &*start, start - buffer.begin());
+        Serial.printf("end:   %p (%u)\n", &*end, end - buffer.begin());
+
+        Serial.println();
+        if (end > start) {
+            Serial.printf("unused: %u\n", start - buffer.begin());
+        }
+        for (auto it = start; it != end; ) {
+            BlockHeader& header = reinterpret_cast<BlockHeader&>(*it);
+            Serial.printf("header: %p (%u), pointer: %p, size: %u, free: %u\n", &header, it - buffer.begin(), getUserPtr(&header), header.size, header.free);
+            if (it + header.size >= buffer.end()) {
+                // Serial.printf("unused: %u\n", buffer.end() - it - header.size);
+                it = buffer.begin();
+            } else {
+                it += header.size;
+            }
+        }
+        if (end > start) {
+            Serial.printf("unused: %u\n\n", buffer.end() - end);
+        } else {
+            Serial.printf("unused: %u\n\n", start - end);
+        }
     }
 };
 
@@ -168,6 +234,7 @@ public:
 
     // Allocate memory for n objects of type T
     static T* allocate(std::size_t n) {
+        // Serial.printf("%s: %u\n", __PRETTY_FUNCTION__, n);
         if (n > std::numeric_limits<std::size_t>::max() / sizeof(T)) {
             return nullptr;  // No exceptions, return null on overflow
         }
