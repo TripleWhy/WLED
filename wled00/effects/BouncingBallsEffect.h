@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "../FX.h"
 #include "Effect.h"
 
@@ -8,8 +9,6 @@ class BouncingBallsEffect : public BaseEffect<BouncingBallsEffect> {
         unsigned long lastBounceTime{strip.now};
         float impactVelocity{};
         float height{};
-        float pixelHeight{};
-        uint32_t color{};
     };
 
 private:
@@ -26,7 +25,7 @@ public:
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         numBalls = (SEGMENT.intensity * (maxNumBalls - 1)) / 255 + 1; // minimum 1 ball
-        strips = std::min(static_cast<unsigned>(SEGMENT.custom3), coordinate.height);
+        strips = std::clamp(static_cast<unsigned>(SEGMENT.custom3), 1u, coordinate.height);
         useBackgroundColor = !SEGMENT.check2;
 
         if (useBackgroundColor)
@@ -60,8 +59,9 @@ public:
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         for (size_t ballIndex = 0; ballIndex < numBalls; ballIndex++) {
             const Ball& ball = balls[stripIndex * maxNumBalls + ballIndex];
-            if (ball.pixelHeight - (ballSize / 2) <= coordinate.getXAbsolute() && coordinate.getXAbsolute() < ball.pixelHeight + ((ballSize + 1) / 2))
-                return ball.color;
+            const float pixelHeight = ball.height * (coordinate.width - 1);
+            if (pixelHeight - (ballSize / 2) <= coordinate.getXAbsolute() && coordinate.getXAbsolute() < pixelHeight + ((ballSize + 1) / 2))
+                return ballColors[ballIndex];
         }
 
         if (useBackgroundColor)
@@ -101,8 +101,6 @@ private:
             } else if (balls[i].height > 1.0f) {
                 continue; // do not draw OOB ball
             }
-            balls[i].pixelHeight = balls[i].height * (width - 1);
-            balls[i].color = ballColors[i];
         }
     }
 
