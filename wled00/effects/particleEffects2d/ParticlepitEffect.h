@@ -3,9 +3,8 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   PS Ballpit: particles falling down, user can enable these three options: X-wraparound, side bounce, ground bounce
@@ -14,37 +13,29 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlepitEffect : public BaseEffect<ParticlepitEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticlePitEffect : public BaseEffect<ParticlePitEffect, Particle2dEffect> {
 private:
-    using Self = ParticlepitEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticlePitEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Ballpit@Speed,Intensity,Size,Hardness,Saturation,Cylinder,Walls,Ground;;!;2;pal=11,sx=100,ix=220,c1=120,c2=130,c3=31,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEPIT;
 
-    explicit ParticlepitEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticlePitEffect(const EffectInformation& ei)
+        : Base{ei, 1, true, false}
+    {
+        PartSys.setKillOutOfBounds(true);
+        PartSys.setGravity(); // enable with default gravity
+        PartSys.setUsedParticles(170); // use 75% of available particles
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
-
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, 1, 0, true, false)) // init, request one source (actually dont really need one TODO: test if using zero sources also works)
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setKillOutOfBounds(true);
-            PartSys.setGravity(); // enable with default gravity
-            PartSys.setUsedParticles(170); // use 75% of available particles
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
 
         PartSys.setWrapX(SEGMENT.check1);
         PartSys.setBounceX(SEGMENT.check2);
@@ -88,7 +79,7 @@ public:
         if (SEGMENT.call % 6 == 0)// (3 + max(3, (SEGMENT.speed >> 2))) == 0) // note: if friction is too low, hard particles uncontrollably 'wander' left and right if wrapX is enabled
             PartSys.applyFriction(frictioncoefficient);
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

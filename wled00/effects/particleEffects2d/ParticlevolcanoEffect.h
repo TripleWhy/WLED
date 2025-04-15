@@ -3,9 +3,8 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle Volcano
@@ -13,53 +12,45 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-#define NUMBEROFSOURCES 1
-class ParticlevolcanoEffect : public BaseEffect<ParticlevolcanoEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleVolcanoEffect : public BaseEffect<ParticleVolcanoEffect, Particle2dEffect> {
 private:
-    using Self = ParticlevolcanoEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleVolcanoEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
+
+    static constexpr uint32_t NUMBEROFSOURCES = 1;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Volcano@Speed,Intensity,Move,Bounce,Spread,AgeColor,Walls,Collide;;!;2;pal=35,sx=100,ix=190,c1=0,c2=160,c3=6,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEVOLCANO;
 
-    explicit ParticlevolcanoEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleVolcanoEffect(const EffectInformation& ei)
+        : Base{ei, NUMBEROFSOURCES, false, false}
+    {
+        PartSys.setBounceY(true);
+        PartSys.setGravity(); // enable with default gforce
+        PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
+        PartSys.setMotionBlur(230); // anable motion blur
+
+        const uint8_t numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); // number of sprays
+        for (uint32_t i = 0; i < numSprays; i++) {
+            PartSys.sources[i].source.hue = hw_random16();
+            PartSys.sources[i].source.x = PartSys.maxX / (numSprays + 1) * (i + 1); // distribute evenly
+            PartSys.sources[i].maxLife = 300; // lifetime in frames
+            PartSys.sources[i].minLife = 250;
+            PartSys.sources[i].sourceFlags.collide = true; // seeded particles will collide (if enabled)
+            PartSys.sources[i].sourceFlags.perpetual = true; // source never dies
+        }
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         PSsettings2D volcanosettings;
         volcanosettings.asByte = 0b00000100; // PS settings for volcano movement: bounceX is enabled
         uint8_t numSprays; // note: so far only one tested but more is possible
         uint32_t i = 0;
-
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES)) // init, no additional data needed
-                return mode_static(); // allocation failed or not 2D
-
-            PartSys.setBounceY(true);
-            PartSys.setGravity(); // enable with default gforce
-            PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
-            PartSys.setMotionBlur(230); // anable motion blur
-
-            numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); // number of sprays
-            for (i = 0; i < numSprays; i++) {
-                PartSys.sources[i].source.hue = hw_random16();
-                PartSys.sources[i].source.x = PartSys.maxX / (numSprays + 1) * (i + 1); // distribute evenly
-                PartSys.sources[i].maxLife = 300; // lifetime in frames
-                PartSys.sources[i].minLife = 250;
-                PartSys.sources[i].sourceFlags.collide = true; // seeded particles will collide (if enabled)
-                PartSys.sources[i].sourceFlags.perpetual = true; // source never dies
-            }
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
 
         numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); // number of volcanoes
 
@@ -80,7 +71,7 @@ public:
         }
 
         // Particle System settings
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setColorByAge(SEGMENT.check1);
         PartSys.setBounceX(SEGMENT.check2);
         PartSys.setWallHardness(SEGMENT.custom2);
@@ -90,7 +81,7 @@ public:
         else
             PartSys.enableParticleCollisions(false);
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

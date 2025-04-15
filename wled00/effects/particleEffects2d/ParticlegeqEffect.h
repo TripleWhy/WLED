@@ -3,47 +3,38 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle base Graphical Equalizer
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlegeqEffect : public BaseEffect<ParticlegeqEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleGeqEffect : public BaseEffect<ParticleGeqEffect, Particle2dEffect> {
 private:
-    using Self = ParticlegeqEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleGeqEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS GEQ 2D@Speed,Intensity,Diverge,Bounce,Gravity,Cylinder,Walls,Floor;;!;2f;pal=0,sx=155,ix=200,c1=0";
-    static constexpr const uint8_t effectId = FX_MODE_PARTICLEGEQ;
+    static constexpr const uint8_t effectId = FX_MODE_PARTICLESGEQ;
 
-    explicit ParticlegeqEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleGeqEffect(const EffectInformation& ei)
+        : Base{ei, 1, false, false}
+    {
+        PartSys.setKillOutOfBounds(true);
+        PartSys.setUsedParticles(170); // use 2/3 of available particles
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
-
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, 1))
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setKillOutOfBounds(true);
-            PartSys.setUsedParticles(170); // use 2/3 of available particles
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
         uint32_t i;
         // set particle system properties
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setWrapX(SEGMENT.check1);
         PartSys.setBounceX(SEGMENT.check2);
         PartSys.setBounceY(SEGMENT.check3);
@@ -89,7 +80,7 @@ public:
             }
         }
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

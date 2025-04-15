@@ -3,53 +3,44 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle Spray, just a particle spray with many parameters
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlesprayEffect : public BaseEffect<ParticlesprayEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleSprayEffect : public BaseEffect<ParticleSprayEffect, Particle2dEffect> {
 private:
-    using Self = ParticlesprayEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleSprayEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Spray@Speed,!,Left/Right,Up/Down,Angle,Gravity,Cylinder/Square,Collide;;!;2v;pal=0,sx=150,ix=150,c1=220,c2=30,c3=21";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLESPRAY;
 
-    explicit ParticlesprayEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleSprayEffect(const EffectInformation& ei)
+        : Base{ei, 1, false, false}
+    {
+        PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
+        PartSys.setBounceY(true);
+        PartSys.setMotionBlur(200); // anable motion blur
+        PartSys.setSmearBlur(10); // anable motion blur
+        PartSys.sources[0].source.hue = hw_random16();
+        PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide (if enabled)
+        PartSys.sources[0].var = 3;
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         const uint8_t hardness = 200; // collision hardness is fixed
 
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, 1)) // init, no additional data needed
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
-            PartSys.setBounceY(true);
-            PartSys.setMotionBlur(200); // anable motion blur
-            PartSys.setSmearBlur(10); // anable motion blur
-            PartSys.sources[0].source.hue = hw_random16();
-            PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide (if enabled)
-            PartSys.sources[0].var = 3;
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
         // Particle System settings
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setBounceX(!SEGMENT.check2);
         PartSys.setWrapX(SEGMENT.check2);
         PartSys.setWallHardness(hardness);
@@ -102,7 +93,7 @@ public:
         }
         #endif
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

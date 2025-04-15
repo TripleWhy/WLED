@@ -3,50 +3,39 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Fuzzy Noise: Perlin noise 'gravity' mapping as in particles on 'noise hills' viewed from above
   calculates slope gradient at the particle positions and applies 'downhill' force, resulting in a fuzzy perlin noise display
   by DedeHai (Damian Schneider)
 */
-class ParticleperlinEffect : public BaseEffect<ParticleperlinEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticlePerlinEffect : public BaseEffect<ParticlePerlinEffect, Particle2dEffect> {
 private:
-    using Self = ParticleperlinEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticlePerlinEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fuzzy Noise@Speed,Particles,Bounce,Friction,Scale,Cylinder,Smear,Collide;;!;2;pal=64,sx=50,ix=200,c1=130,c2=30,c3=5,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEPERLIN;
 
-    explicit ParticleperlinEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticlePerlinEffect(const EffectInformation& ei)
+        : Base{ei, 1, true, false}
+    {
+        PartSys.setKillOutOfBounds(true); // should never happen, but lets make sure there are no stray particles
+        PartSys.setMotionBlur(230); // anable motion blur
+        PartSys.setBounceY(true);
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         uint32_t i;
 
-        if (SEGMENT.call == 0) { // initialization TODO: make this a PSinit function, this is needed in every particle FX but first, get this working.
-            if (!initParticleSystem2D(PartSys, 1, 0, true)) // init with 1 source and advanced properties
-                return mode_static(); // allocation failed or not 2D
-
-            PartSys.setKillOutOfBounds(true); // should never happen, but lets make sure there are no stray particles
-            PartSys.setMotionBlur(230); // anable motion blur
-            PartSys.setBounceY(true);
-            aux0 = rand();
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setWrapX(SEGMENT.check1);
         PartSys.setBounceX(!SEGMENT.check1);
         PartSys.setWallHardness(SEGMENT.custom1); // wall hardness
@@ -79,12 +68,12 @@ public:
         if (SEGMENT.call % (16 - (SEGMENT.custom2 >> 4)) == 0)
             PartSys.applyFriction(2);
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 
 private:
-    uint16_t aux0{};
+    uint16_t aux0{static_cast<uint16_t>(rand())}; //TODO replace with different rng
 };
 
 

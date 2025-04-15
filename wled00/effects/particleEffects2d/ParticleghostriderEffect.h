@@ -3,50 +3,40 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle replacement of Ghost Rider by DedeHai (Damian Schneider), original FX by stepko adapted by Blaz Kristan (AKA blazoncek)
 */
-#define MAXANGLESTEP 2200 //32767 means 180°
-class ParticleghostriderEffect : public BaseEffect<ParticleghostriderEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleGhostriderEffect : public BaseEffect<ParticleGhostriderEffect, Particle2dEffect> {
 private:
-    using Self = ParticleghostriderEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleGhostriderEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
+
+    static constexpr int32_t MAXANGLESTEP = 2200; //32767 means 180°
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Ghost Rider@Speed,Spiral,Blur,Color Cycle,Spread,AgeColor,Walls;;!;2;pal=1,sx=70,ix=0,c1=220,c2=30,c3=21,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEGHOSTRIDER;
 
-    explicit ParticleghostriderEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleGhostriderEffect(const EffectInformation& ei)
+        : Base{ei, 1, false, false}
+    {
+        PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
+        PartSys.sources[0].maxLife = 260; // lifetime in frames
+        PartSys.sources[0].minLife = 250;
+        PartSys.sources[0].source.x = hw_random16(PartSys.maxX);
+        PartSys.sources[0].source.y = hw_random16(PartSys.maxY);
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         PSsettings2D ghostsettings;
         ghostsettings.asByte = 0b0000011; //enable wrapX and wrapY
-
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, 1)) // init, no additional data needed
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
-            PartSys.sources[0].maxLife = 260; // lifetime in frames
-            PartSys.sources[0].minLife = 250;
-            PartSys.sources[0].source.x = hw_random16(PartSys.maxX);
-            PartSys.sources[0].source.y = hw_random16(PartSys.maxY);
-            step = hw_random16(MAXANGLESTEP) - (MAXANGLESTEP>>1); // angle increment
-        }
-        else {
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-        }
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
 
         if (SEGMENT.intensity > 0) { // spiraling
             if (aux1) {
@@ -61,7 +51,7 @@ public:
             }
         }
         // Particle System settings
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setMotionBlur(SEGMENT.custom1);
         PartSys.sources[0].var = SEGMENT.custom3 >> 1;
 
@@ -97,12 +87,12 @@ public:
         if (SEGMENT.custom2 > 190) //fast color change
             PartSys.sources[0].source.hue += (SEGMENT.custom2 - 190) >> 2;
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 
 private:
-    uint32_t step{};
+    uint32_t step{static_cast<uint32_t>(hw_random16(MAXANGLESTEP) - (MAXANGLESTEP>>1))}; // angle increment
     uint16_t aux0{};
     uint16_t aux1{};
 };

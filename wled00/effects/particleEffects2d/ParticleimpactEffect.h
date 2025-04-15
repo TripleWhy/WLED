@@ -3,59 +3,51 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle smashing down like meteors and exploding as they hit the ground, has many parameters to play with
   by DedeHai (Damian Schneider)
 */
-#define NUMBEROFSOURCES 8
-class ParticleimpactEffect : public BaseEffect<ParticleimpactEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleImpactEffect : public BaseEffect<ParticleImpactEffect, Particle2dEffect> {
 private:
-    using Self = ParticleimpactEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleImpactEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
+
+    static constexpr uint32_t NUMBEROFSOURCES = 8;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Impact@Launches,!,Force,Hardness,Blur,Cylinder,Walls,Collide;;!;2;pal=0,sx=32,ix=85,c1=70,c2=130,c3=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEIMPACT;
 
-    explicit ParticleimpactEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleImpactEffect(const EffectInformation& ei)
+        : Base{ei, NUMBEROFSOURCES, false, false}
+    {
+        PartSys.setKillOutOfBounds(true);
+        PartSys.setGravity(); // enable default gravity
+        PartSys.setBounceY(true); // always use ground bounce
+        PartSys.setWallRoughness(220); // high roughness
+        const uint8_t MaxNumMeteors = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        for (uint32_t i = 0; i < MaxNumMeteors; i++) {
+         // PartSys.sources[i].source.y = 500;
+            PartSys.sources[i].source.ttl = hw_random16(10 * i); // set initial delay for meteors
+            PartSys.sources[i].source.vy = 10; // at positive speeds, no particles are emitted and if particle dies, it will be relaunched
+        }
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         uint32_t i = 0;
         uint8_t MaxNumMeteors;
         PSsettings2D meteorsettings;
         meteorsettings.asByte = 0b00101000; // PS settings for meteors: bounceY and gravity enabled
 
-        if (SEGMENT.call == 0) { // initialization TODO: make this a PSinit function, this is needed in every particle FX but first, get this working.
-            if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES)) // init, no additional data needed
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setKillOutOfBounds(true);
-            PartSys.setGravity(); // enable default gravity
-            PartSys.setBounceY(true); // always use ground bounce
-            PartSys.setWallRoughness(220); // high roughness
-            MaxNumMeteors = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
-            for (i = 0; i < MaxNumMeteors; i++) {
-             // PartSys.sources[i].source.y = 500;
-                PartSys.sources[i].source.ttl = hw_random16(10 * i); // set initial delay for meteors
-                PartSys.sources[i].source.vy = 10; // at positive speeds, no particles are emitted and if particle dies, it will be relaunched
-            }
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data! (TODO: ask how to handle this so it always works)
-
         // Particle System settings
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setWrapX(SEGMENT.check1);
         PartSys.setBounceX(SEGMENT.check2);
         PartSys.setMotionBlur(SEGMENT.custom3<<3);
@@ -133,7 +125,7 @@ public:
             }
         }
 
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

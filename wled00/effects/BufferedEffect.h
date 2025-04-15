@@ -223,11 +223,11 @@ public:
             uint8_t keep = smear ? 255 : 255 - blur_amount;
             uint8_t seep = blur_amount >> 1;
             uint32_t carryover = BLACK;
-            uint32_t lastnew;       // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration
-            uint32_t last;
+            uint32_t lastnew{};       // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration. However, the compiler complains without it.
+            uint32_t last{};
             uint32_t curnew = BLACK;
             end = std::min(end, pixels.size());
-            for (unsigned i = 0; i < end; i++) {
+            for (unsigned i = start; i < end; i++) {
                 uint32_t cur = getPixelColor(i);
                 uint32_t part = color_fade(cur, seep);
                 curnew = color_fade(cur, keep);
@@ -249,7 +249,16 @@ public:
         }
 
         // 2D blurring, can be asymmetrical
-        void blur2d(uint8_t blur_x, uint8_t blur_y, bool smear = false) {
+        // void blur1d(uint8_t blur_amount, bool smear = false, unsigned start = 0, unsigned end = std::numeric_limits<unsigned>::max()) {
+        void blur2d(
+            uint8_t blur_x,
+            uint8_t blur_y,
+            bool smear = false,
+            unsigned start_x = 0,
+            unsigned start_y = 0,
+            unsigned end_x = std::numeric_limits<unsigned>::max(),
+            unsigned end_y = std::numeric_limits<unsigned>::max()
+        ) {
             static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
 
             const unsigned cols = Segment::getEffectWidth<dimensionality>();
@@ -259,7 +268,8 @@ public:
             if (blur_x) {
                 const uint8_t keepx = smear ? 255 : 255 - blur_x;
                 const uint8_t seepx = blur_x >> 1;
-                for (unsigned row = 0; row < rows; row++) { // blur rows (x direction)
+                end_x = std::min(end_x, rows);
+                for (unsigned row = start_x; row < end_x; row++) { // blur rows (x direction)
                     uint32_t carryover = BLACK;
                     uint32_t curnew = BLACK;
                     for (unsigned x = 0; x < cols; x++) {
@@ -282,7 +292,8 @@ public:
             if (blur_y) {
                 const uint8_t keepy = smear ? 255 : 255 - blur_y;
                 const uint8_t seepy = blur_y >> 1;
-                for (unsigned col = 0; col < cols; col++) {
+                end_y = std::min(end_y, cols);
+                for (unsigned col = start_y; col < end_y; col++) {
                     uint32_t carryover = BLACK;
                     uint32_t curnew = BLACK;
                     for (unsigned y = 0; y < rows; y++) {

@@ -1,7 +1,6 @@
 #pragma once
 #ifndef WLED_DISABLE_PARTICLESYSTEM1D
 
-#include <memory>
 #include "../../FX.h"
 #include "../../FXparticleSystem.h"
 #include "../BufferedEffect.h"

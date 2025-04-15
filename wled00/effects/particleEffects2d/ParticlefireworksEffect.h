@@ -3,55 +3,45 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle Fireworks
   Rockets shoot up and explode in a random color, sometimes in a defined pattern
   by DedeHai (Damian Schneider)
 */
-#define NUMBEROFSOURCES 8
-
-class ParticlefireworksEffect : public BaseEffect<ParticlefireworksEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleFireworksEffect : public BaseEffect<ParticleFireworksEffect, Particle2dEffect> {
 private:
-    using Self = ParticlefireworksEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleFireworksEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
+
+    static constexpr uint32_t NUMBEROFSOURCES = 8;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fireworks@Launches,Explosion Size,Fuse,Blur,Gravity,Cylinder,Ground,Fast;;!;2;pal=11,ix=50,c1=40,c2=0,c3=12";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEFIREWORKS;
 
-    explicit ParticlefireworksEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleFireworksEffect(const EffectInformation& ei)
+        : Base{ei, NUMBEROFSOURCES, false, false}
+    {
+        PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
+        PartSys.setWallHardness(120); // ground bounce is fixed
+        const uint32_t numRockets = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        for (uint32_t j = 0; j < numRockets; j++) {
+            PartSys.sources[j].source.ttl = 500 * j; // first rocket starts immediately, others follow soon
+            PartSys.sources[j].source.vy = -1; // at negative speed, no particles are emitted and if rocket dies, it will be relaunched
+        }
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         uint32_t numRockets;
 
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES))
-                return mode_static(); // allocation failed
-
-            PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
-            PartSys.setWallHardness(120); // ground bounce is fixed
-            numRockets = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
-            for (uint32_t j = 0; j < numRockets; j++) {
-                PartSys.sources[j].source.ttl = 500 * j; // first rocket starts immediately, others follow soon
-                PartSys.sources[j].source.vy = -1; // at negative speed, no particles are emitted and if rocket dies, it will be relaunched
-            }
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         numRockets = map(SEGMENT.speed, 0 , 255, 4, min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES));
 
         PartSys.setWrapX(SEGMENT.check1);
@@ -85,10 +75,10 @@ public:
         // check each rocket's state and emit particles according to its state: moving up = emit exhaust, at top = explode; falling down = standby time
         uint32_t emitparticles, frequency, baseangle, hueincrement; // number of particles to emit for each rocket's state
         // variables for circular explosions
-        [[maybe_unused]] int32_t speed, currentspeed, speedvariation, percircle;
+        int32_t speed{}, currentspeed, percircle;
         int32_t counter = 0;
-        [[maybe_unused]] uint16_t angle;
-        [[maybe_unused]] unsigned angleincrement;
+        uint16_t angle{};
+        unsigned angleincrement;
         bool circularexplosion = false;
 
         // emit particles for each rocket
@@ -160,7 +150,7 @@ public:
                 PartSys.particleMoveUpdate(PartSys.particles[i], PartSys.particleFlags[i], nullptr, nullptr);
             }
         }
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

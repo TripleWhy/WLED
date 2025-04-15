@@ -3,9 +3,8 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle System Vortex
@@ -13,51 +12,42 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-#define NUMBEROFSOURCES 8
-class ParticlevortexEffect : public BaseEffect<ParticlevortexEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleVortexEffect : public BaseEffect<ParticleVortexEffect, Particle2dEffect> {
 private:
-    using Self = ParticlevortexEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleVortexEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
+
+    static constexpr uint32_t NUMBEROFSOURCES = 8;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Vortex@Rotation Speed,Particle Speed,Arms,Flip,Nozzle,Smear,Direction,Random Flip;;!;2;pal=27,c1=200,c2=0,c3=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEVORTEX;
 
-    explicit ParticlevortexEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleVortexEffect(const EffectInformation& ei)
+        : Base{ei, NUMBEROFSOURCES, false, false}
+    {
+        #ifdef ESP8266
+        PartSys.setMotionBlur(180);
+        #else
+        PartSys.setMotionBlur(130);
+        #endif
+        for (uint32_t i = 0; i < min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); i++) {
+            PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
+            PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
+            PartSys.sources[i].maxLife = 900;
+            PartSys.sources[i].minLife = 800;
+        }
+        PartSys.setKillOutOfBounds(true);
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        if (coordinate.width == 1)
-            return mode_static();
-        ParticleSystem2D *PartSys = nullptr;
         uint32_t i, j;
 
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES))
-                return mode_static(); // allocation failed
-            #ifdef ESP8266
-            PartSys.setMotionBlur(180);
-            #else
-            PartSys.setMotionBlur(130);
-            #endif
-            for (i = 0; i < min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); i++) {
-                PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
-                PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
-                PartSys.sources[i].maxLife = 900;
-                PartSys.sources[i].minLife = 800;
-            }
-            PartSys.setKillOutOfBounds(true);
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         uint32_t spraycount = min(PartSys.numSources, (uint32_t)(1 + (SEGMENT.custom1 >> 5))); // number of sprays to display, 1-8
         #ifdef ESP8266
         for (i = 1; i < 4; i++) { // need static particles in the center to reduce blinking (would be black every other frame without this hack), just set them there fixed
@@ -78,8 +68,8 @@ public:
 
         // update colors of the sprays
         for (i = 0; i < spraycount; i++) {
-                uint32_t coloroffset = 0xFF / spraycount;
-                PartSys.sources[i].source.hue = coloroffset * i;
+            uint32_t coloroffset = 0xFF / spraycount;
+            PartSys.sources[i].source.hue = coloroffset * i;
         }
 
         // set rotation direction and speed
@@ -131,7 +121,7 @@ public:
                 j = (j + 1) % spraycount;
             }
         }
-        PartSys.update(); //update all particles and render to frame
+        PartSys.update(buffer); //update all particles and render to frame
         return true;
     }
 

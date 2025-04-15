@@ -3,49 +3,39 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   PS Blobs: large particles bouncing around, changing size and form
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleblobsEffect : public BaseEffect<ParticleblobsEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleBlobsEffect : public BaseEffect<ParticleBlobsEffect, Particle2dEffect> {
 private:
-    using Self = ParticleblobsEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleBlobsEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Blobs@Speed,Blobs,Size,Life,Blur,Wobble,Collide,Pulsate;;!;2v;sx=30,ix=64,c1=200,c2=130,c3=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEBLOBS;
 
-    explicit ParticleblobsEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleBlobsEffect(const EffectInformation& ei)
+        : Base{ei, 1, true, true}
+    {
+        PartSys.setBounceX(true);
+        PartSys.setBounceY(true);
+        PartSys.setWallHardness(255);
+        PartSys.setWallRoughness(255);
+        PartSys.setCollisionHardness(255);
+}
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
-
-        if (SEGMENT.call == 0) {
-            if (!initParticleSystem2D(PartSys, 1, 0, true, true)) //init, request one source, no additional bytes, advanced size & size control (actually dont really need one TODO: test if using zero sources also works)
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setBounceX(true);
-            PartSys.setBounceY(true);
-            PartSys.setWallHardness(255);
-            PartSys.setWallRoughness(255);
-            PartSys.setCollisionHardness(255);
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 128)); // minimum 10%, maximum 50% of available particles (note: PS ensures at least 1)
         PartSys.enableParticleCollisions(SEGMENT.check2);
 
@@ -92,7 +82,7 @@ public:
         #endif
 
         PartSys.setMotionBlur(((SEGMENT.custom3) << 3) + 7);
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

@@ -3,9 +3,8 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle rotating GEQ
@@ -13,48 +12,40 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-#define NUMBEROFSOURCES 16
-class ParticlecentergeqEffect : public BaseEffect<ParticlecentergeqEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleCenterGeqEffect : public BaseEffect<ParticleCenterGeqEffect, Particle2dEffect> {
 private:
-    using Self = ParticlecentergeqEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleCenterGeqEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
+
+    static constexpr uint32_t NUMBEROFSOURCES = 16;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS GEQ Nova@Speed,Intensity,Rotation Speed,Color Change,Nozzle,,Direction;;!;2f;pal=13,ix=180,c1=0,c2=0,c3=8";
-    static constexpr const uint8_t effectId = FX_MODE_PARTICLECIRCULARGEQ;
+    static constexpr const uint8_t effectId = FX_MODE_PARTICLECENTERGEQ;
 
-    explicit ParticlecentergeqEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleCenterGeqEffect(const EffectInformation& ei)
+        : Base{ei, NUMBEROFSOURCES, false, false}
+    {
+        uint8_t const numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        for (uint32_t i = 0; i < numSprays; i++) {
+            PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
+            PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
+            PartSys.sources[i].source.hue = i * 16; // even color distribution
+            PartSys.sources[i].maxLife = 400;
+            PartSys.sources[i].minLife = 200;
+        }
+        PartSys.setKillOutOfBounds(true);
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         uint8_t numSprays;
         uint32_t i;
 
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, NUMBEROFSOURCES))  // init, request 16 sources
-                return mode_static(); // allocation failed or not 2D
-
-            numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
-            for (i = 0; i < numSprays; i++) {
-                PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
-                PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
-                PartSys.sources[i].source.hue = i * 16; // even color distribution
-                PartSys.sources[i].maxLife = 400;
-                PartSys.sources[i].minLife = 200;
-            }
-            PartSys.setKillOutOfBounds(true);
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
 
         um_data_t *um_data = getAudioData();
@@ -89,7 +80,7 @@ public:
 
             j = (j + 1) % numSprays;
         }
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
         return true;
     }
 

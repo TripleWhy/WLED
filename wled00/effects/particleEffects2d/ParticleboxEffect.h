@@ -3,48 +3,38 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle Box, applies gravity to particles in either a random direction or random but only downwards (sloshing)
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleboxEffect : public BaseEffect<ParticleboxEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleBoxEffect : public BaseEffect<ParticleBoxEffect, Particle2dEffect> {
 private:
-    using Self = ParticleboxEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleBoxEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Box@!,Particles,Tilt,Hardness,Size,Random,Washing Machine,Sloshing;;!;2;pal=53,ix=50,c3=1,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEBOX;
 
-    explicit ParticleboxEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleBoxEffect(const EffectInformation& ei)
+        : Base{ei, 1, false, false}
+    {
+        PartSys.setBounceX(true);
+        PartSys.setBounceY(true);
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         uint32_t i;
 
-        if (SEGMENT.call == 0) { // initialization
-            if (!initParticleSystem2D(PartSys, 1)) // init
-                return mode_static(); // allocation failed or not 2D
-            PartSys.setBounceX(true);
-            PartSys.setBounceY(true);
-            aux0 = hw_random16(); // position in perlin noise
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setParticleSize(SEGMENT.custom3<<3);
         PartSys.setWallHardness(min(SEGMENT.custom2, (uint8_t)200)); // wall hardness is 200 or more
         PartSys.enableParticleCollisions(true, max(2, (int)SEGMENT.custom2)); // enable collisions and set particle collision hardness
@@ -97,12 +87,12 @@ public:
         if ((SEGMENT.call & 0x0F) == 0) // every 16th frame
             PartSys.applyFriction(1);
 
-        PartSys.update();   // update and render
+        PartSys.update(buffer);   // update and render
         return true;
     }
 
 private:
-    uint16_t aux0{};
+    uint16_t aux0{hw_random16()};
 };
 
 

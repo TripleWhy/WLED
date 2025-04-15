@@ -461,21 +461,21 @@ static constexpr std::array<const EffectInformation*, MODE_COUNT> setupEffectDat
   assignEffectInfo(array, Akemi2dEffect::effectInformation); // audio
 
   #ifndef WLED_DISABLE_PARTICLESYSTEM2D
-  assignEffectInfo(array, ParticlevolcanoEffect::effectInformation);
-  assignEffectInfo(array, ParticlefireEffect::effectInformation);
-  assignEffectInfo(array, ParticlefireworksEffect::effectInformation);
-  assignEffectInfo(array, ParticlevortexEffect::effectInformation);
-  assignEffectInfo(array, ParticleperlinEffect::effectInformation);
-  assignEffectInfo(array, ParticlepitEffect::effectInformation);
-  assignEffectInfo(array, ParticleboxEffect::effectInformation);
-  assignEffectInfo(array, ParticleattractorEffect::effectInformation); // 872 bytes
-  assignEffectInfo(array, ParticleimpactEffect::effectInformation);
-  assignEffectInfo(array, ParticlewaterfallEffect::effectInformation);
-  assignEffectInfo(array, ParticlesprayEffect::effectInformation);
-  assignEffectInfo(array, ParticleGEQEffect::effectInformation);
-  assignEffectInfo(array, ParticlecenterGEQEffect::effectInformation);
-  assignEffectInfo(array, ParticleghostriderEffect::effectInformation);
-  assignEffectInfo(array, ParticleblobsEffect::effectInformation);
+  assignEffectInfo(array, ParticleVolcanoEffect::effectInformation);
+  assignEffectInfo(array, ParticleFireEffect::effectInformation);
+  assignEffectInfo(array, ParticleFireworksEffect::effectInformation);
+  assignEffectInfo(array, ParticleVortexEffect::effectInformation);
+  assignEffectInfo(array, ParticlePerlinEffect::effectInformation);
+  assignEffectInfo(array, ParticlePitEffect::effectInformation);
+  assignEffectInfo(array, ParticleBoxEffect::effectInformation);
+  assignEffectInfo(array, ParticleAttractorEffect::effectInformation); // 872 bytes
+  assignEffectInfo(array, ParticleImpactEffect::effectInformation);
+  assignEffectInfo(array, ParticleWaterfallEffect::effectInformation);
+  assignEffectInfo(array, ParticleSprayEffect::effectInformation);
+  assignEffectInfo(array, ParticleGeqEffect::effectInformation);
+  assignEffectInfo(array, ParticleCenterGeqEffect::effectInformation);
+  assignEffectInfo(array, ParticleGhostriderEffect::effectInformation);
+  assignEffectInfo(array, ParticleBlobsEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM2D
   #endif // WLED_DISABLE_2D
 

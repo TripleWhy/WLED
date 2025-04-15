@@ -3,61 +3,50 @@
 #ifndef WLED_DISABLE_PARTICLESYSTEM2D
 
 #include "../../FX.h"
-#include "../../FXparticleSystem.h"
-#include "../BufferedEffect.h"
 #include "../Effect.h"
+#include "Particle2dEffect.h"
 
 /*
   Particle Fire
   realistic fire effect using particles. heat based and using perlin-noise for wind
   by DedeHai (Damian Schneider)
 */
-class ParticlefireEffect : public BaseEffect<ParticlefireEffect, BufferedEffect<EffectDimensionality::d2>> {
+class ParticleFireEffect : public BaseEffect<ParticleFireEffect, Particle2dEffect> {
 private:
-    using Self = ParticlefireEffect;
-    using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
+    using Self = ParticleFireEffect;
+    using Base = BaseEffect<Self, Particle2dEffect>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fire@Speed,Intensity,Flame Height,Wind,Spread,Smooth,Cylinder,Turbulence;;!;2;pal=35,sx=110,c1=110,c2=50,c3=31,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEFIRE;
 
-    explicit ParticlefireEffect(const EffectInformation& ei) : Base{ei, false} {}
+    explicit ParticleFireEffect(const EffectInformation& ei)
+        : Base{ei, Segment::getEffectWidth<EffectDimensionality::d2>(), false, false}
+    {
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
 
-        ParticleSystem2D *PartSys = nullptr;
         uint32_t i; // index variable
         uint32_t numFlames; // number of flames: depends on fire width. for a fire width of 16 pixels, about 25-30 flames give good results
 
-        if (SEGMENT.call == 0) { // initialization TODO: make this a PSinit function, this is needed in every particle FX but first, get this working.
-            if (!initParticleSystem2D(PartSys, SEGMENT.virtualWidth(), 4)) //maximum number of source (PS may limit based on segment size); need 4 additional bytes for time keeping (uint32_t lastcall)
-                return mode_static(); // allocation failed or not 2D
-            aux0 = hw_random16(); // aux0 is wind position (index) in the perlin noise
-        }
-        else
-            PartSys = reinterpret_cast<ParticleSystem2D *>(SEGENV.data); // if not first call, just set the pointer to the PS
-
-        if (PartSys == nullptr)
-            return mode_static(); // something went wrong, no data!
-
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
         PartSys.setWrapX(SEGMENT.check2);
         PartSys.setMotionBlur(SEGMENT.check1 * 170); // anable/disable motion blur
 
         uint32_t firespeed = max((uint8_t)100, SEGMENT.speed); //limit speed to 100 minimum, reduce frame rate to make it slower (slower speeds than 100 do not look nice)
         if (SEGMENT.speed < 100) { //slow, limit FPS
-            uint32_t *lastcall = reinterpret_cast<uint32_t *>(PartSys.PSdataEnd);
-            uint32_t period = strip.now - *lastcall;
+            uint32_t period = strip.now - lastcall;
             if (period < (uint32_t)map(SEGMENT.speed, 0, 99, 50, 10)) { // limit to 90FPS - 20FPS
                 SEGMENT.call--; //skipping a frame, decrement the counter (on call0, this is never executed as lastcall is 0, so its fine to not check if >0)
                 //still need to render the frame or flickering will occur in transitions
-                PartSys.updateFire(SEGMENT.intensity, true); // render the fire without updating particles (render only)
-                return; //do not update this frame
+                PartSys.updateFire(buffer, SEGMENT.intensity, true); // render the fire without updating particles (render only)
+                return false; //do not update this frame
             }
-            *lastcall = strip.now;
+            lastcall = strip.now;
         }
 
         uint32_t spread = (PartSys.maxX >> 5) * (SEGMENT.custom3 + 1); //fire around segment center (in subpixel points)
@@ -107,13 +96,14 @@ public:
             PartSys.flameEmit(PartSys.sources[j]);
         }
 
-        PartSys.updateFire(SEGMENT.intensity, false); // update and render the fire
+        PartSys.updateFire(buffer, SEGMENT.intensity, false); // update and render the fire
         return true;
     }
 
 private:
+    uint32_t lastcall{};
     uint32_t step{};
-    uint16_t aux0{};
+    uint16_t aux0{hw_random16()}; // aux0 is wind position (index) in the perlin noise
     uint16_t aux1{};
 };
 
