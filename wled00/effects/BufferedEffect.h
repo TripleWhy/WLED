@@ -16,6 +16,9 @@
 
 class BufferedEffectBase : public Effect {
 public:
+    static constexpr bool verifyBufferBounds = true;
+    static constexpr bool verifyXyBounds = true;
+
     class PixelBufferBase {
         template<EffectDimensionality>
         friend class BufferedEffect;
@@ -88,15 +91,20 @@ public:
 
     protected:
         inline uint32_t getPixelColorLinear(unsigned i) const {
-            if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
-                Serial.printf("BufferedEffect::PixelBuffer::getPixelColor: %d >= %u\n", i, pixels.size());
-                std::terminate();
+            if constexpr (verifyBufferBounds) {
+                if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
+                    Serial.printf("BufferedEffect::getPixelColorLinear: %u >= %u\n", i, pixels.size());
+                    std::terminate();
+                }
             }
             return pixels[static_cast<size_t>(i)];
         }
         inline void setPixelColorLinear(unsigned i, uint32_t c) {
-            if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
-                std::terminate();
+            if constexpr (verifyBufferBounds) {
+                if (static_cast<size_t>(i) >= pixels.size()) [[unlikely]] {
+                    Serial.printf("BufferedEffect::setPixelColorLinear: %u >= %u\n", i, pixels.size());
+                    std::terminate();
+                }
             }
             pixels[static_cast<size_t>(i)] = c;
         }
@@ -516,7 +524,7 @@ public:
             }
         }
 
-        void wuPixel(uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu
+        void wuPixel(const EffectCoordinate& coordinate, uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu
             constexpr auto WU_WEIGHT = [](unsigned a, unsigned b) -> uint8_t { return ((uint8_t) (((a)*(b)+(a)+(b))>>8)); };
             // extract the fractional parts and derive their inverses
             unsigned xx = x & 0xff, yy = y & 0xff, ix = 255 - xx, iy = 255 - yy;
@@ -525,8 +533,11 @@ public:
                              WU_WEIGHT(ix, yy), WU_WEIGHT(xx, yy)};
             // multiply the intensities by the colour, and saturating-add them to the pixels
             for (int i = 0; i < 4; i++) {
-                int wu_x = (x >> 8) + (i & 1);        // precalculate x
-                int wu_y = (y >> 8) + ((i >> 1) & 1); // precalculate y
+                unsigned wu_x = (x >> 8) + (i & 1);        // precalculate x
+                unsigned wu_y = (y >> 8) + ((i >> 1) & 1); // precalculate y
+                if ((wu_x >= coordinate.width) || (wu_y >= coordinate.height)) {
+                    continue;
+                }
                 CRGB led = getPixelColor(wu_x, wu_y);
                 CRGB oldLed = led;
                 led.r = qadd8(led.r, c.r * wu[i] >> 8);
@@ -583,6 +594,16 @@ private:
         } else if constexpr (dimensionality == EffectDimensionality::d1) {
             return x;
         } else {
+            if constexpr (verifyXyBounds) {
+                if (x >= Segment::getEffectWidth<dimensionality>()) [[unlikely]] {
+                    Serial.printf("BufferedEffect::convertToLinear: x %u >= %u\n", x, Segment::getEffectWidth<dimensionality>());
+                    std::terminate();
+                }
+                if (y >= Segment::getEffectHeight<dimensionality>()) [[unlikely]] {
+                    Serial.printf("BufferedEffect::convertToLinear: y %u >= %u\n", y, Segment::getEffectHeight<dimensionality>());
+                    std::terminate();
+                }
+            }
             return y * Segment::getEffectWidth<dimensionality>() + x;
         }
     }
