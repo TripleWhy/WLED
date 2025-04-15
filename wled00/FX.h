@@ -630,22 +630,8 @@ typedef struct Segment {
     #endif
     bool isPixelClipped(int i) const;
     [[gnu::hot]] uint32_t getPixelColor(int i) const;
-    // 1D support functions (some implement 2D as well)
-    void blur(uint8_t, bool smear = false);
     void clear();
-    //TODO remove?
     void fill(uint32_t c);
-    //TODO remove?
-    void fade_out(uint8_t r);
-    void fadeToSecondaryBy(uint8_t fadeBy);
-    void fadeToBlackBy(uint8_t fadeBy);
-    //TODO remove?
-    inline void blendPixelColor(int n, uint32_t color, uint8_t blend)    { setPixelColor(n, color_blend(getPixelColor(n), color, blend)); }
-    inline void blendPixelColor(int n, CRGB c, uint8_t blend)            { blendPixelColor(n, RGBW32(c.r,c.g,c.b,0), blend); }
-    inline void addPixelColor(int n, uint32_t color, bool preserveCR = true)                     { setPixelColor(n, color_add(getPixelColor(n), color, preserveCR)); }
-    inline void addPixelColor(int n, byte r, byte g, byte b, byte w = 0, bool preserveCR = true) { addPixelColor(n, RGBW32(r,g,b,w), preserveCR); }
-    inline void addPixelColor(int n, CRGB c, bool preserveCR = true)                             { addPixelColor(n, RGBW32(c.r,c.g,c.b,0), preserveCR); }
-    inline void fadePixelColor(uint16_t n, uint8_t fade)                 { setPixelColor(n, color_fade(getPixelColor(n), fade, true)); }
     [[gnu::hot]] uint32_t color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) const;
     [[gnu::hot]] uint32_t color_wheel(uint8_t pos) const;
 
@@ -673,29 +659,6 @@ typedef struct Segment {
     #endif
     [[gnu::hot]] bool isPixelXYClipped(int x, int y) const;
     [[gnu::hot]] uint32_t getPixelColorXY(int x, int y) const;
-    // 2D support functions
-    inline void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend) { setPixelColorXY(x, y, color_blend(getPixelColorXY(x,y), color, blend)); }
-    inline void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)         { blendPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), blend); }
-    inline void addPixelColorXY(int x, int y, uint32_t color, bool preserveCR = true)                     { setPixelColorXY(x, y, color_add(getPixelColorXY(x,y), color, preserveCR)); }
-    inline void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0, bool preserveCR = true) { addPixelColorXY(x, y, RGBW32(r,g,b,w), preserveCR); }
-    inline void addPixelColorXY(int x, int y, CRGB c, bool preserveCR = true)                             { addPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), preserveCR); }
-    inline void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)                   { setPixelColorXY(x, y, color_fade(getPixelColorXY(x,y), fade, true)); }
-    //void box_blur(unsigned r = 1U, bool smear = false); // 2D box blur
-    void blur2D(uint8_t blur_x, uint8_t blur_y, bool smear = false);
-    void moveX(int delta, bool wrap = false);
-    void moveY(int delta, bool wrap = false);
-    void move(unsigned dir, unsigned delta, bool wrap = false);
-    void drawCircle(uint16_t cx, uint16_t cy, uint8_t radius, uint32_t c, bool soft = false);
-    inline void drawCircle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c, bool soft = false) { drawCircle(cx, cy, radius, RGBW32(c.r,c.g,c.b,0), soft); }
-    void fillCircle(uint16_t cx, uint16_t cy, uint8_t radius, uint32_t c, bool soft = false);
-    inline void fillCircle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c, bool soft = false) { fillCircle(cx, cy, radius, RGBW32(c.r,c.g,c.b,0), soft); }
-    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c, bool soft = false);
-    inline void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c, bool soft = false) { drawLine(x0, y0, x1, y1, RGBW32(c.r,c.g,c.b,0), soft); } // automatic inline
-    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2 = 0, int8_t rotate = 0, bool usePalGrad = false);
-    inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
-    inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c, CRGB c2, int8_t rotate = 0, bool usePalGrad = false) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0), RGBW32(c2.r,c2.g,c2.b,0), rotate, usePalGrad); } // automatic inline
-    void wu_pixel(uint32_t x, uint32_t y, CRGB c);
-    inline void fill_solid(CRGB c) { fill(RGBW32(c.r,c.g,c.b,0)); }
   #else
     inline bool is2D() const                                                      { return false; }
     inline void setPixelColorXY(int x, int y, uint32_t c)                         { setPixelColor(x, c); }
@@ -710,27 +673,6 @@ typedef struct Segment {
     #endif
     inline bool isPixelXYClipped(int x, int y)                                    { return isPixelClipped(x); }
     inline uint32_t getPixelColorXY(int x, int y)                                 { return getPixelColor(x); }
-    inline void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t c, uint8_t blend) { blendPixelColor(x, c, blend); }
-    inline void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColor(x, RGBW32(c.r,c.g,c.b,0), blend); }
-    inline void addPixelColorXY(int x, int y, uint32_t color, bool saturate = false) { addPixelColor(x, color, saturate); }
-    inline void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0, bool saturate = false) { addPixelColor(x, RGBW32(r,g,b,w), saturate); }
-    inline void addPixelColorXY(int x, int y, CRGB c, bool saturate = false)         { addPixelColor(x, RGBW32(c.r,c.g,c.b,0), saturate); }
-    inline void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)            { fadePixelColor(x, fade); }
-    //inline void box_blur(unsigned i, bool vertical, uint8_t blur_amount) {}
-    inline void blur2D(uint8_t blur_x, uint8_t blur_y, bool smear = false) {}
-    inline void moveX(int delta, bool wrap = false) {}
-    inline void moveY(int delta, bool wrap = false) {}
-    inline void move(uint8_t dir, uint8_t delta, bool wrap = false) {}
-    inline void drawCircle(uint16_t cx, uint16_t cy, uint8_t radius, uint32_t c, bool soft = false) {}
-    inline void drawCircle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c, bool soft = false) {}
-    inline void fillCircle(uint16_t cx, uint16_t cy, uint8_t radius, uint32_t c, bool soft = false) {}
-    inline void fillCircle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c, bool soft = false) {}
-    inline void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c, bool soft = false) {}
-    inline void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c, bool soft = false) {}
-    inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t = 0, int8_t = 0, bool = false) {}
-    inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB color) {}
-    inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c, CRGB c2, int8_t rotate = 0, bool usePalGrad = false) {}
-    inline void wu_pixel(uint32_t x, uint32_t y, CRGB c) {}
   #endif
 } segment;
 //static int segSize = sizeof(Segment);
