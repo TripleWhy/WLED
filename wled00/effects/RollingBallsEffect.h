@@ -14,10 +14,10 @@
 class RollingBallsEffect : public BaseEffect<RollingBallsEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
     struct RollingBall {
-        unsigned long lastBounceUpdate;
-        float mass; // could fix this to be = 1. if memory is an issue
-        float velocity;
-        float height;
+        unsigned long lastBounceUpdate{};
+        float mass{}; // could fix this to be = 1. if memory is an issue
+        float velocity{};
+        float height{};
     };
 
 private:

@@ -15,9 +15,9 @@ class FairyEffect : public BaseEffect<FairyEffect, BufferedEffect<EffectDimensio
 public:
     //4 bytes
     struct Flasher {
-        uint16_t stateStart;
-        uint8_t stateDur;
-        bool stateOn;
+        uint16_t stateStart{};
+        uint8_t stateDur{};
+        bool stateOn{};
     };
 
 private:

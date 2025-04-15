@@ -52,7 +52,7 @@ public:
             buffer.fadeToBlackBy((SEGMENT.speed>>2)+64);
 
             CRGB color = CRGB::White;
-            buffer.wuPixel(gPosX * 256 / 10, gPosY * 256 / 10, color);
+            buffer.wuPixel(coordinate, gPosX * 256 / 10, gPosY * 256 / 10, color);
 
             gPosX += Vspeed * sin_t(radians(gAngle));
             gPosY += Vspeed * cos_t(radians(gAngle));
@@ -80,7 +80,7 @@ public:
                     lightersPosX[i] += -7 * sin_t(radians(Angle[i]));
                     lightersPosY[i] += -7 * cos_t(radians(Angle[i]));
                 }
-                buffer.wuPixel(lightersPosX[i] * 256 / 10, lightersPosY[i] * 256 / 10, ColorFromPalette(SEGPALETTE, (256 - time[i])));
+                buffer.wuPixel(coordinate, lightersPosX[i] * 256 / 10, lightersPosY[i] * 256 / 10, ColorFromPalette(SEGPALETTE, (256 - time[i])));
             }
             buffer.blur(SEGMENT.intensity>>3);
         }

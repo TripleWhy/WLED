@@ -28,12 +28,12 @@ class DancingShadowsEffect : public BaseEffect<DancingShadowsEffect, BufferedEff
 private:
     //13 bytes
     struct Spotlight {
-        float speed;
-        uint8_t colorIdx;
-        int16_t position;
-        unsigned long lastUpdateTime;
-        uint8_t width;
-        uint8_t type;
+        float speed{};
+        uint8_t colorIdx{};
+        int16_t position{};
+        unsigned long lastUpdateTime{};
+        uint8_t width{};
+        uint8_t type{};
     };
 
 private:

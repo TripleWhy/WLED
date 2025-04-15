@@ -19,7 +19,7 @@ class StarburstEffect : public BaseEffect<StarburstEffect, BufferedEffect<Effect
 private:
     //each needs 20+STARBURST_MAX_FRAG*4 bytes
     struct Star {
-        CRGB     color;
+        CRGB     color{};
         uint32_t birth  =0;
         uint32_t last   =0;
         float    vel    =0;

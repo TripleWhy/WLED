@@ -11,9 +11,9 @@
 class RippleEffect : public BaseEffect<RippleEffect, BufferedEffect<EffectDimensionality::d2>> {
 public:
     struct Ripple {
-        uint8_t state;
-        uint8_t color;
-        uint16_t pos;
+        uint8_t state{};
+        uint8_t color{};
+        uint16_t pos{};
     };
 
 private:

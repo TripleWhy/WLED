@@ -13,10 +13,12 @@ class PopcornEffect : public BaseEffect<PopcornEffect, BufferedEffect<EffectDime
 public:
     //Spark type is used for popcorn, 1D fireworks, and drip
     struct Spark {
-        float pos, posX;
-        float vel, velX;
-        uint16_t col;
-        uint8_t colIndex;
+        float pos{};
+        float posX{};
+        float vel{};
+        float velX{};
+        uint16_t col{};
+        uint8_t colIndex{};
     };
 
 private:

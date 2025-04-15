@@ -36,8 +36,8 @@ public:
             float angle = radians(i * 10);
             uint32_t x = (CX + (sin_t(angle) * (beatsin8_t(i, 0, L*2)-L))) * 255.f;
             uint32_t y = (CY + (cos_t(angle) * (beatsin8_t(i, 0, L*2)-L))) * 255.f;
-            if(SEGMENT.palette == 0) buffer.wuPixel(x, y, CHSV(i * 10, 255, 255));
-            else buffer.wuPixel(x, y, ColorFromPalette(SEGPALETTE, i * 10));
+            if(SEGMENT.palette == 0) buffer.wuPixel(coordinate, x, y, CHSV(i * 10, 255, 255));
+            else buffer.wuPixel(coordinate, x, y, ColorFromPalette(SEGPALETTE, i * 10));
         }
         buffer.blur(SEGMENT.intensity >> 4, SEGMENT.check1);
         return true;

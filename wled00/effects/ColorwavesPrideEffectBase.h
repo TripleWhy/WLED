@@ -20,6 +20,10 @@ public:
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
+
         unsigned duration = 10 + SEGMENT.speed;
 
         uint8_t sat8 = isPride2015 ? beatsin88_t(87, 220, 250) : 255;

@@ -43,7 +43,7 @@ public:
             }
             int thisMax = map(thisVal, 0, 512, 0, rows);
 
-            for (int j = 0; j < thisMax; j++) {
+            for (int j = 0, jMax = std::min(thisMax, rows); j < jMax; j++) {
                 buffer.addPixelColor(i, j, ColorFromPalette(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
                 buffer.addPixelColor((cols - 1) - i, (rows - 1) - j, ColorFromPalette(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
             }

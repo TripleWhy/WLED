@@ -14,12 +14,20 @@
 class Crazybees2dEffect : public BaseEffect<Crazybees2dEffect, BufferedEffect<EffectDimensionality::d2>> {
 private:
     struct Bee {
-        uint8_t posX, posY, aimX, aimY, hue;
-        int8_t deltaX, deltaY, signX, signY, error;
+        uint8_t posX{};
+        uint8_t posY{};
+        uint8_t aimX{};
+        uint8_t aimY{};
+        uint8_t hue;
+        int8_t deltaX{};
+        int8_t deltaY{};
+        int8_t signX{};
+        int8_t signY{};
+        int8_t error{};
         void aimed(uint16_t w, uint16_t h) {
             //prng.setSeed(millis());
-            aimX   = prng.random8(0, w);
-            aimY   = prng.random8(0, h);
+            aimX   = prng.random8(1u, w-1);
+            aimY   = prng.random8(1u, h-1);
             hue    = prng.random8();
             deltaX = abs(aimX - posX);
             deltaY = abs(aimY - posY);
@@ -40,6 +48,9 @@ public:
     explicit Crazybees2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if ((coordinate.width < 3) || (coordinate.height < 3)) {
+            return false;
+        }
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }

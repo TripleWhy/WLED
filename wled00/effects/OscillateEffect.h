@@ -11,10 +11,10 @@
 class OscillateEffect : public BaseEffect<OscillateEffect> {
 private:
     struct Oscillator {
-        uint16_t pos;
-        uint8_t  size;
-        int8_t   dir;
-        uint8_t  speed;
+        uint16_t pos{};
+        uint8_t  size{};
+        int8_t   dir{};
+        uint8_t  speed{};
     };
 
 private:

@@ -12,8 +12,8 @@
 class Gameoflife2dEffect : public BaseEffect<Gameoflife2dEffect, BufferedEffect<EffectDimensionality::d2>> {
 private:
     struct ColorCount {
-        CRGB color;
-        int8_t count;
+        CRGB color{};
+        int8_t count{};
     };
 
 private:

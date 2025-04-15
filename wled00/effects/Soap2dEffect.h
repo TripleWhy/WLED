@@ -13,8 +13,8 @@
 class Soap2dEffect : public BaseEffect<Soap2dEffect, BufferedEffect<EffectDimensionality::d2>> {
 private:
     struct NoisePixel {
-        uint8_t noise3d;
-        CRGB    pixel;
+        uint8_t noise3d{};
+        CRGB    pixel{};
     };
 
 private:
