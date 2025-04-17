@@ -78,7 +78,7 @@ typedef union {
 typedef struct { // 10 bytes
   int16_t x{};  // x position in particle system
   int16_t y{};  // y position in particle system
-  uint16_t ttl{1u}; // time to live in frames
+  uint16_t ttl{}; // time to live in frames
   int8_t vx{};  // horizontal velocity
   int8_t vy{};  // vertical velocity
   uint8_t hue{};  // color hue
@@ -141,7 +141,7 @@ struct PSsizeControl { // 8 bytes
 typedef struct {
   uint16_t minLife{}; // minimum ttl of emittet particles
   uint16_t maxLife{}; // maximum ttl of emitted particles
-  PSparticle source{}; // use a particle as the emitter source (speed, position, color)
+  PSparticle source{0, 0, 1u, 0, 0, 0u, 255u}; // use a particle as the emitter source (speed, position, color)
   PSparticleFlags sourceFlags{}; // flags for the source particle
   int8_t var{}; // variation of emitted speed (adds random(+/- var) to speed)
   int8_t vx{}; // emitting speed
@@ -296,7 +296,7 @@ typedef union {
 //struct for a single particle (8 bytes)
 typedef struct {
   int32_t x{};  // x position in particle system
-  uint16_t ttl{1}; // time to live in frames
+  uint16_t ttl{}; // time to live in frames
   int8_t vx{};  // horizontal velocity
   uint8_t hue{};  // color hue
 } PSparticle1D;
@@ -327,7 +327,7 @@ typedef struct {
 typedef struct {
   uint16_t minLife{}; // minimum ttl of emittet particles
   uint16_t maxLife{}; // maximum ttl of emitted particles
-  PSparticle1D source{}; // use a particle as the emitter source (speed, position, color)
+  PSparticle1D source{0, 1u, 0, 0u}; // use a particle as the emitter source (speed, position, color)
   PSparticleFlags1D sourceFlags{}; // flags for the source particle
   int8_t var{}; // variation of emitted speed (adds random(+/- var) to speed)
   int8_t v{}; // emitting speed
