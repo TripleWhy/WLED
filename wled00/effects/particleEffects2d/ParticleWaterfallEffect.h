@@ -11,23 +11,27 @@
   Uses palette for particle color, spray source at top emitting particles, many config options
   by DedeHai (Damian Schneider)
 */
-class ParticleWaterfallEffect : public BaseEffect<ParticleWaterfallEffect, Particle2dEffect> {
+class ParticleWaterfallEffect : public BaseEffect<ParticleWaterfallEffect, Particle2dEffect<ParticleWaterfallEffect>> {
 private:
     using Self = ParticleWaterfallEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Waterfall@Speed,Intensity,Variation,Collide,Position,Cylinder,Walls,Ground;;!;2;pal=9,sx=15,ix=200,c1=32,c2=160,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEWATERFALL;
 
-    explicit ParticleWaterfallEffect(const EffectInformation& ei)
-        : Base{ei, 12, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(12, false, false)) {
+            return false;
+        }
+
         PartSys.setGravity();  // enable with default gforce
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
         PartSys.setMotionBlur(190); // anable motion blur
         PartSys.setSmearBlur(30); // enable 2D blurring (smearing)
-        for (uint32_t i = 0; i < PartSys.numSources; i++) {
+        for (uint32_t i = 0; i < PartSys.sources.size(); i++) {
             PartSys.sources[i].source.hue = i*90;
             PartSys.sources[i].sourceFlags.collide = true; // seeded particles will collide
         #ifdef ESP8266
@@ -38,6 +42,7 @@ public:
             PartSys.sources[i].minLife = 150;
         #endif
         }
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -54,7 +59,7 @@ public:
         PartSys.setBounceX(SEGMENT.check2); // walls
         PartSys.setBounceY(SEGMENT.check3); // ground
         PartSys.setWallHardness(SEGMENT.custom2);
-        numSprays = min((int32_t)PartSys.numSources, max((int32_t)(coordinate.width - 1) / 6, (int32_t)2)); // number of sprays depends on segment width
+        numSprays = min((int32_t)PartSys.sources.size(), max((int32_t)(coordinate.width - 1) / 6, (int32_t)2)); // number of sprays depends on segment width
         if (SEGMENT.custom2 > 0) // collisions enabled
             PartSys.enableParticleCollisions(true, SEGMENT.custom2); // enable collisions and set particle collision hardness
         else {

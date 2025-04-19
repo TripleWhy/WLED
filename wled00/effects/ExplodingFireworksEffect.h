@@ -39,7 +39,7 @@ public:
         int maxSparks = maxData / sizeof(Spark); //ESP8266: max. 21/42/85 sparks/seg, ESP32: max. 53/106/213 sparks/seg
 
         unsigned numSparks = min(5 + ((rows*cols) >> 1), maxSparks);
-        if (!resizeVector(sparks, numSparks)) {
+        if (!sparks.resize(numSparks)) {
             return false;
         }
         sparks.shrink_to_fit();

@@ -152,8 +152,10 @@ typedef struct {
 // class uses approximately 60 bytes
 class ParticleSystem2D {
 public:
-  ParticleSystem2D(const uint8_t effectID, const uint32_t width, const uint32_t height, const uint32_t requestedsources, const bool advanced, const bool sizecontrol);
+  ParticleSystem2D(const uint8_t effectID);
   ~ParticleSystem2D() = default;
+  bool init(const uint32_t width, const uint32_t height, const uint32_t requestedsources, const bool advanced, const bool sizecontrol);
+  bool isInitialized() const;
   // note: memory is allcated in the FX function, no deconstructor needed
   void update(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer); //update the particles according to set options and render to the matrix
   void updateFire(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer, const uint8_t intensity, const bool renderonly); // update function for fire, if renderonly is set, particles are not updated (required to fix transitions with frameskips)
@@ -212,7 +214,6 @@ public:
   int32_t maxX{};
   int32_t maxY{}; // particle system size i.e. width-1 / height-1 in subpixels, Note: all "max" variables must be signed to compare to coordinates (which are signed)
   uint32_t usedParticles{}; // number of particles used in animation, is relative to 'numParticles'
-  uint32_t numSources{}; // number of sources
   SegmentAllocator<PSsource>::vector sources{}; // numsources
   SegmentAllocator<PSparticle>::vector particles{};
   SegmentAllocator<PSparticleFlags>::vector particleFlags{}; // numparticles
@@ -228,7 +229,6 @@ public:
 
   // note: variables that are accessed often are 32bit for speed
   PSsettings2D particlesettings{}; // settings used when updating particles (can also used by FX to move sources), do not edit properties directly, use functions above
-  uint32_t numParticles{};  // total number of particles allocated by this system note: during transitions, less are available, use availableParticles
   uint32_t emitIndex{0u}; // index to count through particles to emit so searching for dead pixels is faster
   int32_t collisionHardness{};
   uint32_t wallHardness{255u};
@@ -339,8 +339,10 @@ typedef struct {
 class ParticleSystem1D
 {
 public:
-  ParticleSystem1D(const uint8_t effectID, const uint32_t length, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced);
+  ParticleSystem1D(const uint8_t effectID);
   ~ParticleSystem1D() = default;
+  bool init(const uint32_t length, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced);
+  bool isInitialized() const;
   void update(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer); //update the particles according to set options and render to the matrix
   void updateSystem(size_t length); // call at the beginning of every FX, updates pointers and dimensions
   // particle emitters
@@ -383,7 +385,6 @@ private:
 public:
   int32_t maxX{}; // particle system size i.e. width-1, Note: all "max" variables must be signed to compare to coordinates (which are signed)
   uint32_t usedParticles{}; // number of particles used in animation, is relative to 'numParticles'
-  uint32_t numSources{}; // number of sources
   SegmentAllocator<PSsource1D>::vector sources{}; // numSources
   //TODO flogs should probly be merged with particles, either by merging PSparticleFlags1D into PSparticle1D, or by adding a new type that contains both types.
   SegmentAllocator<PSparticle1D>::vector particles{}; // numParticles
@@ -397,7 +398,6 @@ private:
 
   // note: variables that are accessed often are 32bit for speed
   PSsettings1D particlesettings{}; // settings used when updating particles
-  uint32_t numParticles{};  // total number of particles allocated by this system note: never use more than this, even if more are available (only this many advanced particles are allocated)
   uint8_t fractionOfParticlesUsed{255}; // percentage of particles used in the system (255=100%), used during transition updates
   uint32_t emitIndex{0}; // index to count through particles to emit so searching for dead pixels is faster
   int32_t collisionHardness{};

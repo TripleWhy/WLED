@@ -28,7 +28,7 @@ public:
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (!resizeVector(bump, (cols+2)*(rows+2))) {
+        if (!bump.resize((cols+2)*(rows+2))) {
             return false;
         }
 

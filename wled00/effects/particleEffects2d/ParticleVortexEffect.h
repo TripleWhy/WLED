@@ -12,10 +12,10 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleVortexEffect : public BaseEffect<ParticleVortexEffect, Particle2dEffect> {
+class ParticleVortexEffect : public BaseEffect<ParticleVortexEffect, Particle2dEffect<ParticleVortexEffect>> {
 private:
     using Self = ParticleVortexEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
     static constexpr uint32_t NUMBEROFSOURCES = 8;
 
@@ -23,21 +23,26 @@ public:
     static constexpr const char metaData[] PROGMEM = "PS Vortex@Rotation Speed,Particle Speed,Arms,Flip,Nozzle,Smear,Direction,Random Flip;;!;2;pal=27,c1=200,c2=0,c3=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEVORTEX;
 
-    explicit ParticleVortexEffect(const EffectInformation& ei)
-        : Base{ei, NUMBEROFSOURCES, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(NUMBEROFSOURCES, false, false)) {
+            return false;
+        }
+
         #ifdef ESP8266
         PartSys.setMotionBlur(180);
         #else
         PartSys.setMotionBlur(130);
         #endif
-        for (uint32_t i = 0; i < min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); i++) {
+        for (uint32_t i = 0; i < min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES); i++) {
             PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
             PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
             PartSys.sources[i].maxLife = 900;
             PartSys.sources[i].minLife = 800;
         }
         PartSys.setKillOutOfBounds(true);
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -48,7 +53,7 @@ public:
         uint32_t i, j;
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        uint32_t spraycount = min(PartSys.numSources, (uint32_t)(1 + (SEGMENT.custom1 >> 5))); // number of sprays to display, 1-8
+        uint32_t spraycount = min(PartSys.sources.size(), (uint32_t)(1 + (SEGMENT.custom1 >> 5))); // number of sprays to display, 1-8
         #ifdef ESP8266
         for (i = 1; i < 4; i++) { // need static particles in the center to reduce blinking (would be black every other frame without this hack), just set them there fixed
             int partindex = (int)PartSys.usedParticles - (int)i;

@@ -10,18 +10,19 @@ Particle based Chase effect
 Uses palette for particle color
 by DedeHai (Damian Schneider)
 */
-class ParticleChaseEffect : public BaseEffect<ParticleChaseEffect, Particle1dEffect> {
+class ParticleChaseEffect : public BaseEffect<ParticleChaseEffect, Particle1dEffect<ParticleChaseEffect>> {
 private:
     using Self = ParticleChaseEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Chase@!,Density,Size,Hue,Blur,,,Position Color;,!;!;1;pal=11,sx=50,c2=5,c3=0";
     static constexpr const uint8_t effectId = FX_MODE_PSCHASE;
 
-    explicit ParticleChaseEffect(const EffectInformation& ei)
-        : Base{ei, 1, 255, true}
-    {
+    using Base::Base;
+
+    bool init() {
+        return Base::init(1, 255, true);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

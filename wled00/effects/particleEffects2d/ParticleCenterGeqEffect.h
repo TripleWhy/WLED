@@ -12,10 +12,10 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleCenterGeqEffect : public BaseEffect<ParticleCenterGeqEffect, Particle2dEffect> {
+class ParticleCenterGeqEffect : public BaseEffect<ParticleCenterGeqEffect, Particle2dEffect<ParticleCenterGeqEffect>> {
 private:
     using Self = ParticleCenterGeqEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
     static constexpr uint32_t NUMBEROFSOURCES = 16;
 
@@ -23,10 +23,14 @@ public:
     static constexpr const char metaData[] PROGMEM = "PS GEQ Nova@Speed,Intensity,Rotation Speed,Color Change,Nozzle,,Direction;;!;2f;pal=13,ix=180,c1=0,c2=0,c3=8";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLECENTERGEQ;
 
-    explicit ParticleCenterGeqEffect(const EffectInformation& ei)
-        : Base{ei, NUMBEROFSOURCES, false, false}
-    {
-        uint8_t const numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(NUMBEROFSOURCES, false, false)) {
+            return false;
+        }
+
+        uint8_t const numSprays = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES);
         for (uint32_t i = 0; i < numSprays; i++) {
             PartSys.sources[i].source.x = (PartSys.maxX + 1) >> 1; // center
             PartSys.sources[i].source.y = (PartSys.maxY + 1) >> 1; // center
@@ -35,6 +39,7 @@ public:
             PartSys.sources[i].minLife = 200;
         }
         PartSys.setKillOutOfBounds(true);
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -46,7 +51,7 @@ public:
         uint32_t i;
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        numSprays = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES);
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t *)um_data->u_data[2]; // 16 bins with FFT data, log mapped already, each band contains frequency amplitude 0-255

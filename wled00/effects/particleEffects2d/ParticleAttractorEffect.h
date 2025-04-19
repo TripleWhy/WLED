@@ -12,18 +12,22 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleAttractorEffect : public BaseEffect<ParticleAttractorEffect, Particle2dEffect> {
+class ParticleAttractorEffect : public BaseEffect<ParticleAttractorEffect, Particle2dEffect<ParticleAttractorEffect>> {
 private:
     using Self = ParticleAttractorEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Attractor@Mass,Particles,Size,Collide,Friction,AgeColor,Move,Swallow;;!;2;pal=9,sx=100,ix=82,c1=2,c2=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEATTRACTOR;
 
-    explicit ParticleAttractorEffect(const EffectInformation& ei)
-        : Base{ei, 1, true, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, true, false)) {
+            return false;
+        }
+
         PartSys.sources[0].source.hue = hw_random16();
         PartSys.sources[0].source.vx = -7; // will collied with wall and get random bounce direction
         PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide
@@ -38,6 +42,7 @@ public:
         PartSys.sources[0].var = 4; // emiting variation
         PartSys.setWallHardness(255);  //bounce forever
         PartSys.setWallRoughness(200); //randomize wall bounce
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

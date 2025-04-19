@@ -10,20 +10,25 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleFire1dEffect : public BaseEffect<ParticleFire1dEffect, Particle1dEffect> {
+class ParticleFire1dEffect : public BaseEffect<ParticleFire1dEffect, Particle1dEffect<ParticleFire1dEffect>> {
 private:
     using Self = ParticleFire1dEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fire 1D@!,!,Cooling,Blur;,!;!;1;pal=35,sx=100,ix=50,c1=80,c2=100,c3=28,o1=1,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PSFIRE1D;
 
-    explicit ParticleFire1dEffect(const EffectInformation& ei)
-        : Base{ei, 5, 255, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(5, 255, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true);
         PartSys.setParticleSize(1);
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -43,8 +48,8 @@ public:
             else
                 PartSys.sources[i].source.ttl = 100 + hw_random16(200);
         }
-        for (uint i = 0; i < PartSys.numSources; i++) {
-            j = (j + 1) % PartSys.numSources;
+        for (uint i = 0; i < PartSys.sources.size(); i++) {
+            j = (j + 1) % PartSys.sources.size();
             PartSys.sources[j].source.x = 0;
             PartSys.sources[j].var = 2 + (SEGMENT.speed >> 4);
             // base flames

@@ -11,20 +11,25 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleGeqEffect : public BaseEffect<ParticleGeqEffect, Particle2dEffect> {
+class ParticleGeqEffect : public BaseEffect<ParticleGeqEffect, Particle2dEffect<ParticleGeqEffect>> {
 private:
     using Self = ParticleGeqEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS GEQ 2D@Speed,Intensity,Diverge,Bounce,Gravity,Cylinder,Walls,Floor;;!;2f;pal=0,sx=155,ix=200,c1=0";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLESGEQ;
 
-    explicit ParticleGeqEffect(const EffectInformation& ei)
-        : Base{ei, 1, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, false, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true);
         PartSys.setUsedParticles(170); // use 2/3 of available particles
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

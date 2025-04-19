@@ -35,7 +35,7 @@ public:
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (!resizeVector(noisePixels, coordinate.width * coordinate.height)) {
+        if (!noisePixels.resize(coordinate.width * coordinate.height)) {
             return false;
         }
 

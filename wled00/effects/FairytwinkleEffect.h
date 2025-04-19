@@ -21,7 +21,7 @@ private:
     using Base::Base;
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!resizeVector(flashers, coordinate.width)) {
+        if (!flashers.resize(coordinate.width)) {
             return false;
         }
 

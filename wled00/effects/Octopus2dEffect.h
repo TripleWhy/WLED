@@ -32,7 +32,7 @@ public:
         const int rows = coordinate.height;
         const uint8_t mapp = 180 / MAX(cols,rows);
 
-        if (!resizeVector(rMap, coordinate.width * coordinate.height)) {
+        if (!rMap.resize(coordinate.width * coordinate.height)) {
             return false;
         }
 

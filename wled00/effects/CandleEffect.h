@@ -27,7 +27,7 @@ public:
         bool multi = SEGMENT.check3 && coordinate.width;
         if (multi) {
             const unsigned dataSize = max(1, (int)coordinate.width -1) *3; //max. 1365 pixels (ESP8266)
-            if (!resizeVector(data, dataSize)) {
+            if (!data.resize(dataSize)) {
                 multi = false;
             }
         }

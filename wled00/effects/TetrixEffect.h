@@ -33,7 +33,7 @@ public:
             return false;
         }
 
-      if (!resizeVector(drops, coordinate.height)) {
+      if (!drops.resize(coordinate.height)) {
           return false;
       }
 

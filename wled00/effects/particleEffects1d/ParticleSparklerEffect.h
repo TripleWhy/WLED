@@ -10,18 +10,19 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleSparklerEffect : public BaseEffect<ParticleSparklerEffect, Particle1dEffect> {
+class ParticleSparklerEffect : public BaseEffect<ParticleSparklerEffect, Particle1dEffect<ParticleSparklerEffect>> {
 private:
     using Self = ParticleSparklerEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Sparkler@Move,!,Saturation,Blur,Sparklers,Slide,Bounce,Large;,!;!;1;pal=0,sx=255,c1=0,c2=0,c3=6";
     static constexpr const uint8_t effectId = FX_MODE_PSSPARKLER;
 
-    explicit ParticleSparklerEffect(const EffectInformation& ei)
-        : Base{ei, 16, 128 , true}
-    {
+    using Base::Base;
+
+    bool init() {
+        return Base::init(16, 128, true);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -39,7 +40,7 @@ public:
         sparklersettings.wrap = !SEGMENT.check2;
         sparklersettings.bounce = SEGMENT.check2; // note: bounce always takes priority over wrap
 
-        numSparklers = PartSys.numSources;
+        numSparklers = PartSys.sources.size();
         PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur/overlay
         //PartSys.setSmearBlur(SEGMENT.custom2); // anable smearing blur
 

@@ -37,7 +37,7 @@ public:
         }
 
         unsigned maxRipples = min(1 + (int)(coordinate.width >> 2), MAX_RIPPLES);  // 56 max for 16 segment ESP8266
-        if (!resizeVector(ripples, maxRipples)) {
+        if (!ripples.resize(maxRipples)) {
             return false;
         }
         ripples.shrink_to_fit();

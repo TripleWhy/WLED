@@ -30,7 +30,7 @@ public:
         const auto XY = [&](int x, int y) { return (x%cols) + (y%rows) * cols; };
 
         unsigned dataSize = (coordinate.width+7) >> 3; //1 bit per LED for trails
-        if (!resizeVector(data, dataSize)) {
+        if (!data.resize(dataSize)) {
             return false;
         }
 

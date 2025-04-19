@@ -11,20 +11,25 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleBoxEffect : public BaseEffect<ParticleBoxEffect, Particle2dEffect> {
+class ParticleBoxEffect : public BaseEffect<ParticleBoxEffect, Particle2dEffect<ParticleBoxEffect>> {
 private:
     using Self = ParticleBoxEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Box@!,Particles,Tilt,Hardness,Size,Random,Washing Machine,Sloshing;;!;2;pal=53,ix=50,c3=1,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEBOX;
 
-    explicit ParticleBoxEffect(const EffectInformation& ei)
-        : Base{ei, 1, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, false, false)) {
+            return false;
+        }
+
         PartSys.setBounceX(true);
         PartSys.setBounceY(true);
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

@@ -23,7 +23,7 @@ public:
             return false;
         }
 
-        if (!resizeVector(trail, coordinate.width)) {
+        if (!trail.resize(coordinate.width)) {
             return false;
         }
 

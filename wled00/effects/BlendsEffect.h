@@ -22,7 +22,7 @@ public:
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         pixelLen = coordinate.width > UINT8_MAX ? UINT8_MAX : coordinate.width;
-        if (!resizeVector(pixels, pixelLen)) {
+        if (!pixels.resize(pixelLen)) {
             return false;
         }
 

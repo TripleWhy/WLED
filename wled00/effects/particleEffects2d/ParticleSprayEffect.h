@@ -11,18 +11,22 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleSprayEffect : public BaseEffect<ParticleSprayEffect, Particle2dEffect> {
+class ParticleSprayEffect : public BaseEffect<ParticleSprayEffect, Particle2dEffect<ParticleSprayEffect>> {
 private:
     using Self = ParticleSprayEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Spray@Speed,!,Left/Right,Up/Down,Angle,Gravity,Cylinder/Square,Collide;;!;2v;pal=0,sx=150,ix=150,c1=220,c2=30,c3=21";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLESPRAY;
 
-    explicit ParticleSprayEffect(const EffectInformation& ei)
-        : Base{ei, 1, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, false, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
         PartSys.setBounceY(true);
         PartSys.setMotionBlur(200); // anable motion blur
@@ -30,6 +34,7 @@ public:
         PartSys.sources[0].source.hue = hw_random16();
         PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide (if enabled)
         PartSys.sources[0].var = 3;
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -45,7 +50,7 @@ public:
         PartSys.setWrapX(SEGMENT.check2);
         PartSys.setWallHardness(hardness);
         PartSys.setGravity(8 * SEGMENT.check1); // enable gravity if checked (8 is default strength)
-        //numSprays = min(PartSys.numSources, (uint8_t)1); // number of sprays
+        //numSprays = min(PartSys.sources.size(), (uint8_t)1); // number of sprays
 
         if (SEGMENT.check3) // collisions enabled
             PartSys.enableParticleCollisions(true, hardness); // enable collisions and set particle collision hardness

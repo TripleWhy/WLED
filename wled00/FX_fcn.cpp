@@ -535,17 +535,25 @@ Segment &Segment::setOption(uint8_t n, bool val) {
 Segment &Segment::setMode(uint8_t effectId, bool loadDefaults) {
   const EffectInformation* effectInfo = nullptr;
   // skip reserved
-  while (effectId < strip.getModeCount() && (effectInfo = strip.getEffectInformation(effectId)) == nullptr) effectId++;
+  while (effectId < strip.getModeCount() && (effectInfo = strip.getEffectInformation(effectId)) == nullptr) {
+    effectId++;
+  }
   if (effectInfo == nullptr) {
     effectId = 0; // set solid mode
     effectInfo = strip.getEffectInformation(0);
   }
-  if ((effect != nullptr) && (effectId == effect->getEffectId())) return *this;
+  if ((effect != nullptr) && (effectId == effect->getEffectId())) {
+    return *this;
+  }
+  targetEffectId = effectId;
 #ifndef WLED_DISABLE_MODE_BLEND
   //DEBUG_PRINTF_P(PSTR("- Starting effect transition: %d\n"), effectId);
   startTransition(strip.getTransition(), std::move(effect)); // set effect transitions
+#else
+  effect = nullptr;
 #endif
-  effect = effectInfo->makeEffect();
+  // actual effect creation is delayed so that it can be tried every frame if there isn't enough memory at the moment.
+
   const char* const metaData = effectInfo->metaData;
   int sOpt;
   // load default values from effect string
@@ -572,6 +580,14 @@ Segment &Segment::setMode(uint8_t effectId, bool loadDefaults) {
   markForReset();
   stateChanged = true; // send UDP/WS broadcast
   return *this;
+}
+
+void Segment::ensureEffect() {
+  if (effect != nullptr) [[likely]] {
+    return;
+  }
+  const EffectInformation* effectInfo = strip.getEffectInformation(targetEffectId);
+  effect = effectInfo->makeEffect();
 }
 
 Segment &Segment::setPalette(uint8_t pal) {

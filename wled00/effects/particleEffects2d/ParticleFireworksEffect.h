@@ -11,10 +11,10 @@
   Rockets shoot up and explode in a random color, sometimes in a defined pattern
   by DedeHai (Damian Schneider)
 */
-class ParticleFireworksEffect : public BaseEffect<ParticleFireworksEffect, Particle2dEffect> {
+class ParticleFireworksEffect : public BaseEffect<ParticleFireworksEffect, Particle2dEffect<ParticleFireworksEffect>> {
 private:
     using Self = ParticleFireworksEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
     static constexpr uint32_t NUMBEROFSOURCES = 8;
 
@@ -22,16 +22,21 @@ public:
     static constexpr const char metaData[] PROGMEM = "PS Fireworks@Launches,Explosion Size,Fuse,Blur,Gravity,Cylinder,Ground,Fast;;!;2;pal=11,ix=50,c1=40,c2=0,c3=12";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEFIREWORKS;
 
-    explicit ParticleFireworksEffect(const EffectInformation& ei)
-        : Base{ei, NUMBEROFSOURCES, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(NUMBEROFSOURCES, false, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
         PartSys.setWallHardness(120); // ground bounce is fixed
-        const uint32_t numRockets = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        const uint32_t numRockets = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES);
         for (uint32_t j = 0; j < numRockets; j++) {
             PartSys.sources[j].source.ttl = 500 * j; // first rocket starts immediately, others follow soon
             PartSys.sources[j].source.vy = -1; // at negative speed, no particles are emitted and if rocket dies, it will be relaunched
         }
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -42,7 +47,7 @@ public:
         uint32_t numRockets;
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        numRockets = map(SEGMENT.speed, 0 , 255, 4, min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES));
+        numRockets = map(SEGMENT.speed, 0 , 255, 4, min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES));
 
         PartSys.setWrapX(SEGMENT.check1);
         PartSys.setBounceY(SEGMENT.check2);

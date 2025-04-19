@@ -20,7 +20,7 @@ public:
     using Base::Base;
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!resizeVector(colorIndexes, coordinate.width)) {
+        if (!colorIndexes.resize(coordinate.width)) {
             return false;
         }
 

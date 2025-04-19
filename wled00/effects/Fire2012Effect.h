@@ -50,7 +50,7 @@ public:
 
         const unsigned strips = coordinate.height;
         const unsigned heatSize = strips * coordinate.width;
-        if (!resizeVector(heat, heatSize)) {
+        if (!heat.resize(heatSize)) {
             return false;
         }
 

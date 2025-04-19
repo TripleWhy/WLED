@@ -9,10 +9,10 @@
 /*
   Particle replacement of Ghost Rider by DedeHai (Damian Schneider), original FX by stepko adapted by Blaz Kristan (AKA blazoncek)
 */
-class ParticleGhostriderEffect : public BaseEffect<ParticleGhostriderEffect, Particle2dEffect> {
+class ParticleGhostriderEffect : public BaseEffect<ParticleGhostriderEffect, Particle2dEffect<ParticleGhostriderEffect>> {
 private:
     using Self = ParticleGhostriderEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
     static constexpr int32_t MAXANGLESTEP = 2200; //32767 means 180°
 
@@ -20,14 +20,19 @@ public:
     static constexpr const char metaData[] PROGMEM = "PS Ghost Rider@Speed,Spiral,Blur,Color Cycle,Spread,AgeColor,Walls;;!;2;pal=1,sx=70,ix=0,c1=220,c2=30,c3=21,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEGHOSTRIDER;
 
-    explicit ParticleGhostriderEffect(const EffectInformation& ei)
-        : Base{ei, 1, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, false, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
         PartSys.sources[0].maxLife = 260; // lifetime in frames
         PartSys.sources[0].minLife = 250;
         PartSys.sources[0].source.x = hw_random16(PartSys.maxX);
         PartSys.sources[0].source.y = hw_random16(PartSys.maxY);
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

@@ -10,22 +10,27 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleStarburstEffect : public BaseEffect<ParticleStarburstEffect, Particle1dEffect> {
+class ParticleStarburstEffect : public BaseEffect<ParticleStarburstEffect, Particle1dEffect<ParticleStarburstEffect>> {
 private:
     using Self = ParticleStarburstEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Starburst@Chance,Fragments,Size,Blur,Cooling,Gravity,Colorful,Push;,!;!;1;pal=52,sx=150,ix=150,c1=120,c2=0,c3=21";
     static constexpr const uint8_t effectId = FX_MODE_PSSTARBURST;
 
-    explicit ParticleStarburstEffect(const EffectInformation& ei)
-        : Base{ei, 1, 200, true}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, 200, true)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true);
         PartSys.enableParticleCollisions(true, 200);
         PartSys.sources[0].source.ttl = 1; // set initial stanby time
         PartSys.sources[0].sat = 0; // emitted particles start out white
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

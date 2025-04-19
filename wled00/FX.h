@@ -401,6 +401,7 @@ typedef struct Segment {
     } tmpsegd_t;
 
   private:
+    uint8_t targetEffectId;
     SegmentAllocator<Effect>::unique_ptr effect;
 
     union {
@@ -608,6 +609,7 @@ typedef struct Segment {
     [[gnu::hot]] void updateTransitionProgress();            // set current progression of transition
     inline uint16_t progress() const { return Segment::_transitionprogress; }  // transition progression between 0-65535
     [[gnu::hot]] uint8_t  currentBri(bool useCct = false) const; // current segment brightness/CCT (blended while in transition)
+    void ensureEffect();
     Effect* getTransitionEffect() const;                         // while in transition: Old mode, nullptr otherwise
     Effect* getCurrentEffect() const;                            // Currently active effect/mode. While in transition: New mode.
     [[gnu::hot]] uint32_t currentColor(uint8_t slot) const;      // currently active segment color (blended while in transition)

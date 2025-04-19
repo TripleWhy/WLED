@@ -29,7 +29,7 @@ public:
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (!resizeVector(previousBarHeight, coordinate.width)) {
+        if (!previousBarHeight.resize(coordinate.width)) {
             return false;
         }
 

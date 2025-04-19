@@ -47,7 +47,7 @@ public:
         unsigned flasherDistance = ((255 - SEGMENT.intensity) / 28) +1; //1-10
         unsigned numFlashers = (coordinate.width / flasherDistance) +1;
 
-        if (!resizeVector(flashers, numFlashers)) {
+        if (!flashers.resize(numFlashers)) {
             return false;
         }
 

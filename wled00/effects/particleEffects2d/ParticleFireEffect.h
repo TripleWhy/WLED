@@ -11,18 +11,19 @@
   realistic fire effect using particles. heat based and using perlin-noise for wind
   by DedeHai (Damian Schneider)
 */
-class ParticleFireEffect : public BaseEffect<ParticleFireEffect, Particle2dEffect> {
+class ParticleFireEffect : public BaseEffect<ParticleFireEffect, Particle2dEffect<ParticleFireEffect>> {
 private:
     using Self = ParticleFireEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fire@Speed,Intensity,Flame Height,Wind,Spread,Smooth,Cylinder,Turbulence;;!;2;pal=35,sx=110,c1=110,c2=50,c3=31,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEFIRE;
 
-    explicit ParticleFireEffect(const EffectInformation& ei)
-        : Base{ei, Segment::getEffectWidth<EffectDimensionality::d2>(), false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        return Base::init(Segment::getEffectWidth<EffectDimensionality::d2>(), false, false);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -50,7 +51,7 @@ public:
         }
 
         uint32_t spread = (PartSys.maxX >> 5) * (SEGMENT.custom3 + 1); //fire around segment center (in subpixel points)
-        numFlames = min((uint32_t)PartSys.numSources, (4 + ((spread / PS_P_RADIUS) << 1))); // number of flames used depends on spread with, good value is (fire width in pixel) * 2
+        numFlames = min((uint32_t)PartSys.sources.size(), (4 + ((spread / PS_P_RADIUS) << 1))); // number of flames used depends on spread with, good value is (fire width in pixel) * 2
         uint32_t percycle = (numFlames * 2) / 3; // maximum number of particles emitted per cycle (TODO: for ESP826 maybe use flames/2)
 
         // update the flame sprays:

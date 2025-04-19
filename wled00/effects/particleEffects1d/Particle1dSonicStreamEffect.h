@@ -10,23 +10,28 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particle1dSonicStreamEffect : public BaseEffect<Particle1dSonicStreamEffect, Particle1dEffect> {
+class Particle1dSonicStreamEffect : public BaseEffect<Particle1dSonicStreamEffect, Particle1dEffect<Particle1dSonicStreamEffect>> {
 private:
     using Self = Particle1dSonicStreamEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Sonic Stream@!,!,Color,Blur,Bin,Mod,Filter,Push;,!;!;1f;c3=0,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS1DSONICSTREAM;
 
-    explicit Particle1dSonicStreamEffect(const EffectInformation& ei)
-        : Base{ei, 1, 255, true}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, 255, true)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true);
         PartSys.sources[0].source.x = 0; // at start
         //PartSys.sources[1].source.x = PartSys.maxX; // at end
         PartSys.sources[0].var = 0;//SEGMENT.custom1 >> 3;
         PartSys.sources[0].sat = 255;
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

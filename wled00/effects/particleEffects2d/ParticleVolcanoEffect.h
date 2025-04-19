@@ -12,10 +12,10 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleVolcanoEffect : public BaseEffect<ParticleVolcanoEffect, Particle2dEffect> {
+class ParticleVolcanoEffect : public BaseEffect<ParticleVolcanoEffect, Particle2dEffect<ParticleVolcanoEffect>> {
 private:
     using Self = ParticleVolcanoEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
     static constexpr uint32_t NUMBEROFSOURCES = 1;
 
@@ -23,15 +23,19 @@ public:
     static constexpr const char metaData[] PROGMEM = "PS Volcano@Speed,Intensity,Move,Bounce,Spread,AgeColor,Walls,Collide;;!;2;pal=35,sx=100,ix=190,c1=0,c2=160,c3=6,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEVOLCANO;
 
-    explicit ParticleVolcanoEffect(const EffectInformation& ei)
-        : Base{ei, NUMBEROFSOURCES, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(NUMBEROFSOURCES, false, false)) {
+            return false;
+        }
+
         PartSys.setBounceY(true);
         PartSys.setGravity(); // enable with default gforce
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return (except on top, taken care of by gravity setting)
         PartSys.setMotionBlur(230); // anable motion blur
 
-        const uint8_t numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); // number of sprays
+        const uint8_t numSprays = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES); // number of sprays
         for (uint32_t i = 0; i < numSprays; i++) {
             PartSys.sources[i].source.hue = hw_random16();
             PartSys.sources[i].source.x = PartSys.maxX / (numSprays + 1) * (i + 1); // distribute evenly
@@ -40,6 +44,7 @@ public:
             PartSys.sources[i].sourceFlags.collide = true; // seeded particles will collide (if enabled)
             PartSys.sources[i].sourceFlags.perpetual = true; // source never dies
         }
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -52,7 +57,7 @@ public:
         uint8_t numSprays; // note: so far only one tested but more is possible
         uint32_t i = 0;
 
-        numSprays = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES); // number of volcanoes
+        numSprays = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES); // number of volcanoes
 
         // change source emitting color from time to time, emit one particle per spray
         if (SEGMENT.call % (11 - (SEGMENT.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles (and update the sources)

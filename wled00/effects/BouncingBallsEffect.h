@@ -42,7 +42,7 @@ public:
             }
         }
 
-        if (!resizeVector(balls, maxNumBalls * strips)) { //TODO reduce to actual ball count instead of max ball count?
+        if (!balls.resize(maxNumBalls * strips)) { //TODO reduce to actual ball count instead of max ball count?
             return false;
         }
 

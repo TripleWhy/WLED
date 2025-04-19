@@ -42,7 +42,7 @@ public:
         if (usablePopcorns * strips * sizeof(Spark) > FAIR_DATA_PER_SEG)
             usablePopcorns = FAIR_DATA_PER_SEG / (strips * sizeof(Spark)) + 1; // at least 1 popcorn per vstrip
 
-        if (!resizeVector(popcorn, usablePopcorns)) { // on a matrix 64x64 this could consume a little less than 27kB when Bar expansion is used
+        if (!popcorn.resize(usablePopcorns)) { // on a matrix 64x64 this could consume a little less than 27kB when Bar expansion is used
             return false;
         }
 

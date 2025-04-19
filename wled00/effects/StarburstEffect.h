@@ -56,7 +56,7 @@ public:
         if (numStars > maxStars)
             numStars = maxStars;
 
-        if (!resizeVector(stars, numStars)) {
+        if (!stars.resize(numStars)) {
             return false;
         }
         stars.shrink_to_fit();

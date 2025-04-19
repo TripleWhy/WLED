@@ -36,7 +36,7 @@ public:
         const int rows = coordinate.height;
         const auto XY = [&](int x, int y) { return (x%cols) + (y%rows) * cols; };
 
-        if (!resizeVector(prevLeds, coordinate.width)) {
+        if (!prevLeds.resize(coordinate.width)) {
             return false;
         }
 

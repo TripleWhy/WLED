@@ -10,10 +10,10 @@
   Particle smashing down like meteors and exploding as they hit the ground, has many parameters to play with
   by DedeHai (Damian Schneider)
 */
-class ParticleImpactEffect : public BaseEffect<ParticleImpactEffect, Particle2dEffect> {
+class ParticleImpactEffect : public BaseEffect<ParticleImpactEffect, Particle2dEffect<ParticleImpactEffect>> {
 private:
     using Self = ParticleImpactEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
     static constexpr uint32_t NUMBEROFSOURCES = 8;
 
@@ -21,19 +21,24 @@ public:
     static constexpr const char metaData[] PROGMEM = "PS Impact@Launches,!,Force,Hardness,Blur,Cylinder,Walls,Collide;;!;2;pal=0,sx=32,ix=85,c1=70,c2=130,c3=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEIMPACT;
 
-    explicit ParticleImpactEffect(const EffectInformation& ei)
-        : Base{ei, NUMBEROFSOURCES, false, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(NUMBEROFSOURCES, false, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true);
         PartSys.setGravity(); // enable default gravity
         PartSys.setBounceY(true); // always use ground bounce
         PartSys.setWallRoughness(220); // high roughness
-        const uint8_t MaxNumMeteors = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        const uint8_t MaxNumMeteors = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES);
         for (uint32_t i = 0; i < MaxNumMeteors; i++) {
          // PartSys.sources[i].source.y = 500;
             PartSys.sources[i].source.ttl = hw_random16(10 * i); // set initial delay for meteors
             PartSys.sources[i].source.vy = 10; // at positive speeds, no particles are emitted and if particle dies, it will be relaunched
         }
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -54,7 +59,7 @@ public:
         uint8_t hardness = map(SEGMENT.custom2, 0, 255, PS_P_MINSURFACEHARDNESS - 2, 255);
         PartSys.setWallHardness(hardness);
         PartSys.enableParticleCollisions(SEGMENT.check3, hardness); // enable collisions and set particle collision hardness
-        MaxNumMeteors = min(PartSys.numSources, (uint32_t)NUMBEROFSOURCES);
+        MaxNumMeteors = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES);
         uint8_t numMeteors = MaxNumMeteors; // TODO: clean this up   map(SEGMENT.custom3, 0, 31, 1, MaxNumMeteors); // number of meteors to use for animation
 
         uint32_t emitparticles; // number of particles to emit for each rocket's state

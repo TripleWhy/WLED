@@ -22,7 +22,7 @@ public:
         }
 
         unsigned dataSize = (coordinate.width+7) >> 3; //1 bit per LED
-        if (!resizeVector(data, dataSize)) {
+        if (!data.resize(dataSize)) {
             return false;
         }
 

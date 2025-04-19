@@ -11,21 +11,26 @@
   calculates slope gradient at the particle positions and applies 'downhill' force, resulting in a fuzzy perlin noise display
   by DedeHai (Damian Schneider)
 */
-class ParticlePerlinEffect : public BaseEffect<ParticlePerlinEffect, Particle2dEffect> {
+class ParticlePerlinEffect : public BaseEffect<ParticlePerlinEffect, Particle2dEffect<ParticlePerlinEffect>> {
 private:
     using Self = ParticlePerlinEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Fuzzy Noise@Speed,Particles,Bounce,Friction,Scale,Cylinder,Smear,Collide;;!;2;pal=64,sx=50,ix=200,c1=130,c2=30,c3=5,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEPERLIN;
 
-    explicit ParticlePerlinEffect(const EffectInformation& ei)
-        : Base{ei, 1, true, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, true, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true); // should never happen, but lets make sure there are no stray particles
         PartSys.setMotionBlur(230); // anable motion blur
         PartSys.setBounceY(true);
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

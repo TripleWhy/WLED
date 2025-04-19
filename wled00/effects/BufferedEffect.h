@@ -24,9 +24,6 @@ public:
         friend class BufferedEffect;
     public:
         explicit PixelBufferBase() = default;
-        explicit PixelBufferBase(size_t size) {
-            resizeVector(pixels, size);
-        }
 
         inline bool isEmpty() const {
             return pixels.empty();
@@ -138,12 +135,15 @@ class BufferedEffect : public BufferedEffectBase {
 public:
     class PixelBuffer : public PixelBufferBase {
     public:
-        explicit constexpr PixelBuffer() = default;
-        explicit constexpr PixelBuffer(size_t length) : PixelBufferBase(length) {
+        using PixelBufferBase::PixelBufferBase;
+
+        inline bool resize(size_t size) {
             static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
+            return pixels.resize(size);
         }
-        explicit constexpr PixelBuffer(size_t width, size_t height) : PixelBufferBase(width * height) {
+        inline bool resize(size_t width, size_t height) {
             static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+            return pixels.resize(width * height);
         }
 
         inline void setPixelColor(unsigned x, uint32_t color) {
@@ -578,7 +578,7 @@ protected:
         const unsigned height = Segment::getEffectHeight<dimensionality>();
         const size_t length = width * height;
 
-        if (!resizeVector(buffer.pixels, length)) {
+        if (!buffer.pixels.resize(length)) {
             return;
         }
 
@@ -591,7 +591,7 @@ protected:
 
 public:
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        return resizeVector(buffer.pixels, coordinate.width * coordinate.height);
+        return buffer.pixels.resize(coordinate.width * coordinate.height);
     }
 
     uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {

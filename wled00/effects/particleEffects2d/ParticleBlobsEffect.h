@@ -11,24 +11,29 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticleBlobsEffect : public BaseEffect<ParticleBlobsEffect, Particle2dEffect> {
+class ParticleBlobsEffect : public BaseEffect<ParticleBlobsEffect, Particle2dEffect<ParticleBlobsEffect>> {
 private:
     using Self = ParticleBlobsEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Blobs@Speed,Blobs,Size,Life,Blur,Wobble,Collide,Pulsate;;!;2v;sx=30,ix=64,c1=200,c2=130,c3=0,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEBLOBS;
 
-    explicit ParticleBlobsEffect(const EffectInformation& ei)
-        : Base{ei, 1, true, true}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, true, true)) {
+            return false;
+        }
+
         PartSys.setBounceX(true);
         PartSys.setBounceY(true);
         PartSys.setWallHardness(255);
         PartSys.setWallRoughness(255);
         PartSys.setCollisionHardness(255);
-}
+        return true;
+    }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         if (!Base::nextFrameImpl(coordinate)) {

@@ -6,16 +6,31 @@
 #include "../BufferedEffect.h"
 #include "../Effect.h"
 
+template<typename T>
 class Particle2dEffect : public BufferedEffect<EffectDimensionality::d2> {
 private:
     using Self = Particle2dEffect;
     using Base = BufferedEffect<EffectDimensionality::d2>;
 
 public:
-    explicit Particle2dEffect(const EffectInformation& ei, const uint32_t requestedsources, const bool advanced, const bool sizecontrol)
+    explicit Particle2dEffect(const EffectInformation& ei)
         : Base{ei, false},
-          PartSys{ei.effectId, Segment::getEffectWidth<dimensionality>(), Segment::getEffectHeight<dimensionality>(), requestedsources, advanced, sizecontrol}
+          PartSys{ei.effectId}
     {
+    }
+
+    inline bool init(const uint32_t requestedsources, const bool advanced, const bool sizecontrol) {
+        return PartSys.init(Segment::getEffectWidth<dimensionality>(), Segment::getEffectHeight<dimensionality>(), requestedsources, advanced, sizecontrol);
+    }
+
+    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(coordinate)) {
+            return false;
+        }
+        if (PartSys.isInitialized()) {
+            return true;
+        }
+        return static_cast<T*>(this)->init();
     }
 
 protected:

@@ -53,25 +53,6 @@ public:
         return info.getPixelColor(this, coordinate, currentColor);
     }
 
-    template<typename Vector>
-    static inline bool resizeVector(Vector& vector, size_t size, bool preserveContent = false) {
-        if (vector.size() == size) {
-            return true;
-        }
-        if (!preserveContent) {
-            vector.clear();
-            vector.shrink_to_fit();
-        }
-        vector.resize(size);
-        if (vector.size() != size) {
-            vector.clear();
-            vector.shrink_to_fit();
-            return false;
-        }
-        vector.shrink_to_fit();
-        return true;
-    }
-
 private:
     const EffectInformation& info;
 };

@@ -13,21 +13,26 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlePitEffect : public BaseEffect<ParticlePitEffect, Particle2dEffect> {
+class ParticlePitEffect : public BaseEffect<ParticlePitEffect, Particle2dEffect<ParticlePitEffect>> {
 private:
     using Self = ParticlePitEffect;
-    using Base = BaseEffect<Self, Particle2dEffect>;
+    using Base = BaseEffect<Self, Particle2dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Ballpit@Speed,Intensity,Size,Hardness,Saturation,Cylinder,Walls,Ground;;!;2;pal=11,sx=100,ix=220,c1=120,c2=130,c3=31,o3=1";
     static constexpr const uint8_t effectId = FX_MODE_PARTICLEPIT;
 
-    explicit ParticlePitEffect(const EffectInformation& ei)
-        : Base{ei, 1, true, false}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, true, false)) {
+            return false;
+        }
+
         PartSys.setKillOutOfBounds(true);
         PartSys.setGravity(); // enable with default gravity
         PartSys.setUsedParticles(170); // use 75% of available particles
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

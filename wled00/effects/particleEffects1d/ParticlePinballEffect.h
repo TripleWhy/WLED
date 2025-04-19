@@ -11,22 +11,27 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class ParticlePinballEffect : public BaseEffect<ParticlePinballEffect, Particle1dEffect> {
+class ParticlePinballEffect : public BaseEffect<ParticlePinballEffect, Particle1dEffect<ParticlePinballEffect>> {
 private:
     using Self = ParticlePinballEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Pinball@Speed,!,Size,Blur,Gravity,Collide,Rolling,Position Color;,!;!;1;pal=0,ix=220,c2=0,c3=8,o1=1";
     static constexpr const uint8_t effectId = FX_MODE_PSPINBALL;
 
-    explicit ParticlePinballEffect(const EffectInformation& ei)
-        : Base{ei, 1, 128, true}
-    {
+    using Base::Base;
+
+    bool init() {
+        if (!Base::init(1, 128, true)) {
+            return false;
+        }
+
         PartSys.sources[0].sourceFlags.collide = true; // seeded particles will collide (if enabled)
         PartSys.sources[0].source.x = PS_P_RADIUS_1D; //emit at bottom
         PartSys.setKillOutOfBounds(true); // out of bounds particles dont return
         PartSys.setUsedParticles(255); // use all available particles for init
+        return true;
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

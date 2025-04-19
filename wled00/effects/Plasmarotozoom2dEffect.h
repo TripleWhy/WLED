@@ -25,7 +25,7 @@ public:
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (!resizeVector(plasma, coordinate.width)) {
+        if (!plasma.resize(coordinate.width)) {
             return false;
         }
 

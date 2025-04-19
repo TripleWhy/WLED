@@ -55,7 +55,7 @@ public:
         bool initialize = previousSpotlightCount != numSpotlights;
         previousSpotlightCount = numSpotlights;
 
-        if (!resizeVector(spotlights, numSpotlights)) {
+        if (!spotlights.resize(numSpotlights)) {
             return false;
         }
 

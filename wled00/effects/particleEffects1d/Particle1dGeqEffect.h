@@ -10,18 +10,19 @@
   Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
-class Particle1dGeqEffect : public BaseEffect<Particle1dGeqEffect, Particle1dEffect> {
+class Particle1dGeqEffect : public BaseEffect<Particle1dGeqEffect, Particle1dEffect<Particle1dGeqEffect>> {
 private:
     using Self = Particle1dGeqEffect;
-    using Base = BaseEffect<Self, Particle1dEffect>;
+    using Base = BaseEffect<Self, Particle1dEffect<Self>>;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS GEQ 1D@Speed,!,Size,Blur,,,,;,!;!;1f;pal=0,sx=50,ix=200,c1=0,c2=0,c3=0,o1=1,o2=1";
     static constexpr const uint8_t effectId = FX_MODE_PS1DGEQ;
 
-    explicit Particle1dGeqEffect(const EffectInformation& ei)
-        : Base{ei, 16, 255, true}
-    {
+    using Base::Base;
+
+    bool init() {
+        return Base::init(16, 255, true);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -34,7 +35,7 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        numSources = PartSys.numSources;
+        numSources = PartSys.sources.size();
         PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
 
         uint32_t spacing = PartSys.maxX / numSources;

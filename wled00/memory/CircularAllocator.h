@@ -169,6 +169,14 @@ public:
         }
     }
 
+    static std::size_t getContinuousFreeSpace() {
+        if (start > end) {
+            return start - end;
+        } else {
+            return std::max(buffer.end() - end, start - buffer.begin());
+        }
+    }
+
     static std::size_t getUsedSpace() {
         return (end - start + bufferSize) % bufferSize;
     }
@@ -218,7 +226,6 @@ public:
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
     using unique_ptr = std::unique_ptr<T, Deleter>;
-    using vector = std::vector<T, CircularAllocator>;
 
     // Required by C++11 for allocator compatibility
     template<typename U>
@@ -272,10 +279,39 @@ public:
 
     template<typename... Args>
     static CircularAllocator::unique_ptr make_unique(Args&&... args) {
+        if (getContinuousFreeSpace() < 1) {
+            return nullptr;
+        }
         T* rawPtr = allocate(1);
         construct(rawPtr, std::forward<Args>(args)...);
         return CircularAllocator::unique_ptr{rawPtr};
     }
+
+    static inline constexpr std::size_t getContinuousFreeSpace() {
+        return CircularBufferMemoryManager<Tag>::getContinuousFreeSpace() / sizeof(T);
+    }
+
+    class vector : public std::vector<T, CircularAllocator> {
+    private:
+        using Base = std::vector<T, CircularAllocator>;
+
+    public:
+        bool resize(size_type count, bool preserveContent = false) {
+            if (Base::size() == count) {
+                return true;
+            }
+            if (!preserveContent) {
+                Base::clear();
+                Base::shrink_to_fit();
+            }
+            if (getContinuousFreeSpace() < count) {
+                return false;
+            }
+            Base::reserve(count);
+            Base::resize(count);
+            return true;
+        }
+    };
 };
 
 // Equality operators for allocator comparison - required by STL

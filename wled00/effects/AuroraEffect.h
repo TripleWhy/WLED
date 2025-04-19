@@ -125,11 +125,11 @@ public:
         }
 
         //Intensity slider changed or first call
-        if(previousIntensity != SEGMENT.intensity || SEGENV.call == 0) {
+        if(previousIntensity != SEGMENT.intensity || SEGENV.call == 0 || waves.size() != wavecount) {
             wavecount = map(SEGMENT.intensity, 0, 255, 2, W_MAX_COUNT);
             previousIntensity = SEGMENT.intensity;
 
-            if (!resizeVector(waves, wavecount)) {
+            if (!waves.resize(wavecount)) {
                 return false;
             }
 

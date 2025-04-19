@@ -28,28 +28,48 @@ static constexpr bool renderSolo = true; // is set to true if this is the only p
 static uint32_t calculateNumberOfParticles2D(const uint32_t pixels, const bool advanced, const bool sizecontrol);
 static uint32_t calculateNumberOfSources2D(const uint32_t pixels, const uint32_t requestedsources);
 
-ParticleSystem2D::ParticleSystem2D(const uint8_t effectID, const uint32_t width, const uint32_t height, const uint32_t requestedsources, const bool advanced, const bool sizecontrol)
-  : renderbuffer{static_cast<size_t>(advanced) * 10u, static_cast<size_t>(advanced) * 10u},
-    effectID{effectID}
+ParticleSystem2D::ParticleSystem2D(const uint8_t effectID)
+  : effectID{effectID}
 {
-  PSPRINTLN("\n ParticleSystem2D constructor");
-  const uint32_t pixels = width * height;
-  numParticles = calculateNumberOfParticles2D(pixels, advanced, sizecontrol);
-  PSPRINT(" segmentsize:" + String(width) + " " + String(height));
-  PSPRINT(" request numparticles:" + String(numParticles));
-  numSources = calculateNumberOfSources2D(pixels, requestedsources);
+}
 
-  Effect::resizeVector(particles, numParticles);
-  Effect::resizeVector(particleFlags, numParticles);
-  Effect::resizeVector(sources, numSources);
+bool ParticleSystem2D::init(const uint32_t width, const uint32_t height, const uint32_t requestedsources, const bool advanced, const bool sizecontrol) {
+  if (!renderbuffer.resize(static_cast<size_t>(advanced) * 10u, static_cast<size_t>(advanced) * 10u)) {
+    return false;
+  }
+
+  const uint32_t pixels = width * height;
+  const uint32_t numParticles = calculateNumberOfParticles2D(pixels, advanced, sizecontrol);
+  const uint32_t numSources = calculateNumberOfSources2D(pixels, requestedsources);
+
+  if (!particleFlags.resize(numParticles)) {
+    return false;
+  }
+  if (!particles.resize(numParticles)) {
+    return false;
+  }
   if (advanced) {
-    Effect::resizeVector(advPartProps, numParticles);
+    if (!advPartProps.resize(numParticles)) {
+      return false;
+    }
   }
   if (sizecontrol) {
-    Effect::resizeVector(advPartSize, numParticles);
+    if (!advPartSize.resize(numParticles)) {
+      return false;
+    }
+  }
+
+  // sources is the last allocation action, so isInitialized() will use that to check if everything is fine.
+  if (!sources.resize(numSources)) {
+    return false;
   }
 
   setMatrixSize(width, height);
+  return true;
+}
+
+bool ParticleSystem2D::isInitialized() const {
+  return !sources.empty();
 }
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
@@ -90,9 +110,9 @@ void ParticleSystem2D::updateFire(BufferedEffect<EffectDimensionality::d2>::Pixe
 // set percentage of used particles as uint8_t i.e 127 means 50% for example
 void ParticleSystem2D::setUsedParticles(uint8_t percentage) {
   fractionOfParticlesUsed = percentage; // note usedParticles is updated in memory manager
-  updateUsedParticles(numParticles, particles.size(), fractionOfParticlesUsed, usedParticles);
+  updateUsedParticles(particles.size(), particles.size(), fractionOfParticlesUsed, usedParticles);
   PSPRINT(" SetUsedpaticles: allocated particles: ");
-  PSPRINT(numParticles);
+  PSPRINT(particles.size());
   PSPRINT(" available particles: ");
   PSPRINT(particles.size());
   PSPRINT(" ,used percentage: ");
@@ -1040,21 +1060,42 @@ static uint32_t calculateNumberOfSources2D(uint32_t pixels, uint32_t requestedso
 static uint32_t calculateNumberOfParticles1D(const uint32_t length, const uint32_t fraction, const bool isadvanced);
 static uint32_t calculateNumberOfSources1D(const uint32_t requestedsources);
 
-ParticleSystem1D::ParticleSystem1D(const uint8_t effectID, const uint32_t length, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced)
-  : renderbuffer{static_cast<size_t>(advanced) * 10u},
-    effectID{effectID}
+ParticleSystem1D::ParticleSystem1D(const uint8_t effectID)
+  : effectID{effectID}
 {
-  numParticles = calculateNumberOfParticles1D(length, fractionofparticles, advanced);
-  numSources = calculateNumberOfSources1D(requestedsources);
+}
 
-  Effect::resizeVector(particles, numParticles);
-  Effect::resizeVector(particleFlags, numParticles);
-  Effect::resizeVector(sources, numSources);
+bool ParticleSystem1D::init(const uint32_t length, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced) {
+  if (!renderbuffer.resize(static_cast<size_t>(advanced) * 10u)) {
+    return false;
+  }
+
+  const uint32_t numParticles = calculateNumberOfParticles1D(length, fractionofparticles, advanced);
+  const uint32_t numSources = calculateNumberOfSources1D(requestedsources);
+
+  if (!particleFlags.resize(numParticles)) {
+    return false;
+  }
+  if (!particles.resize(numParticles)) {
+    return false;
+  }
   if (advanced) {
-    Effect::resizeVector(advPartProps, numParticles);
+    if (!advPartProps.resize(numParticles)) {
+      return false;
+    }
+  }
+
+  // sources is the last allocation action, so isInitialized() will use that to check if everything is fine.
+  if (!sources.resize(numSources)) {
+    return false;
   }
 
   setSize(length);
+  return true;
+}
+
+bool ParticleSystem1D::isInitialized() const {
+  return !sources.empty();
 }
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
@@ -1085,9 +1126,9 @@ void ParticleSystem1D::update(BufferedEffect<EffectDimensionality::d1>::PixelBuf
 // set percentage of used particles as uint8_t i.e 127 means 50% for example
 void ParticleSystem1D::setUsedParticles(const uint8_t percentage) {
   fractionOfParticlesUsed = percentage; // note usedParticles is updated in memory manager
-  updateUsedParticles(numParticles, particles.size(), fractionOfParticlesUsed, usedParticles);
+  updateUsedParticles(particles.size(), particles.size(), fractionOfParticlesUsed, usedParticles);
   PSPRINT(" SetUsedpaticles: allocated particles: ");
-  PSPRINT(numParticles);
+  PSPRINT(particles.size());
   PSPRINT(" available particles: ");
   PSPRINT(particles.size());
   PSPRINT(" ,used percentage: ");
