@@ -21,8 +21,8 @@ public:
 
     using Base::Base;
 
-    bool init() {
-        if (!Base::init(0, 255, false)) {
+    bool init(const EffectCoordinate& coordinate) {
+        if (!Base::init(coordinate, 0, 255, false)) {
             return false;
         }
 
@@ -132,7 +132,7 @@ public:
                 }
                 else { // overflow
                     direction = !(direction); // flip direction
-                    aux1 = SEGMENT.virtualLength() + 100; // set countdown
+                    aux1 = coordinate.width + 100; // set countdown
                 }
                 if (direction == false) // down, start dropping the highest number particle
                     aux0--; // next particle

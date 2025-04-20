@@ -21,8 +21,8 @@ public:
 
     using Base::Base;
 
-    bool init() {
-        return Base::init(1, 255, true);
+    bool init(const EffectCoordinate& coordinate) {
+        return Base::init(coordinate, 1, 255, true);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {

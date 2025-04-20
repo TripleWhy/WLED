@@ -7,6 +7,7 @@
 // Sine waves that have controllable phase change speed, frequency and cutoff. By Andrew Tuline.
 // SEGMENT.speed ->Speed, SEGMENT.intensity -> Frequency (SEGMENT.fft1 -> Color change, SEGMENT.fft2 -> PWM cutoff)
 //
+// Adjustable sinewave. By Andrew Tuline
 class SinewaveEffect : public BaseEffect<SinewaveEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
     using Self = SinewaveEffect;
@@ -22,8 +23,6 @@ public:
         if (!Base::nextFrameImpl(coordinate)) {
             return false;
         }
-                             // Adjustable sinewave. By Andrew Tuline
-        //#define qsuba(x, b)  ((x>b)?x-b:0)               // Analog Unsigned subtraction macro. if result <0, then => 0
 
         unsigned colorIndex = strip.now /32;//(256 - SEGMENT.fft1);  // Amount of colour change.
 

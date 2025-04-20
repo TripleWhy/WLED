@@ -7,9 +7,10 @@
 /*
  * Sec flashes running on prim.
  */
-#define FLASH_COUNT 4
 class ChaseFlashEffect : public BaseEffect<ChaseFlashEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
+    static constexpr unsigned FLASH_COUNT = 4;
+
     using Self = ChaseFlashEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 

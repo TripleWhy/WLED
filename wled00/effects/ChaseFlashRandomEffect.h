@@ -9,6 +9,8 @@
  */
 class ChaseFlashRandomEffect : public BaseEffect<ChaseFlashRandomEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
+    static constexpr unsigned FLASH_COUNT = 4;
+
     using Self = ChaseFlashRandomEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 

@@ -24,7 +24,7 @@ public:
             return false;
         }
 
-        const uint16_t width  = SEGMENT.is2D() ? coordinate.width : coordinate.width;
+        const uint16_t width  = coordinate.width;
         const uint16_t height = coordinate.height;
 
         if (SEGENV.call == 0) {

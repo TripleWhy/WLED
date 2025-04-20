@@ -121,7 +121,7 @@ private:
                 CRGB c = ledsbuff[j];
                 if (isRow)
                     std::swap(j,i);
-                SEGMENT.setPixelColorXY(i, j, noisePixels[XY(coordinate,i,j)].pixel = c);
+                buffer.setPixelColor(i, j, noisePixels[XY(coordinate,i,j)].pixel = c);
                 if (isRow)
                     std::swap(j,i);
             }

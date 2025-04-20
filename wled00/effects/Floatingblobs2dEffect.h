@@ -9,9 +9,10 @@
 //     2D Floating Blobs  //
 ////////////////////////////
 //// Floating Blobs by stepko (c)2021 [https://editor.soulmatelights.com/gallery/573-blobs], adapted by Blaz Kristan (AKA blazoncek)
-#define MAX_BLOBS 8
 class Floatingblobs2dEffect : public BaseEffect<Floatingblobs2dEffect, BufferedEffect<EffectDimensionality::d2>> {
 private:
+    static constexpr size_t MAX_BLOBS = 8;
+
     using Self = Floatingblobs2dEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
@@ -114,6 +115,5 @@ private:
     uint16_t aux0{};
     uint16_t aux1{};
 };
-#undef MAX_BLOBS
 
 #endif //WLED_DISABLE_2D

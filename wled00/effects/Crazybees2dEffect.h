@@ -10,9 +10,10 @@
 //     2D Crazy Bees   //
 /////////////////////////
 //// Crazy bees by stepko (c)12.02.21 [https://editor.soulmatelights.com/gallery/651-crazy-bees], adapted by Blaz Kristan (AKA blazoncek), improved by @dedehai
-#define MAX_BEES 5
 class Crazybees2dEffect : public BaseEffect<Crazybees2dEffect, BufferedEffect<EffectDimensionality::d2>> {
 private:
+    static constexpr int MAX_BEES = 5;
+
     struct Bee {
         uint8_t posX{};
         uint8_t posY{};
@@ -103,6 +104,5 @@ private:
     std::array<Bee, MAX_BEES> bee{};
     uint32_t step{};
 };
-#undef MAX_BEES
 
 #endif //WLED_DISABLE_2D

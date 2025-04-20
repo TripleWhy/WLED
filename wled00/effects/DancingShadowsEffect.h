@@ -4,19 +4,6 @@
 #include "BufferedEffect.h"
 #include "Effect.h"
 
-#define SPOT_TYPE_SOLID       0
-#define SPOT_TYPE_GRADIENT    1
-#define SPOT_TYPE_2X_GRADIENT 2
-#define SPOT_TYPE_2X_DOT      3
-#define SPOT_TYPE_3X_DOT      4
-#define SPOT_TYPE_4X_DOT      5
-#define SPOT_TYPES_COUNT      6
-#ifdef ESP8266
-  #define SPOT_MAX_COUNT 17          //Number of simultaneous waves
-#else
-  #define SPOT_MAX_COUNT 49          //Number of simultaneous waves
-#endif
-
 /*
  * Spotlights moving back and forth that cast dancing shadows.
  * Shine this through tree branches/leaves or other close-up objects that cast
@@ -26,6 +13,22 @@
  */
 class DancingShadowsEffect : public BaseEffect<DancingShadowsEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
+    #ifdef ESP8266
+    static constexpr long SPOT_MAX_COUNT = 17;          //Number of simultaneous waves
+    #else
+    static constexpr long SPOT_MAX_COUNT = 49;          //Number of simultaneous waves
+    #endif
+
+    enum class SpotType : uint8_t {
+        SOLID =       0,
+        GRADIENT =    1,
+        GRADIENT_X2 = 2,
+        DOT_X2 =      3,
+        DOT_X3 =      4,
+        DOT_X4 =      5,
+        COUNT
+    };
+
     //13 bytes
     struct Spotlight {
         float speed{};
@@ -33,7 +36,7 @@ private:
         int16_t position{};
         unsigned long lastUpdateTime{};
         uint8_t width{};
-        uint8_t type{};
+        SpotType type{};
     };
 
 private:
@@ -98,7 +101,7 @@ public:
                 }
 
                 spotlights[i].lastUpdateTime = time;
-                spotlights[i].type = hw_random8(SPOT_TYPES_COUNT);
+                spotlights[i].type = static_cast<SpotType>(hw_random8(static_cast<uint8_t>(SpotType::COUNT)));
             }
 
             uint32_t color = SEGMENT.color_from_palette(spotlights[i].colorIdx, false, false, 255);
@@ -110,7 +113,7 @@ public:
                 }
             } else {
                 switch (spotlights[i].type) {
-                    case SPOT_TYPE_SOLID:
+                    case SpotType::SOLID:
                         for (size_t j = 0; j < spotlights[i].width; j++) {
                             if ((start + j) >= 0 && (start + j) < coordinate.width) {
                                 buffer.blendPixelColor(start + j, color, 128);
@@ -118,7 +121,7 @@ public:
                         }
                     break;
 
-                    case SPOT_TYPE_GRADIENT:
+                    case SpotType::GRADIENT:
                         for (size_t j = 0; j < spotlights[i].width; j++) {
                             if ((start + j) >= 0 && (start + j) < coordinate.width) {
                                 buffer.blendPixelColor(start + j, color, cubicwave8(map(j, 0, spotlights[i].width - 1, 0, 255)));
@@ -126,7 +129,7 @@ public:
                         }
                     break;
 
-                    case SPOT_TYPE_2X_GRADIENT:
+                    case SpotType::GRADIENT_X2:
                         for (size_t j = 0; j < spotlights[i].width; j++) {
                             if ((start + j) >= 0 && (start + j) < coordinate.width) {
                                 buffer.blendPixelColor(start + j, color, cubicwave8(2 * map(j, 0, spotlights[i].width - 1, 0, 255)));
@@ -134,7 +137,7 @@ public:
                         }
                     break;
 
-                    case SPOT_TYPE_2X_DOT:
+                    case SpotType::DOT_X2:
                         for (size_t j = 0; j < spotlights[i].width; j += 2) {
                             if ((start + j) >= 0 && (start + j) < coordinate.width) {
                                 buffer.blendPixelColor(start + j, color, 128);
@@ -142,7 +145,7 @@ public:
                         }
                     break;
 
-                    case SPOT_TYPE_3X_DOT:
+                    case SpotType::DOT_X3:
                         for (size_t j = 0; j < spotlights[i].width; j += 3) {
                             if ((start + j) >= 0 && (start + j) < coordinate.width) {
                                 buffer.blendPixelColor(start + j, color, 128);
@@ -150,12 +153,15 @@ public:
                         }
                     break;
 
-                    case SPOT_TYPE_4X_DOT:
+                    case SpotType::DOT_X4:
                         for (size_t j = 0; j < spotlights[i].width; j += 4) {
                             if ((start + j) >= 0 && (start + j) < coordinate.width) {
                                 buffer.blendPixelColor(start + j, color, 128);
                             }
                         }
+                    break;
+
+                    case SpotType::COUNT:
                     break;
                 }
             }

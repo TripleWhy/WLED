@@ -7,29 +7,28 @@
 /*
   Aurora effect
 */
-
-//CONFIG
-#ifdef ESP8266
-  #define W_MAX_COUNT  9          //Number of simultaneous waves
-#else
-  #define W_MAX_COUNT 20          //Number of simultaneous waves
-#endif
-#define W_MAX_SPEED 6             //Higher number, higher speed
-#define W_WIDTH_FACTOR 6          //Higher number, smaller waves
-
 class AuroraEffect : public BaseEffect<AuroraEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
+//CONFIG
+#ifdef ESP8266
+    static constexpr long     W_MAX_COUNT = 9;       //Number of simultaneous waves
+#else
+    static constexpr long     W_MAX_COUNT = 20;      //Number of simultaneous waves
+#endif
+    static constexpr float    W_MAX_SPEED = 6;       //Higher number, higher speed
+    static constexpr uint32_t W_WIDTH_FACTOR = 6;    //Higher number, smaller waves
+
     //24 bytes
     class AuroraWave {
     private:
-        uint16_t ttl;
-        CRGB basecolor;
-        float basealpha;
-        uint16_t age;
-        uint16_t width;
-        float center;
-        bool goingleft;
-        float speed_factor;
+        uint16_t ttl{};
+        CRGB basecolor{};
+        float basealpha{};
+        uint16_t age{};
+        uint16_t width{};
+        float center{};
+        bool goingleft{};
+        float speed_factor{};
         bool alive = true;
 
     public:
@@ -43,7 +42,7 @@ private:
                 width = 1;
             center = hw_random8(101) / (float)100 * segment_length;
             goingleft = hw_random8(0, 2) == 0;
-            speed_factor = (hw_random8(10, 31) / (float)100 * W_MAX_SPEED / 255);
+            speed_factor = hw_random8(10, 31) * (W_MAX_SPEED / (100.0f * 255.0f));
             alive = true;
         }
 

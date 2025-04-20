@@ -9,14 +9,14 @@
 / based on the video: https://www.reddit.com/r/arduino/comments/c3sd46/i_made_this_fireworks_effect_for_my_led_strips/
 / Speed sets frequency of new starbursts, intensity is the intensity of the burst
 */
-#ifdef ESP8266
-  #define STARBURST_MAX_FRAG   8 //52 bytes / star
-#else
-  #define STARBURST_MAX_FRAG  10 //60 bytes / star
-#endif
-
 class StarburstEffect : public BaseEffect<StarburstEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
+#ifdef ESP8266
+    static constexpr int STARBURST_MAX_FRAG =  8; //52 bytes / star
+#else
+    static constexpr int STARBURST_MAX_FRAG = 10; //60 bytes / star
+#endif
+
     //each needs 20+STARBURST_MAX_FRAG*4 bytes
     struct Star {
         CRGB     color{};
@@ -138,7 +138,7 @@ public:
 
             float particleSize = (1.0f - fade) * 2.0f;
 
-            for (size_t index=0; index < STARBURST_MAX_FRAG*2; index++) {
+            for (size_t index=0; index < static_cast<size_t>(STARBURST_MAX_FRAG)*2u; index++) {
                 bool mirrored = index & 0x1;
                 unsigned i = index >> 1;
                 if (stars[j].fragment[i] > 0) {

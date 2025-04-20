@@ -22,8 +22,8 @@ public:
 
     using Base::Base;
 
-    bool init() {
-        return Base::init(Segment::getEffectWidth<EffectDimensionality::d2>(), false, false);
+    bool init(const EffectCoordinate& coordinate) {
+        return Base::init(coordinate, coordinate.width, false, false);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -62,10 +62,10 @@ public:
                 PartSys.sources[i].source.x = (PartSys.maxX >> 1) - (spread >> 1) + hw_random(spread); // change flame position: distribute randomly on chosen width
                 PartSys.sources[i].source.y = -(PS_P_RADIUS << 2); // set the source below the frame
                 PartSys.sources[i].source.ttl = 20 + hw_random16((SEGMENT.custom1 * SEGMENT.custom1) >> 8) / (1 + (firespeed >> 5)); //'hotness' of fire, faster flames reduce the effect or flame height will scale too much with speed
-                PartSys.sources[i].maxLife = hw_random16(SEGMENT.virtualHeight() >> 1) + 16; // defines flame height together with the vy speed, vy speed*maxlife/PS_P_RADIUS is the average flame height
+                PartSys.sources[i].maxLife = hw_random16(coordinate.height >> 1) + 16; // defines flame height together with the vy speed, vy speed*maxlife/PS_P_RADIUS is the average flame height
                 PartSys.sources[i].minLife = PartSys.sources[i].maxLife >> 1;
                 PartSys.sources[i].vx = hw_random16(4) - 2; // emitting speed (sideways)
-                PartSys.sources[i].vy = (SEGMENT.virtualHeight() >> 1) + (firespeed >> 4) + (SEGMENT.custom1 >> 4); // emitting speed (upwards)
+                PartSys.sources[i].vy = (coordinate.height >> 1) + (firespeed >> 4) + (SEGMENT.custom1 >> 4); // emitting speed (upwards)
                 PartSys.sources[i].var = 2 + hw_random16(2 + (firespeed >> 4)); // speed variation around vx,vy (+/- var)
             }
         }

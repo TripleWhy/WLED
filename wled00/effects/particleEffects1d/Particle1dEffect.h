@@ -19,8 +19,8 @@ public:
     {
     }
 
-    inline bool init(const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced) {
-        return PartSys.init(Segment::getEffectWidth<dimensionality>(), requestedsources, fractionofparticles, advanced);
+    inline bool init(const EffectCoordinate& coordinate, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced) {
+        return PartSys.init(coordinate.width, requestedsources, fractionofparticles, advanced);
     }
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
@@ -30,7 +30,7 @@ public:
         if (PartSys.isInitialized()) {
             return true;
         }
-        return static_cast<T*>(this)->init();
+        return static_cast<T*>(this)->init(coordinate);
     }
 
 protected:

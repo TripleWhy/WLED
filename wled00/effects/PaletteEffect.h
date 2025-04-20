@@ -41,8 +41,8 @@ public:
 
     bool nextFrameImpl(const EffectCoordinate& coordinate) {
         const bool isMatrix = strip.isMatrix;
-        const int cols = SEG_W;
-        const int rows = isMatrix ? SEG_H : strip.getActiveSegmentsNum();
+        const int cols = coordinate.width;
+        const int rows = isMatrix ? coordinate.width : strip.getActiveSegmentsNum();
 
         const int  inputRotation        = SEGMENT.custom1;
         const bool inputAnimateRotation = SEGMENT.check2;

@@ -9,9 +9,10 @@
  * Creates random comets
  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/MultiComet.h
  */
-#define MAX_COMETS 8
 class MultiCometEffect : public BaseEffect<MultiCometEffect, BufferedEffect<EffectDimensionality::d1>> {
 private:
+    static constexpr unsigned MAX_COMETS = 8;
+
     using Self = MultiCometEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d1>>;
 
@@ -59,5 +60,4 @@ private:
     std::array<uint16_t, MAX_COMETS> comets{};
     uint32_t step{};
 };
-#undef MAX_COMETS
 

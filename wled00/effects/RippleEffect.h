@@ -95,6 +95,5 @@ private:
     uint16_t aux0{};
     uint16_t aux1{};
 };
-#undef MAX_RIPPLES
 
 #endif //WLED_DISABLE_2D

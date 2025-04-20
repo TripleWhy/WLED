@@ -25,8 +25,8 @@ public:
 
     using Base::Base;
 
-    bool init() {
-        if (!Base::init(4, 255, false)) {
+    bool init(const EffectCoordinate& coordinate) {
+        if (!Base::init(coordinate, 4, 255, false)) {
             return false;
         }
 

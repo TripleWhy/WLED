@@ -8,9 +8,10 @@
 //     2D Ghost Rider  //
 /////////////////////////
 //// Ghost Rider by stepko (c)2021 [https://editor.soulmatelights.com/gallery/716-ghost-rider], adapted by Blaz Kristan (AKA blazoncek)
-#define LIGHTERS_AM 64  // max lighters (adequate for 32x32 matrix)
 class Ghostrider2dEffect : public BaseEffect<Ghostrider2dEffect, BufferedEffect<EffectDimensionality::d2>> {
 private:
+    static constexpr int LIGHTERS_AM = 64;  // max lighters (adequate for 32x32 matrix)
+
     using Self = Ghostrider2dEffect;
     using Base = BaseEffect<Self, BufferedEffect<EffectDimensionality::d2>>;
 
@@ -103,5 +104,4 @@ private:
     uint16_t aux0{};
     uint16_t aux1{};
 };
-#undef LIGHTERS_AM
 

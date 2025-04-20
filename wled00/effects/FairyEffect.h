@@ -7,11 +7,11 @@
 /*
  * Fairy, inspired by https://www.youtube.com/watch?v=zeOw5MZWq24
  */
-
-#define FLASHERS_PER_ZONE 6
-#define MAX_SHIMMER 92
-
 class FairyEffect : public BaseEffect<FairyEffect, BufferedEffect<EffectDimensionality::d1>> {
+private:
+    static constexpr unsigned FLASHERS_PER_ZONE = 6;
+    static constexpr unsigned MAX_SHIMMER = 92;
+
 public:
     //4 bytes
     struct Flasher {

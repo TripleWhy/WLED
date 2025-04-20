@@ -4,13 +4,14 @@
 #include "BufferedEffect.h"
 #include "Effect.h"
 
-#define maxNumPopcorn 21 // max 21 on 16 segment ESP8266
 /*
 *  POPCORN
 *  modified from https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Popcorn.h
 */
 class PopcornEffect : public BaseEffect<PopcornEffect, BufferedEffect<EffectDimensionality::d2VStrips>> {
 public:
+    static constexpr unsigned maxNumPopcorn = 21; // max 21 on 16 segment ESP8266
+
     //Spark type is used for popcorn, 1D fireworks, and drip
     struct Spark {
         float pos{};
