@@ -8,16 +8,17 @@
 #include "../src/font/console_font_5x8.h"
 #include "../src/font/console_font_6x8.h"
 #include "../src/font/console_font_7x9.h"
+#include "../wled.h"
 #include "effectUtils.h"
 #include <algorithm>
 #include <variant>
 
 static constexpr bool verifyBufferBounds = true;
-static constexpr bool verifyXyBounds = true;
+static constexpr bool verifyBufferXyBounds = true;
 
 class PixelBufferBase {
-    template<EffectDimensionality>
-    friend class BufferedEffect;
+private:
+    using Self = PixelBufferBase;
 
 public:
     explicit PixelBufferBase() = default;
@@ -119,11 +120,34 @@ protected:
 
 template<EffectDimensionality dimensionality>
 class PixelBuffer : public PixelBufferBase {
-    template<EffectDimensionality>
-    friend class BufferedEffect;
+private:
+    using Self = PixelBuffer;
+    using Base = PixelBufferBase;
 
 public:
     using PixelBufferBase::PixelBufferBase;
+
+    bool copySegmentPixels() {
+        const unsigned width = Segment::getEffectWidth<dimensionality>();
+        const unsigned height = Segment::getEffectHeight<dimensionality>();
+
+        if constexpr (dimensionality == EffectDimensionality::d1) {
+            if (!resize(width * height)) {
+                return false;
+            }
+        } else {
+            if (!resize(width, height)) {
+                return false;
+            }
+        }
+
+        for (unsigned y = 0u; y < height; ++y) {
+            for (unsigned x = 0u; x < width; ++x) {
+                pixels[convertToLinear(x, y)] = SEGMENT.getPixelColor(convertToSegmentPixelIndex(x, y));
+            }
+        }
+        return true;
+    }
 
     inline bool resize(size_t size) {
         static_assert(dimensionality == EffectDimensionality::d1, "Use more coordinate arguments.");
@@ -131,6 +155,7 @@ public:
     }
     inline bool resize(size_t width, size_t height) {
         static_assert(dimensionality != EffectDimensionality::d1, "Use fewer coordinate arguments.");
+        Self::width = width;
         return pixels.resize(width * height);
     }
 
@@ -249,8 +274,8 @@ public:
     ) {
         static_assert(dimensionality != EffectDimensionality::d1, "This function is for 2D effects only.");
 
-        const unsigned cols = Segment::getEffectWidth<dimensionality>();
-        const unsigned rows = Segment::getEffectHeight<dimensionality>();
+        const unsigned cols = width;
+        const unsigned rows = pixels.size() / width;
         end_x = std::min(end_x, rows);
         end_y = std::min(end_y, cols);
         uint32_t lastnew{};   // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration, but it silences warnings
@@ -329,8 +354,8 @@ public:
         if (delta == 0)
             return; // not active
 
-        const int vW = Segment::getEffectWidth<dimensionality>();   // segment width in logical pixels (can be 0 if segment is inactive)
-        const int vH = Segment::getEffectHeight<dimensionality>();  // segment height in logical pixels (is always >= 1)
+        const int vW = width;   // segment width in logical pixels (can be 0 if segment is inactive)
+        const int vH = pixels.size() / width;  // segment height in logical pixels (is always >= 1)
         int absDelta = abs(delta);
         if (absDelta >= vW)
             return;
@@ -365,8 +390,8 @@ public:
         if (delta == 0)
             return; // not active
 
-        const int vW = Segment::getEffectWidth<dimensionality>();   // segment width in logical pixels (can be 0 if segment is inactive)
-        const int vH = Segment::getEffectHeight<dimensionality>();  // segment height in logical pixels (is always >= 1)
+        const int vW = width;   // segment width in logical pixels (can be 0 if segment is inactive)
+        const int vH = pixels.size() / width;  // segment height in logical pixels (is always >= 1)
         int absDelta = abs(delta);
         if (absDelta >= vH)
             return;
@@ -457,8 +482,8 @@ public:
         if (radius == 0)
             return; // not active
 
-        const int vW = Segment::getEffectWidth<dimensionality>();   // segment width in logical pixels (can be 0 if segment is inactive)
-        const int vH = Segment::getEffectHeight<dimensionality>();  // segment height in logical pixels (is always >= 1)
+        const int vW = width;   // segment width in logical pixels (can be 0 if segment is inactive)
+        const int vH = pixels.size() / width;  // segment height in logical pixels (is always >= 1)
 
         // draw soft bounding circle
         if (soft)
@@ -490,8 +515,8 @@ public:
         if (usePalGrad)
             grad = SEGPALETTE; // selected palette as gradient
 
-        const int width = Segment::getEffectWidth<dimensionality>();
-        const int height = Segment::getEffectHeight<dimensionality>();
+        const int width = Self::width;
+        const int height = pixels.size() / Self::width;
 
         //if (w<5 || w>6 || h!=8) return;
         for (int i = 0; i<h; i++) { // character height
@@ -547,31 +572,34 @@ public:
     }
 
 private:
-    static inline unsigned convertToLinear(unsigned x, unsigned y) {
+    inline unsigned convertToLinear(unsigned x, unsigned y) const {
         if constexpr (dimensionality == EffectDimensionality::d0) {
             return 0;
         } else if constexpr (dimensionality == EffectDimensionality::d1) {
             return x;
         } else {
-            if constexpr (verifyXyBounds) {
-                if (x >= Segment::getEffectWidth<dimensionality>()) [[unlikely]] {
-                    Serial.printf("BufferedEffect::convertToLinear: x %u >= %u\n", x, Segment::getEffectWidth<dimensionality>());
+            if constexpr (verifyBufferXyBounds) {
+                if (x >= width) [[unlikely]] {
+                    Serial.printf("BufferedEffect::convertToLinear: x %u >= %u\n", x, width);
                     std::terminate();
                 }
-                if (y >= Segment::getEffectHeight<dimensionality>()) [[unlikely]] {
-                    Serial.printf("BufferedEffect::convertToLinear: y %u >= %u\n", y, Segment::getEffectHeight<dimensionality>());
+                if (y >= (pixels.size() / width)) [[unlikely]] {
+                    Serial.printf("BufferedEffect::convertToLinear: y %u >= %u\n", y, (pixels.size() / width));
                     std::terminate();
                 }
             }
-            return y * Segment::getEffectWidth<dimensionality>() + x;
+            return y * width + x;
         }
     }
 
-    static inline unsigned convertToSegmentPixelIndex(unsigned x, unsigned y) {
+    inline unsigned convertToSegmentPixelIndex(unsigned x, unsigned y) const {
         if constexpr (dimensionality == EffectDimensionality::d2VStrips) {
             return ((x) | (int((y) + 1) << 16)); // original indexToVStrip
         } else {
             return convertToLinear(x, y);
         }
     }
+
+private:
+    typename std::conditional<(dimensionality != EffectDimensionality::d1), size_t, std::monostate>::type width;
 };
