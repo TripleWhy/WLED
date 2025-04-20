@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>
 
 // font courtesy of https://github.com/idispatch/raster-fonts

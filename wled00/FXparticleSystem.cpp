@@ -73,7 +73,7 @@ bool ParticleSystem2D::isInitialized() const {
 }
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
-void ParticleSystem2D::update(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer) {
+void ParticleSystem2D::update(PixelBuffer<EffectDimensionality::d2>& framebuffer) {
   //apply gravity globally if enabled
   if (particlesettings.useGravity)
     applyGravity();
@@ -100,7 +100,7 @@ void ParticleSystem2D::update(BufferedEffect<EffectDimensionality::d2>::PixelBuf
 }
 
 // update function for fire animation
-void ParticleSystem2D::updateFire(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer, const uint8_t intensity,const bool renderonly) {
+void ParticleSystem2D::updateFire(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint8_t intensity,const bool renderonly) {
   if (!renderonly)
     fireParticleupdate();
   fireIntesity = intensity > 0 ? intensity : 1; // minimum of 1, zero checking is used in render function
@@ -581,7 +581,7 @@ void ParticleSystem2D::pointAttractor(const uint32_t particleindex, PSparticle &
 // if wrap is set, particles half out of bounds are rendered to the other side of the matrix
 // warning: do not render out of bounds particles or system will crash! rendering does not check if particle is out of bounds
 // firemode is only used for PS Fire FX
-void ParticleSystem2D::ParticleSys_render(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer) {
+void ParticleSystem2D::ParticleSys_render(PixelBuffer<EffectDimensionality::d2>& framebuffer) {
   if(blendingStyle == BLEND_STYLE_FADE && SEGMENT.isInTransition() && lastRender + (strip.getFrameTime() >> 1) > strip.now) // fixes speedup during transitions TODO: find a better solution
     return;
   lastRender = strip.now;
@@ -679,7 +679,7 @@ void ParticleSystem2D::ParticleSys_render(BufferedEffect<EffectDimensionality::d
 }
 
 // calculate pixel positions and brightness distribution and render the particle to local buffer or global buffer
-void ParticleSystem2D::renderParticle(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrapX, const bool wrapY) {
+void ParticleSystem2D::renderParticle(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrapX, const bool wrapY) {
   if(particlesize == 0) { // single pixel rendering
     uint32_t x = particles[particleindex].x >> PS_P_RADIUS_SHIFT;
     uint32_t y = particles[particleindex].y >> PS_P_RADIUS_SHIFT;
@@ -1099,7 +1099,7 @@ bool ParticleSystem1D::isInitialized() const {
 }
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
-void ParticleSystem1D::update(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer) {
+void ParticleSystem1D::update(PixelBuffer<EffectDimensionality::d1>& framebuffer) {
   //apply gravity globally if enabled
   if (particlesettings.useGravity) //note: in 1D system, applying gravity after collisions also works but may be worse
     applyGravity();
@@ -1356,7 +1356,7 @@ void ParticleSystem1D::applyFriction(int32_t coefficient) {
 // render particles to the LED buffer (uses palette to render the 8bit particle color value)
 // if wrap is set, particles half out of bounds are rendered to the other side of the matrix
 // warning: do not render out of bounds particles or system will crash! rendering does not check if particle is out of bounds
-void ParticleSystem1D::ParticleSys_render(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer) {
+void ParticleSystem1D::ParticleSys_render(PixelBuffer<EffectDimensionality::d1>& framebuffer) {
   if(blendingStyle == BLEND_STYLE_FADE && SEGMENT.isInTransition() && lastRender + (strip.getFrameTime() >> 1) > strip.now) // fixes speedup during transitions TODO: find a better solution
     return;
   lastRender = strip.now;
@@ -1417,7 +1417,7 @@ void ParticleSystem1D::ParticleSys_render(BufferedEffect<EffectDimensionality::d
 }
 
 // calculate pixel positions and brightness distribution and render the particle to local buffer or global buffer
-void ParticleSystem1D::renderParticle(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrap) {
+void ParticleSystem1D::renderParticle(PixelBuffer<EffectDimensionality::d1>& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrap) {
   uint32_t size = particlesize;
   if (!advPartProps.empty()) {// use advanced size properties
     size = advPartProps[particleindex].size;

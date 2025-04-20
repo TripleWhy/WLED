@@ -16,7 +16,7 @@
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D)) // not both disabled
 
 #include <stdint.h>
-#include "effects/BufferedEffect.h"
+#include "effects/PixelBuffer.h"
 #include "memory/CircularAllocator.h"
 #include "wled.h"
 
@@ -157,8 +157,8 @@ public:
   bool init(const uint32_t width, const uint32_t height, const uint32_t requestedsources, const bool advanced, const bool sizecontrol);
   bool isInitialized() const;
   // note: memory is allcated in the FX function, no deconstructor needed
-  void update(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer); //update the particles according to set options and render to the matrix
-  void updateFire(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer, const uint8_t intensity, const bool renderonly); // update function for fire, if renderonly is set, particles are not updated (required to fix transitions with frameskips)
+  void update(PixelBuffer<EffectDimensionality::d2>& framebuffer); //update the particles according to set options and render to the matrix
+  void updateFire(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint8_t intensity, const bool renderonly); // update function for fire, if renderonly is set, particles are not updated (required to fix transitions with frameskips)
   void updateSystem(unsigned width, unsigned height); // call at the beginning of every FX, updates pointers and dimensions
   void particleMoveUpdate(PSparticle &part, PSparticleFlags &partFlags, PSsettings2D *options = NULL, PSadvancedParticle *advancedproperties = NULL); // move function
   // particle emitters
@@ -198,8 +198,8 @@ public:
 
 private:
   //rendering functions
-  void ParticleSys_render(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer);
-  [[gnu::hot]] void renderParticle(BufferedEffect<EffectDimensionality::d2>::PixelBuffer& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrapX, const bool wrapY);
+  void ParticleSys_render(PixelBuffer<EffectDimensionality::d2>& framebuffer);
+  [[gnu::hot]] void renderParticle(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrapX, const bool wrapY);
   //paricle physics applied by system if flags are set
   void applyGravity(); // applies gravity to all particles
   void handleCollisions();
@@ -221,7 +221,7 @@ public:
   SegmentAllocator<PSsizeControl>::vector advPartSize{}; // sizecontrol ? numparticles : 0
 
   private:
-  BufferedEffect<EffectDimensionality::d2>::PixelBuffer renderbuffer{};
+  PixelBuffer<EffectDimensionality::d2> renderbuffer{};
 
   // last physical pixel that can be drawn to (FX can read this to read segment size if required), equal to width-1 / height-1
   int32_t maxXpixel{};
@@ -343,7 +343,7 @@ public:
   ~ParticleSystem1D() = default;
   bool init(const uint32_t length, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced);
   bool isInitialized() const;
-  void update(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer); //update the particles according to set options and render to the matrix
+  void update(PixelBuffer<EffectDimensionality::d1>& framebuffer); //update the particles according to set options and render to the matrix
   void updateSystem(size_t length); // call at the beginning of every FX, updates pointers and dimensions
   // particle emitters
   int32_t sprayEmit(const PSsource1D &emitter);
@@ -372,8 +372,8 @@ public:
 
 private:
   //rendering functions
-  void ParticleSys_render(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer);
-  void renderParticle(BufferedEffect<EffectDimensionality::d1>::PixelBuffer& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrap);
+  void ParticleSys_render(PixelBuffer<EffectDimensionality::d1>& framebuffer);
+  void renderParticle(PixelBuffer<EffectDimensionality::d1>& framebuffer, const uint32_t particleindex, const uint32_t brightness, const uint32_t color, const bool wrap);
 
   //paricle physics applied by system if flags are set
   void applyGravity(); // applies gravity to all particles
@@ -392,7 +392,7 @@ public:
   SegmentAllocator<PSadvancedParticle1D>::vector advPartProps{}; // isadvanced ? numParticles : 0
 
 private:
-  BufferedEffect<EffectDimensionality::d1>::PixelBuffer renderbuffer;
+  PixelBuffer<EffectDimensionality::d1> renderbuffer;
 
   int32_t maxXpixel{}; // last physical pixel that can be drawn to (FX can read this to read segment size if required), equal to width-1
 

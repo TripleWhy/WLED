@@ -1,3 +1,4 @@
+#pragma once
 // font courtesy of https://github.com/idispatch/raster-fonts
 static const unsigned char console_font_5x12[] PROGMEM = {
 
