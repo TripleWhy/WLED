@@ -18,6 +18,7 @@ class ParticleDancingShadowsEffect : public BaseEffect<ParticleDancingShadowsEff
 private:
     using Self = ParticleDancingShadowsEffect;
     using Base = BaseEffect<Self, Particle1dEffect<Self>>;
+    using SpotType = DancingShadowsEffect::SpotType;
 
 public:
     static constexpr const char metaData[] PROGMEM = "PS Dancing Shadows@Speed,!,Blur,Color Cycle,,Smear,Position Color,Smooth;,!;!;1;sx=100,ix=180,c1=0,c2=0";
@@ -72,7 +73,7 @@ public:
         //generate a spotlight: generates particles just outside of view
         if (deadparticles > 5 && (SEGMENT.call & 0x03) == 0) {
             //random color, random type
-            uint32_t type = hw_random16(SPOT_TYPES_COUNT);
+            SpotType type = static_cast<SpotType>(hw_random16(static_cast<uint32_t>(SpotType::COUNT)));
             int8_t speed = 2 + hw_random16(2 + (SEGMENT.speed >> 1)) + (SEGMENT.speed >> 4);
             int32_t width = hw_random16(1, 10);
             uint32_t ttl = 300; //ttl is particle brightness (below perpetual is set so it does not age, i.e. ttl stays at this value)
@@ -90,31 +91,31 @@ public:
             for (int32_t i = 0; i < width; i++) {
                 if (width > 1) {
                     switch (type) {
-                        case SPOT_TYPE_SOLID:
+                        case SpotType::SOLID:
                             //nothing to do
                             break;
 
-                        case SPOT_TYPE_GRADIENT:
+                        case SpotType::GRADIENT:
                             ttl = cubicwave8(map(i, 0, width - 1, 0, 255));
                             ttl = ttl*ttl >> 8; //make gradient more pronounced
                             break;
 
-                        case SPOT_TYPE_2X_GRADIENT:
+                        case SpotType::GRADIENT_X2:
                             ttl = cubicwave8(2 * map(i, 0, width - 1, 0, 255));
                             ttl = ttl*ttl >> 8;
                             break;
 
-                        case SPOT_TYPE_2X_DOT:
+                        case SpotType::DOT_X2:
                             if (i > 0) position++; //skip one pixel
                             i++;
                             break;
 
-                        case SPOT_TYPE_3X_DOT:
+                        case SpotType::DOT_X3:
                             if (i > 0) position += 2; //skip two pixels
                             i+=2;
                             break;
 
-                        case SPOT_TYPE_4X_DOT:
+                        case SpotType::DOT_X4:
                             if (i > 0) position += 3; //skip three pixels
                             i+=3;
                             break;

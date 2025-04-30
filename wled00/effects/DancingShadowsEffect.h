@@ -12,13 +12,7 @@
  * By Steve Pomeroy @xxv
  */
 class DancingShadowsEffect : public BaseEffect<DancingShadowsEffect, BufferedEffect<EffectDimensionality::d1>> {
-private:
-    #ifdef ESP8266
-    static constexpr long SPOT_MAX_COUNT = 17;          //Number of simultaneous waves
-    #else
-    static constexpr long SPOT_MAX_COUNT = 49;          //Number of simultaneous waves
-    #endif
-
+public:
     enum class SpotType : uint8_t {
         SOLID =       0,
         GRADIENT =    1,
@@ -28,6 +22,13 @@ private:
         DOT_X4 =      5,
         COUNT
     };
+
+private:
+    #ifdef ESP8266
+    static constexpr long SPOT_MAX_COUNT = 17;          //Number of simultaneous waves
+    #else
+    static constexpr long SPOT_MAX_COUNT = 49;          //Number of simultaneous waves
+    #endif
 
     //13 bytes
     struct Spotlight {
