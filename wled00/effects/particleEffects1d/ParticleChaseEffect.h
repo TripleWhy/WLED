@@ -64,7 +64,7 @@ public:
         for (int32_t i = (int32_t)PartSys.usedParticles - 1; i >= 0; i--) { // check from the back, last particle wraps first, multiple particles can overrun per frame
             if (PartSys.particles[i].x > PartSys.maxX + PS_P_RADIUS_1D + PartSys.advPartProps[i].size) { // wrap it around
                 uint32_t nextindex = (i + 1) % PartSys.usedParticles;
-                PartSys.particles[i].x = PartSys.particles[nextindex].x - (int)SEGENV.step;
+                PartSys.particles[i].x = PartSys.particles[nextindex].x - (int)step;
                 if(SEGMENT.check1) // playful mode, vary size
                     PartSys.advPartProps[i].size = max(1 + (SEGMENT.custom1 >> 1), ((int(sin16_t(strip.now << 1) + 32767)) >> 8)); // cycle size
                 if (SEGMENT.custom2 < 255)
@@ -76,25 +76,23 @@ public:
         }
 
         if (SEGMENT.check1) { // playful mode, changes hue, size, speed, density dynamically
-            int8_t* huedir = reinterpret_cast<int8_t *>(PartSys.PSdataEnd);  //assign data pointer
-            int8_t* stepdir = reinterpret_cast<int8_t *>(PartSys.PSdataEnd + 1);
-            if(*stepdir == 0) *stepdir = 1; // initialize directions
-            if(*huedir == 0) *huedir = 1;
+            if(stepdir == 0) stepdir = 1; // initialize directions
+            if(huedir == 0) huedir = 1;
             if (step >= (PartSys.advPartProps[0].size + PS_P_RADIUS_1D * 4) + PartSys.maxX / numParticles)
-                *stepdir = -1; // increase density (decrease space between particles)
+                stepdir = -1; // increase density (decrease space between particles)
             else if (step <= (PartSys.advPartProps[0].size >> 1) + ((PartSys.maxX / numParticles)))
-                *stepdir = 1; // decrease density
+                stepdir = 1; // decrease density
             if (aux1 > 512)
-                *huedir = -1;
+                huedir = -1;
             else if (aux1 < 50)
-                *huedir = 1;
+                huedir = 1;
             if (SEGMENT.call % (1024 / (1 + (SEGMENT.speed >> 2))) == 0)
-                aux1 += *huedir;
+                aux1 += huedir;
             int8_t globalhuestep = 0; // global hue increment
             if (SEGMENT.call % (1 + (int(sin16_t(strip.now) + 32767) >> 12))  == 0)
                 globalhuestep = 2; // global hue change to add some color variation
             if ((SEGMENT.call & 0x1F) == 0)
-                step += *stepdir; // change density
+                step += stepdir; // change density
             for(int32_t i = 0; i < PartSys.usedParticles; i++) {
                 PartSys.particles[i].hue -= globalhuestep; // shift global hue (both directions)
                 PartSys.particles[i].vx = 1 + (SEGMENT.speed >> 2) + ((int32_t(sin16_t(strip.now >> 1) + 32767) * (SEGMENT.speed >> 2)) >> 16);
@@ -107,6 +105,9 @@ public:
     }
 
 private:
+    int8_t huedir{};
+    int8_t stepdir{};
+
     uint32_t step{};
     uint16_t aux0{0xFFFF};
     uint16_t aux1{};

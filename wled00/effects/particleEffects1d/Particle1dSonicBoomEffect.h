@@ -35,7 +35,7 @@ public:
         }
 
         // Particle System settings
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
         PartSys.setMotionBlur(180 * SEGMENT.check3);
         PartSys.setSmearBlur(64 * SEGMENT.check3);
         PartSys.sources[0].var = map(SEGMENT.speed, 0, 255, 10, 127);
@@ -94,7 +94,7 @@ public:
             PartSys.sources[0].maxLife = PartSys.sources[0].minLife + (((unsigned)SEGMENT.intensity * loudness * loudness) >> 13);
             PartSys.sources[0].source.hue = aux0;
             PartSys.sources[0].size = 1; //SEGMENT.speed>>3;
-            uint32_t explosionsize = 4 + (PartSys.maxXpixel >> 2);
+            uint32_t explosionsize = 4 + ((coordinate.width - 1) >> 2);
             explosionsize = hw_random16((explosionsize * loudness) >> 10);
             for (uint32_t e = 0; e < explosionsize; e++) { // emit explosion particles
                     PartSys.sprayEmit(PartSys.sources[0]); // emit a particle
@@ -103,7 +103,8 @@ public:
         else
             aux1 = 0; // reset edge detection
 
-        PartSys.update(); // update and render (needs to be done before manipulation for initial particle spacing to be right)
+        PartSys.update(buffer); // update and render (needs to be done before manipulation for initial particle spacing to be right)
+        return true;
     }
 
 private:

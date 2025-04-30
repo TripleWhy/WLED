@@ -30,7 +30,7 @@ public:
         }
 
         // Particle System settings
-        PartSys.updateSystem(); // update system properties (dimensions and data pointers)
+        PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
         PartSys.setMotionBlur(220 * SEGMENT.check1); // anable motion blur
         PartSys.setSmearBlur(50); // smear a little
         PartSys.setUsedParticles(map(SEGMENT.custom1, 0, 255, 30 >> SEGMENT.check2, 255  >> (SEGMENT.check2*2))); // depends on density and particle size
@@ -120,9 +120,9 @@ public:
         }
         else{
             if (SEGMENT.custom3 <= 10) { // periodic pulse: 0-5 apply at start, 6-10 apply at center
-                if (strip.now > SEGMENT.step) {
+                if (strip.now > step) {
                     int speed = (SEGMENT.custom3 > 5) ? (SEGMENT.custom3 - 6) : SEGMENT.custom3;
-                    SEGMENT.step = strip.now + 7500 - ((SEGMENT.speed << 3) + (speed << 10));
+                    step = strip.now + 7500 - ((SEGMENT.speed << 3) + (speed << 10));
                     int amplitude = 40 + (SEGMENT.custom1 >> 2);
                     int index = (SEGMENT.custom3 > 5) ? (PartSys.usedParticles / 2) : 0; // center or start particle
                     PartSys.particles[index].vx += amplitude;
@@ -177,10 +177,12 @@ public:
                 PartSys.particles[i].hue = 127 + deviation; // map density to hue
             }
         }
-        PartSys.update(); // update and render
+        PartSys.update(buffer); // update and render
+        return true;
     }
 
 private:
+    uint32_t step{};
     uint16_t aux0{0xFFFF};
     uint16_t aux1{0xFFFF};
 };
