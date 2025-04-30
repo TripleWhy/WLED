@@ -4,6 +4,12 @@
 
 #include "colors.h"
 
+#include "ESPAsyncWebServer.h"
+#include "src/dependencies/json/ArduinoJson-v6.h"
+#include "src/dependencies/json/AsyncJson-v6.h"
+#include "src/dependencies/e131/ESPAsyncE131.h"
+
+class EspalexaDevice;
 struct Segment;
 
 /*
@@ -144,9 +150,6 @@ void deInitIR();
 void handleIR();
 
 //json.cpp
-#include "ESPAsyncWebServer.h"
-#include "src/dependencies/json/ArduinoJson-v6.h"
-#include "src/dependencies/json/AsyncJson-v6.h"
 #include "FX.h"
 
 bool deserializeSegment(JsonObject elem, byte it, byte presetId = 0);

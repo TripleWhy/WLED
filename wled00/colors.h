@@ -1,5 +1,6 @@
 #ifndef WLED_COLORS_H
 #define WLED_COLORS_H
+#include <Arduino.h>
 #include "src/dependencies/fastled/fastled_fcn.h"
 /*
   Note on color types and conversions:
