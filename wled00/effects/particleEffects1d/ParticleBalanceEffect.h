@@ -40,7 +40,7 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
+        PartSys.setMotionBlur(SEGMENT.custom2); // enable motion blur
         PartSys.setBounce(!SEGMENT.check2);
         PartSys.setWrap(SEGMENT.check2);
         uint8_t hardness = SEGMENT.custom1 > 0 ? map(SEGMENT.custom1, 0, 255, 50, 250) : 200; // set hardness,  make the walls hard if collisions are disabled
@@ -56,6 +56,17 @@ public:
             }
         }
         aux1 = PartSys.usedParticles;
+
+        // re-order particles in case collisions flipped particles
+        for (i = 0; i < PartSys.usedParticles - 1; i++) {
+            if (PartSys.particles[i].x > PartSys.particles[i+1].x) {
+                if (SEGMENT.check2) { // check for wrap around
+                    if (PartSys.particles[i].x - PartSys.particles[i+1].x > 3 * PS_P_RADIUS_1D)
+                        continue;
+                }
+                std::swap(PartSys.particles[i].x, PartSys.particles[i+1].x);
+            }
+        }
 
         if (SEGMENT.call % (((255 - SEGMENT.speed) >> 6) + 1) == 0) { // how often the force is applied depends on speed setting
             int32_t xgravity;

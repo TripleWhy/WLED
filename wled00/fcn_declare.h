@@ -31,7 +31,8 @@ void IRAM_ATTR touchButtonISR();
 bool deserializeConfig(JsonObject doc, bool fromFS = false);
 void deserializeConfigFromFS();
 bool deserializeConfigSec();
-void serializeConfig();
+void serializeConfig(JsonObject doc);
+void serializeConfigToFS();
 void serializeConfigSec();
 
 template<typename DestType>
@@ -401,10 +402,6 @@ uint8_t beat8(uint16_t beats_per_minute, uint32_t timebase = 0);
 uint16_t beatsin88_t(uint16_t beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0);
 uint16_t beatsin16_t(uint16_t beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0);
 uint8_t beatsin8_t(uint16_t beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255, uint32_t timebase = 0, uint8_t phase_offset = 0);
-uint8_t triwave8(uint8_t in);
-uint16_t triwave16(uint16_t in);
-uint8_t quadwave8(uint8_t in);
-uint8_t cubicwave8(uint8_t in);
 
 um_data_t* simulateSound(uint8_t simulationId);
 void enumerateLedmaps();

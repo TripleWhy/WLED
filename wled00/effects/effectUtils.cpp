@@ -1,3 +1,3 @@
 #include "effectUtils.h"
 
-PRNG prng; // pseudo-random number generator class
+PRNG prng(hw_random()); // pseudo-random number generator class, seed = hardware random number

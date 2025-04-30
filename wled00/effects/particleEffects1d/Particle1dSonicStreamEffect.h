@@ -7,7 +7,6 @@
 
 /*
   Particle based AR effect, swoop particles along the strip with selected frequency loudness
-  Uses palette for particle color
   by DedeHai (Damian Schneider)
 */
 class Particle1dSonicStreamEffect : public BaseEffect<Particle1dSonicStreamEffect, Particle1dEffect<Particle1dSonicStreamEffect>> {
@@ -30,7 +29,6 @@ public:
         PartSys.sources[0].source.x = 0; // at start
         //PartSys.sources[1].source.x = PartSys.maxX; // at end
         PartSys.sources[0].var = 0;//SEGMENT.custom1 >> 3;
-        PartSys.sources[0].sat = 255;
         return true;
     }
 
@@ -43,7 +41,6 @@ public:
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
         PartSys.setMotionBlur(20 + (SEGMENT.custom2 >> 1)); // anable motion blur
         PartSys.setSmearBlur(200); // smooth out the edges
-
         PartSys.sources[0].v = 5 + (SEGMENT.speed >> 2);
 
         // FFT processing
@@ -57,7 +54,7 @@ public:
         if (baseBin > 12)
             loudness = loudness << 2; // double loudness for high frequencies (better detecion)
 
-        uint32_t threshold = 150 - (SEGMENT.intensity >> 1);
+        uint32_t threshold = 140 - (SEGMENT.intensity >> 1);
         if (SEGMENT.check2) { // enable low pass filter for dynamic threshold
             step = (step * 31500 + loudness * (32768 - 31500)) >> 15; // low pass filter for simple beat detection: add average to base threshold
             threshold = 20 + (threshold >> 1) + step; // add average to threshold
@@ -65,6 +62,7 @@ public:
 
         // color
         uint32_t hueincrement = (SEGMENT.custom1 >> 3); // 0-31
+        PartSys.sources[0].sat = SEGMENT.custom1 > 0 ? 255 : 0; // color slider at zero: set to white
         PartSys.setColorByPosition(SEGMENT.custom1 == 255);
 
         // particle manipulation
@@ -75,8 +73,10 @@ public:
                 }
                 else PartSys.particles[i].ttl = 0;
             }
-            if (SEGMENT.check1) // modulate colors by mid frequencies
+            if (SEGMENT.check1) { // modulate colors by mid frequencies
+                int mids = sqrt32_bw((int)fftResult[5] + (int)fftResult[6] + (int)fftResult[7] + (int)fftResult[8] + (int)fftResult[9] + (int)fftResult[10]); // average the mids, bin 5 is ~500Hz, bin 10 is ~2kHz (see audio_reactive.h)
                 PartSys.particles[i].hue += (mids * perlin8(PartSys.particles[i].x << 2, step << 2)) >> 9; // color by perlin noise from mid frequencies
+            }
         }
 
         if (loudness > threshold) {

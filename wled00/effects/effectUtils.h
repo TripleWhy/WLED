@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "../wled_math.h"
+#include "prng.h"
 
 #define SEGCOLOR(x)      Segment::getCurrentColor(x)
 #define SEGPALETTE       Segment::getCurrentPalette()
@@ -61,3 +62,4 @@ inline int8_t tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t attdec) {
     return 0;
 }
 
+extern PRNG prng;

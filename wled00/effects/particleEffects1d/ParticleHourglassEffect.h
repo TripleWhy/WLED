@@ -40,44 +40,35 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 1, 255));
+        PartSys.setUsedParticles(1 + ((SEGMENT.intensity * 255) >> 8));
         PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
         PartSys.setGravity(map(SEGMENT.custom3, 0, 31, 1, 30));
-        PartSys.enableParticleCollisions(true, 34); // hardness value found by experimentation on different settings
+        PartSys.enableParticleCollisions(true, 32); // hardness value found by experimentation on different settings
 
         uint32_t colormode = SEGMENT.custom1 >> 5; // 0-7
 
         if ((SEGMENT.intensity | (PartSys.getAvailableParticles() << 8)) != settingTracker) { // initialize, getAvailableParticles changes while in FX transition
             settingTracker = SEGMENT.intensity | (PartSys.getAvailableParticles() << 8);
             for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
-                PartSys.particleFlags[i].reversegrav = true;
+                PartSys.particleFlags[i].reversegrav = true; // resting particles dont fall
                 direction = 0; // down
                 aux1 = 1; // initialize below
             }
             aux0 = PartSys.usedParticles - 1; // initial state, start with highest number particle
         }
 
+        // calculate target position depending on direction
+        auto calcTargetPos = [&](size_t i) {
+            return PartSys.particleFlags[i].reversegrav ?
+                    PartSys.maxX - i * PS_P_RADIUS_1D - positionOffset
+                : (PartSys.usedParticles - i) * PS_P_RADIUS_1D - positionOffset;
+        };
+
         for (uint32_t i = 0; i < PartSys.usedParticles; i++) { // check if particle reached target position after falling
-            int32_t targetposition;
-            if (PartSys.particleFlags[i].fixed == false) { // && abs(PartSys.particles[i].vx) < 8) {
-                // calculate target position depending on direction
-                bool closeToTarget = false;
-                bool reachedTarget = false;
-                if (PartSys.particleFlags[i].reversegrav) { // up
-                    targetposition = PartSys.maxX - (i * PS_P_RADIUS_1D) - positionOffset; // target resting position
-                    if (targetposition - PartSys.particles[i].x <= 5 * PS_P_RADIUS_1D)
-                        closeToTarget = true;
-                    if (PartSys.particles[i].x >= targetposition) // particle has reached target position, pin it. if not pinned, they do not stack well on larger piles
-                        reachedTarget = true;
-                }
-                else { // down, highest index particle drops first
-                    targetposition = (PartSys.usedParticles - i) * PS_P_RADIUS_1D - positionOffset; // target resting position note: using -offset instead of -1 + offset
-                    if (PartSys.particles[i].x - targetposition <= 5 * PS_P_RADIUS_1D)
-                        closeToTarget = true;
-                    if (PartSys.particles[i].x <= targetposition) // particle has reached target position, pin it. if not pinned, they do not stack well on larger piles
-                        reachedTarget = true;
-                }
-                if (reachedTarget || (closeToTarget && abs(PartSys.particles[i].vx) < 10)) { // reached target or close to target and slow speed
+            if (PartSys.particleFlags[i].fixed == false && abs(PartSys.particles[i].vx) < 5) {
+                int32_t targetposition = calcTargetPos(i);
+                bool closeToTarget = abs(targetposition - PartSys.particles[i].x) < 3 * PS_P_RADIUS_1D;
+                if (closeToTarget) { // close to target and slow speed
                     PartSys.particles[i].x = targetposition; // set exact position
                     PartSys.particleFlags[i].fixed = true;   // pin particle
                 }
@@ -101,20 +92,20 @@ public:
             if (SEGMENT.check1 && !PartSys.particleFlags[i].reversegrav) // flip color when fallen
                 PartSys.particles[i].hue += 120;
         }
+        // re-order particles in case collisions flipped particles (highest number index particle is on the "bottom")
+        for (int i = 0; i < PartSys.usedParticles - 1; i++) {
+            if (PartSys.particles[i].x < PartSys.particles[i+1].x && PartSys.particleFlags[i].fixed == false && PartSys.particleFlags[i+1].fixed == false) {
+                std::swap(PartSys.particles[i].x, PartSys.particles[i+1].x);
+            }
+        }
+
 
         if (aux1 == 1) { // last countdown call before dropping starts, reset all particles
             for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
                 PartSys.particleFlags[i].collide = true;
                 PartSys.particleFlags[i].perpetual = true;
                 PartSys.particles[i].ttl = 260;
-                uint32_t targetposition;
-                //calculate target position depending on direction
-                if (PartSys.particleFlags[i].reversegrav)
-                     targetposition = PartSys.maxX - (i * PS_P_RADIUS_1D + positionOffset); // target resting position
-                else
-                    targetposition = (PartSys.usedParticles - i) * PS_P_RADIUS_1D - positionOffset; // target resting position  -5 - PS_P_RADIUS_1D/2
-
-                PartSys.particles[i].x = targetposition;
+                PartSys.particles[i].x = calcTargetPos(i);
                 PartSys.particleFlags[i].fixed = true;
             }
         }

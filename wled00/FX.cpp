@@ -119,6 +119,7 @@
 #include "effects/PacificaEffect.h"
 #include "effects/PaletteEffect.h"
 #include "effects/particleEffects1d/Particle1dGeqEffect.h"
+#include "effects/particleEffects1d/Particle1dsonicboomEffect.h"
 #include "effects/particleEffects1d/Particle1dSonicStreamEffect.h"
 #include "effects/particleEffects1d/Particle1dSprayEffect.h"
 #include "effects/particleEffects1d/ParticleBalanceEffect.h"
@@ -130,6 +131,7 @@
 #include "effects/particleEffects1d/ParticleHourglassEffect.h"
 #include "effects/particleEffects1d/ParticlePinballEffect.h"
 #include "effects/particleEffects1d/ParticleSparklerEffect.h"
+#include "effects/particleEffects1d/ParticlespringyEffect.h"
 #include "effects/particleEffects1d/ParticleStarburstEffect.h"
 #include "effects/particleEffects2d/ParticleAttractorEffect.h"
 #include "effects/particleEffects2d/ParticleBlobsEffect.h"
@@ -493,6 +495,8 @@ static constexpr std::array<const EffectInformation*, MODE_COUNT> setupEffectDat
   assignEffectInfo(array, Particle1dGeqEffect::effectInformation);
   assignEffectInfo(array, ParticleFire1dEffect::effectInformation);
   assignEffectInfo(array, Particle1dSonicStreamEffect::effectInformation);
+  assignEffectInfo(array, Particle1dSonicBoomEffect::effectInformation);
+  assignEffectInfo(array, ParticleSpringyEffect::effectInformation);
   #endif // WLED_DISABLE_PARTICLESYSTEM1D
 
   return array;

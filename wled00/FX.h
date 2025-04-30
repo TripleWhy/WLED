@@ -40,13 +40,6 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
-/*
-//color mangling macros
-#ifndef RGBW32
-#define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
-#endif
-**/
-
 extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 extern byte realtimeMode;           // used in getMappedPixelIndex()
 
@@ -304,7 +297,9 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 #define FX_MODE_PS1DGEQ                212
 #define FX_MODE_PSFIRE1D               213
 #define FX_MODE_PS1DSONICSTREAM        214
-#define MODE_COUNT                     215
+#define FX_MODE_PS1DSONICBOOM          215
+#define FX_MODE_PS1DSPRINGY            216
+#define MODE_COUNT                     217
 
 
 #define BLEND_STYLE_FADE            0x00  // universal
