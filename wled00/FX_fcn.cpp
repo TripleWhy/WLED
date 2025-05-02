@@ -1572,6 +1572,7 @@ void WS2812FX::service() {
             nullptr,
             &serviceLoop<EffectDimensionality::d2VStrips>,
           };
+          seg.ensureEffect();
           Effect* const effect = seg.getCurrentEffect();
           serviceLoops[static_cast<uint8_t>(effect->getDimensionality())](seg, effect);
           frameDelay = 0;
