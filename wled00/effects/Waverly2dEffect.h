@@ -20,8 +20,8 @@ public:
 
     explicit Waverly2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -31,11 +31,11 @@ public:
         um_data_t *um_data = getAudioData();
         float   volumeSmth  = *(float*)   um_data->u_data[0];
 
-        buffer.fadeToBlackBy(SEGMENT.speed);
+        buffer.fadeToBlackBy(parameters.speed);
 
         long t = strip.now / 2;
         for (int i = 0; i < cols; i++) {
-            unsigned thisVal = (1 + SEGMENT.intensity/64) * perlin8(i * 45 , t , t)/2;
+            unsigned thisVal = (1 + parameters.intensity/64) * perlin8(i * 45 , t , t)/2;
             // use audio if available
             if (um_data) {
                 thisVal /= 32; // reduce intensity of perlin8()
@@ -48,7 +48,7 @@ public:
                 buffer.addPixelColor((cols - 1) - i, (rows - 1) - j, ColorFromPalette(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
             }
         }
-        if (SEGMENT.check3) buffer.blur(16, cols*rows < 100);
+        if (parameters.check3) buffer.blur(16, cols*rows < 100);
         return true;
     }
 

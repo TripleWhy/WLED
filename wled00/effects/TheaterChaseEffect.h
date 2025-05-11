@@ -19,11 +19,11 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        const bool animate = SEGMENT.check1;
-        const bool theatre = SEGMENT.check3;
-        width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
-        uint32_t cycleTime = 50 + (255 - SEGMENT.speed);
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        const bool animate = parameters.check1;
+        const bool theatre = parameters.check3;
+        width = (theatre ? 3 : 1) + (parameters.intensity >> 4);  // window
+        uint32_t cycleTime = 50 + (255 - parameters.speed);
         uint32_t it = strip.now / cycleTime;
 
         c2 = SEGCOLOR(1);
@@ -39,9 +39,9 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        const bool animate = SEGMENT.check1;
-        const bool theatre = SEGMENT.check3;
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        const bool animate = parameters.check1;
+        const bool theatre = parameters.check3;
         if (!animate) {
             c1 = SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, false, 0);
         }

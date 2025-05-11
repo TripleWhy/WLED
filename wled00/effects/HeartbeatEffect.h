@@ -19,18 +19,18 @@ public:
 
     explicit HeartbeatEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned bpm = 40 + (SEGMENT.speed >> 3);
+        unsigned bpm = 40 + (parameters.speed >> 3);
         uint32_t msPerBeat = (60000L / bpm);
         uint32_t secondBeat = (msPerBeat / 3);
         uint32_t bri_lower = aux1;
         unsigned long beatTimer = strip.now - step;
 
-        bri_lower = bri_lower * 2042 / (2048 + SEGMENT.intensity);
+        bri_lower = bri_lower * 2042 / (2048 + parameters.intensity);
         aux1 = bri_lower;
 
         if ((beatTimer > secondBeat) && !aux0) { // time for the second beat?

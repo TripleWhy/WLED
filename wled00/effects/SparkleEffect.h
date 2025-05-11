@@ -19,8 +19,8 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        const uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        const uint32_t cycleTime = 10 + (255 - parameters.speed)*2;
         it = strip.now / cycleTime;
         if (it != step)
         {
@@ -30,18 +30,18 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         if (i == randomLedIndex) {
             return SEGCOLOR(0);
         }
 
-        const bool overlay = SEGMENT.check2;
+        const bool overlay = parameters.check2;
         if (overlay) {
             return currentColor.getColor();
         }
 
-        const bool moving = SEGMENT.check1;
+        const bool moving = parameters.check1;
         const unsigned palIdx = moving ? (i+it)%coordinate.width : i;
         return SEGMENT.color_from_palette(palIdx, true, moving, 1);
     }

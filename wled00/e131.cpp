@@ -224,8 +224,8 @@ void handleDMXData(uint16_t uni, uint16_t dmxChannels, uint8_t* e131_data, uint8
 
           if (e131_data[dataOffset+1] < strip.getModeCount())
             if (e131_data[dataOffset+1] != seg.getEffectId()) seg.setMode(e131_data[dataOffset+1]);
-          if (e131_data[dataOffset+2]   != seg.speed)     seg.speed     = e131_data[dataOffset+2];      
-          if (e131_data[dataOffset+3]   != seg.intensity) seg.intensity = e131_data[dataOffset+3];
+          if (e131_data[dataOffset+2]   != seg.transitionableParameters.speed)     seg.transitionableParameters.speed     = e131_data[dataOffset+2];
+          if (e131_data[dataOffset+3]   != seg.transitionableParameters.intensity) seg.transitionableParameters.intensity = e131_data[dataOffset+3];
           if (e131_data[dataOffset+4]   != seg.palette)   seg.setPalette(e131_data[dataOffset+4]);
 
           if ((e131_data[dataOffset+5] & 0b00000010) != seg.reverse_y) { seg.setOption(SEG_OPTION_REVERSED_Y, e131_data[dataOffset+5] & 0b00000010); }
@@ -249,9 +249,9 @@ void handleDMXData(uint16_t uni, uint16_t dmxChannels, uint8_t* e131_data, uint8
           colors[0] = RGBW32(e131_data[dataOffset+ 6], e131_data[dataOffset+ 7], e131_data[dataOffset+ 8], whites[0]);
           colors[1] = RGBW32(e131_data[dataOffset+ 9], e131_data[dataOffset+10], e131_data[dataOffset+11], whites[1]);
           colors[2] = RGBW32(e131_data[dataOffset+12], e131_data[dataOffset+13], e131_data[dataOffset+14], whites[2]);
-          if (colors[0] != seg.colors[0]) seg.setColor(0, colors[0]);
-          if (colors[1] != seg.colors[1]) seg.setColor(1, colors[1]);
-          if (colors[2] != seg.colors[2]) seg.setColor(2, colors[2]);
+          if (colors[0] != seg.transitionableParameters.colors[0]) seg.setColor(0, colors[0]);
+          if (colors[1] != seg.transitionableParameters.colors[1]) seg.setColor(1, colors[1]);
+          if (colors[2] != seg.transitionableParameters.colors[2]) seg.setColor(2, colors[2]);
 
           // Set segment opacity or global brightness
           if (isSegmentMode) {

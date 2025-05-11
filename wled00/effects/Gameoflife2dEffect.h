@@ -27,8 +27,8 @@ public:
 
     explicit Gameoflife2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -42,7 +42,7 @@ public:
 
         CRGB backgroundColor = SEGCOLOR(1);
 
-        if (SEGENV.call == 0 || strip.now - step > 3000) {
+        if (parameters.call == 0 || strip.now - step > 3000) {
             step = strip.now;
             aux0 = 0;
 
@@ -57,7 +57,7 @@ public:
 
             std::fill(prevLeds.begin(), prevLeds.end(), CRGB::Black);
             crcBuffer.fill(0u);
-        } else if (strip.now - step < FRAMETIME_FIXED * (uint32_t)map(SEGMENT.speed,0,255,64,4)) {
+        } else if (strip.now - step < FRAMETIME_FIXED * (uint32_t)map(parameters.speed,0,255,64,4)) {
             // update only when appropriate time passes (in 42 FPS slots)
         }
 

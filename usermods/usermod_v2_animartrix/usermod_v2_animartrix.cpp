@@ -62,15 +62,15 @@ static const char _data_FX_mode_Rotating_Blob[] PROGMEM = "Z💡Rotating_Blob@Sp
 class ANIMartRIXMod:public ANIMartRIX {
 	public:
 	void initEffect() {
-	  if (SEGENV.call == 0) {
+	  if (SEGENV.transitionableParameters.call == 0) {
 		init(SEGMENT.virtualWidth(), SEGMENT.virtualHeight(), false);
 	  }
 	  float speedFactor = 1.0;
-	  if (SEGMENT.speed < 128) {
-		speedFactor = (float) map(SEGMENT.speed,   0, 127, 1, 10) / 10.0f;
+	  if (SEGMENT.transitionableParameters.speed < 128) {
+		speedFactor = (float) map(SEGMENT.transitionableParameters.speed,   0, 127, 1, 10) / 10.0f;
 	  }
 	  else{
-		speedFactor = map(SEGMENT.speed, 128, 255, 10, 100) / 10;
+		speedFactor = map(SEGMENT.transitionableParameters.speed, 128, 255, 10, 100) / 10;
 	  } 
 	  setSpeedFactor(speedFactor);
 	}

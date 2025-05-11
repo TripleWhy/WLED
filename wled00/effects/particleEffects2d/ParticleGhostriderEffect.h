@@ -35,45 +35,45 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         PSsettings2D ghostsettings;
         ghostsettings.asByte = 0b0000011; //enable wrapX and wrapY
 
-        if (SEGMENT.intensity > 0) { // spiraling
+        if (parameters.intensity > 0) { // spiraling
             if (aux1) {
-                step += SEGMENT.intensity>>3;
+                step += parameters.intensity>>3;
                 if ((int32_t)step > MAXANGLESTEP)
                     aux1 = 0;
             }
             else {
-                step -= SEGMENT.intensity>>3;
+                step -= parameters.intensity>>3;
                 if ((int32_t)step < -MAXANGLESTEP)
                     aux1 = 1;
             }
         }
         // Particle System settings
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setMotionBlur(SEGMENT.custom1);
-        PartSys.sources[0].var = SEGMENT.custom3 >> 1;
+        PartSys.setMotionBlur(parameters.custom1);
+        PartSys.sources[0].var = parameters.custom3 >> 1;
 
         // color by age (PS 'color by age' always starts with hue = 255, don't want that here)
-        if (SEGMENT.check1) {
+        if (parameters.check1) {
             for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
                 PartSys.particles[i].hue = PartSys.sources[0].source.hue + (PartSys.particles[i].ttl<<2);
             }
         }
 
         // enable/disable walls
-        ghostsettings.bounceX = SEGMENT.check2;
-        ghostsettings.bounceY = SEGMENT.check2;
+        ghostsettings.bounceX = parameters.check2;
+        ghostsettings.bounceY = parameters.check2;
 
         aux0 += (int32_t)step; // step is angle increment
         uint16_t emitangle = aux0 + 32767; // +180°
-        int32_t speed = map(SEGMENT.speed, 0, 255, 12, 64);
+        int32_t speed = map(parameters.speed, 0, 255, 12, 64);
         PartSys.sources[0].source.vx = ((int32_t)cos16_t(aux0) * speed) / (int32_t)32767;
         PartSys.sources[0].source.vy = ((int32_t)sin16_t(aux0) * speed) / (int32_t)32767;
         PartSys.sources[0].source.ttl = 500; // source never dies (note: setting 'perpetual' is not needed if replenished each frame)
@@ -86,11 +86,11 @@ public:
         // emit two particles
         PartSys.angleEmit(PartSys.sources[0], emitangle, speed);
         PartSys.angleEmit(PartSys.sources[0], emitangle, speed);
-        if (SEGMENT.call % (11 - (SEGMENT.custom2 / 25)) == 0) { // every nth frame, cycle color and emit particles //TODO: make this a segment call % SEGMENT.custom2  for better control
+        if (parameters.call % (11 - (parameters.custom2 / 25)) == 0) { // every nth frame, cycle color and emit particles //TODO: make this a segment call % parameters.custom2  for better control
             PartSys.sources[0].source.hue++;
         }
-        if (SEGMENT.custom2 > 190) //fast color change
-            PartSys.sources[0].source.hue += (SEGMENT.custom2 - 190) >> 2;
+        if (parameters.custom2 > 190) //fast color change
+            PartSys.sources[0].source.hue += (parameters.custom2 - 190) >> 2;
 
         PartSys.update(buffer); // update and render
         return true;

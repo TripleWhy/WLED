@@ -18,12 +18,12 @@ public:
 
     explicit FireFlickerEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 40 + (255 - SEGMENT.speed);
+        uint32_t cycleTime = 40 + (255 - parameters.speed);
         uint32_t it = strip.now / cycleTime;
         if (step == it) return true;
 
@@ -32,7 +32,7 @@ public:
         byte g = (SEGCOLOR(0) >>  8);
         byte b = (SEGCOLOR(0)      );
         byte lum = (SEGMENT.palette == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
-        lum /= (((256-SEGMENT.intensity)/16)+1);
+        lum /= (((256-parameters.intensity)/16)+1);
         for (unsigned i = 0; i < coordinate.width; i++) {
             byte flicker = hw_random8(lum);
             if (SEGMENT.palette == 0) {

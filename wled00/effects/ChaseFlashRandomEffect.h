@@ -20,8 +20,8 @@ public:
 
     explicit ChaseFlashRandomEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -30,13 +30,13 @@ public:
             return true;
         }
 
-        unsigned flash_step = SEGENV.call % ((FLASH_COUNT * 2) + 1);
+        unsigned flash_step = parameters.call % ((FLASH_COUNT * 2) + 1);
 
         for (int i = 0; i < aux1; i++) {
             buffer.setPixelColor(i, SEGMENT.color_wheel(aux0));
         }
 
-        unsigned delay = 1 + ((10 * (uint16_t)(255 - SEGMENT.speed)) / coordinate.width);
+        unsigned delay = 1 + ((10 * (uint16_t)(255 - parameters.speed)) / coordinate.width);
         if(flash_step < (FLASH_COUNT * 2)) {
             unsigned n = aux1;
             unsigned m = (aux1 + 1) % coordinate.width;

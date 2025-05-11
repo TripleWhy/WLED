@@ -19,8 +19,8 @@ public:
 
     explicit PlasmoidEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -34,11 +34,11 @@ public:
 
         for (unsigned i = 0; i < coordinate.width; i++) {                          // For each of the LED's in the strand, set a brightness based on a wave as follows.
             // updated, similar to "plasma" effect - softhack007
-            uint8_t thisbright = cubicwave8(((i*(1 + (3*SEGMENT.speed/32)))+thisphase) & 0xFF)/2;
-            thisbright += cos8_t(((i*(97 +(5*SEGMENT.speed/32)))+thatphase) & 0xFF)/2; // Let's munge the brightness a bit and animate it all with the phases.
+            uint8_t thisbright = cubicwave8(((i*(1 + (3*parameters.speed/32)))+thisphase) & 0xFF)/2;
+            thisbright += cos8_t(((i*(97 +(5*parameters.speed/32)))+thatphase) & 0xFF)/2; // Let's munge the brightness a bit and animate it all with the phases.
 
             uint8_t colorIndex=thisbright;
-            if (volumeSmth * SEGMENT.intensity / 64 < thisbright) {
+            if (volumeSmth * parameters.intensity / 64 < thisbright) {
                 thisbright = 0;
             }
 

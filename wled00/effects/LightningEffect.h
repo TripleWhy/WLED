@@ -16,8 +16,8 @@ public:
 
     explicit LightningEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -27,14 +27,14 @@ public:
 
         if (aux1 == 0) //init, leader flash
         {
-            aux1 = hw_random8(4, 4 + SEGMENT.intensity/20); //number of flashes
+            aux1 = hw_random8(4, 4 + parameters.intensity/20); //number of flashes
             aux1 *= 2;
 
             bri = 52; //leader has lower brightness
             aux0 = 200; //200ms delay after leader
         }
 
-        if (!SEGMENT.check2) buffer.fill(SEGCOLOR(1));
+        if (!parameters.check2) buffer.fill(SEGCOLOR(1));
 
         if (aux1 > 3 && !(aux1 & 0x01)) { //flash on even number >2
             for (unsigned i = ledstart; i < ledstart + ledlen; i++)
@@ -52,7 +52,7 @@ public:
 
                 aux0 = (50 + hw_random8(100)); //delay between flashes
                 if (aux1 == 2) {
-                    aux0 = (hw_random8(255 - SEGMENT.speed) * 100); // delay between strikes
+                    aux0 = (hw_random8(255 - parameters.speed) * 100); // delay between strikes
                 }
                 step = strip.now;
             }

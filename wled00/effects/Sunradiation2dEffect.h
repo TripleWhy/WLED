@@ -20,8 +20,8 @@ public:
 
     explicit Sunradiation2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -32,13 +32,13 @@ public:
             return false;
         }
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
         unsigned long t = strip.now / 4;
         unsigned index = 0;
-        uint8_t someVal = SEGMENT.speed/4;             // Was 25.
+        uint8_t someVal = parameters.speed/4;             // Was 25.
         for (int j = 0; j < (rows + 2); j++) {
             for (int i = 0; i < (cols + 2); i++) {
                 byte col = ((int16_t)perlin8(i * someVal, j * someVal, t) - 127) >> 2; // about +/- 32
@@ -60,7 +60,7 @@ public:
                 int temp = difx * difx + dify * dify;
                 int col = 255 - temp / 8; //8 its a size of effect
                 if (col < 0) col = 0;
-                const CRGB heatColor = HeatColor(col / (3.0f-(float)(SEGMENT.intensity)/128.f));
+                const CRGB heatColor = HeatColor(col / (3.0f-(float)(parameters.intensity)/128.f));
                 buffer.setPixelColor(x, y, RGBW32(heatColor.r, heatColor.g, heatColor.b, 0));
             }
             yindex += (cols + 2);

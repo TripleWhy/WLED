@@ -20,23 +20,23 @@ public:
 
     explicit Firenoise2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        unsigned xscale = SEGMENT.intensity*4;
-        unsigned yscale = SEGMENT.speed*8;
+        unsigned xscale = parameters.intensity*4;
+        unsigned yscale = parameters.speed*8;
         unsigned indexx = 0;
 
-        CRGBPalette16 pal = SEGMENT.check1 ? SEGPALETTE : SEGMENT.loadPalette(pal, 35);  
+        CRGBPalette16 pal = parameters.check1 ? SEGPALETTE : SEGMENT.loadPalette(pal, 35);  
         for (int j=0; j < cols; j++) {
             for (int i=0; i < rows; i++) {
                 indexx = perlin8(j*yscale*rows/255, i*xscale+strip.now/4);                                               // We're moving along our Perlin map.

@@ -18,8 +18,8 @@ public:
 
     explicit MeteorEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -27,33 +27,33 @@ public:
             return false;
         }
 
-        const bool meteorSmooth = SEGMENT.check3;
+        const bool meteorSmooth = parameters.check3;
         const unsigned meteorSize = 1 + coordinate.width / 20; // 5%
         uint16_t meteorstart;
         if(meteorSmooth) meteorstart = map((step >> 6 & 0xFF), 0, 255, 0, coordinate.width -1);
         else {
-            unsigned counter = strip.now * ((SEGMENT.speed >> 2) + 8);
+            unsigned counter = strip.now * ((parameters.speed >> 2) + 8);
             meteorstart = (counter * coordinate.width) >> 16;
         }
 
-        const int max = SEGMENT.palette==5 || !SEGMENT.check1 ? 240 : 255;
+        const int max = SEGMENT.palette==5 || !parameters.check1 ? 240 : 255;
         // fade all leds to colors[1] in LEDs one step
         for (unsigned i = 0; i < coordinate.width; i++) {
             uint32_t col;
-            if (hw_random8() <= 255 - SEGMENT.intensity) {
+            if (hw_random8() <= 255 - parameters.intensity) {
                 if(meteorSmooth) {
                     if (trail[i] > 0) {
                         int change = trail[i] + 4 - hw_random8(24); //change each time between -20 and +4
                         trail[i] = constrain(change, 0, max);
                     }
-                    col = SEGMENT.check1 ? SEGMENT.color_from_palette(i, true, false, 0, trail[i]) : SEGMENT.color_from_palette(trail[i], false, true, 255);
+                    col = parameters.check1 ? SEGMENT.color_from_palette(i, true, false, 0, trail[i]) : SEGMENT.color_from_palette(trail[i], false, true, 255);
                 }
                 else {
                     trail[i] = scale8(trail[i], 128 + hw_random8(127));
                     int index = trail[i];
                     int idx = 255;
                     int bri = SEGMENT.palette==35 || SEGMENT.palette==36 ? 255 : trail[i];
-                    if (!SEGMENT.check1) {
+                    if (!parameters.check1) {
                         idx = 0;
                         index = map(i,0,coordinate.width,0,max);
                         bri = trail[i];
@@ -69,13 +69,13 @@ public:
             unsigned index = (meteorstart + j) % coordinate.width;
             if(meteorSmooth) {
                     trail[index] = max;
-                    uint32_t col = SEGMENT.check1 ? SEGMENT.color_from_palette(index, true, false, 0, trail[index]) : SEGMENT.color_from_palette(trail[index], false, true, 255);
+                    uint32_t col = parameters.check1 ? SEGMENT.color_from_palette(index, true, false, 0, trail[index]) : SEGMENT.color_from_palette(trail[index], false, true, 255);
                     buffer.setPixelColor(index, col);
             }
             else{
                 int idx = 255;
                 int i = trail[index] = max;
-                if (!SEGMENT.check1) {
+                if (!parameters.check1) {
                     i = map(index,0,coordinate.width,0,max);
                     idx = 0;
                 }
@@ -84,7 +84,7 @@ public:
             }
         }
 
-        step += SEGMENT.speed +1;
+        step += parameters.speed +1;
         return true;
     }
 

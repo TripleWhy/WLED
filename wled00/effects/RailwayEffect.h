@@ -16,13 +16,13 @@ public:
 
     explicit RailwayEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned dur = (256 - SEGMENT.speed) * 40;
-        uint16_t rampdur = (dur * SEGMENT.intensity) >> 8;
+        unsigned dur = (256 - parameters.speed) * 40;
+        uint16_t rampdur = (dur * parameters.intensity) >> 8;
         if (step > dur)
         {
             //reverse direction

@@ -23,24 +23,24 @@ public:
 
     explicit DripEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        if (!SEGMENT.check2)
+        if (!parameters.check2)
             buffer.fill(SEGCOLOR(1));
 
         for (unsigned stripNr=0; stripNr<coordinate.height; stripNr++)
-            runStrip(coordinate, stripNr, &drops[stripNr*maxNumDrops]);
+            runStrip(parameters, coordinate, stripNr, &drops[stripNr*maxNumDrops]);
         return true;
     }
 
 private:
-    void runStrip(const EffectCoordinate& coordinate, uint16_t stripNr, Spark* drops) {
-        unsigned numDrops = 1 + (SEGMENT.intensity >> 6); // 255>>6 = 3
+    void runStrip(TransitionableParameters& parameters, const EffectCoordinate& coordinate, uint16_t stripNr, Spark* drops) {
+        unsigned numDrops = 1 + (parameters.intensity >> 6); // 255>>6 = 3
 
-        float gravity = -0.0005f - (SEGMENT.speed/50000.0f);
+        float gravity = -0.0005f - (parameters.speed/50000.0f);
         gravity *= max(1, (int)coordinate.width-1);
         int sourcedrop = 12;
 
@@ -58,7 +58,7 @@ private:
                     drops[j].col=255;
                 buffer.setPixelColor(uint16_t(drops[j].pos), stripNr, color_blend(BLACK,SEGCOLOR(0),uint8_t(drops[j].col)));
 
-                drops[j].col += map(SEGMENT.speed, 0, 255, 1, 6); // swelling
+                drops[j].col += map(parameters.speed, 0, 255, 1, 6); // swelling
 
                 if (hw_random8() < drops[j].col/10) {               // random drop
                     drops[j].colIndex=2;               //fall

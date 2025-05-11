@@ -20,8 +20,8 @@ public:
 
     explicit Frizzles2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -29,13 +29,13 @@ public:
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        buffer.fadeToBlackBy(16 + SEGMENT.check1 * 10);
+        buffer.fadeToBlackBy(16 + parameters.check1 * 10);
         for (size_t i = 8; i > 0; i--) {
-            buffer.addPixelColor(beatsin8_t(SEGMENT.speed/8 + i, 0, cols - 1),
-                                                            beatsin8_t(SEGMENT.intensity/8 - i, 0, rows - 1),
+            buffer.addPixelColor(beatsin8_t(parameters.speed/8 + i, 0, cols - 1),
+                                                            beatsin8_t(parameters.intensity/8 - i, 0, rows - 1),
                                                             ColorFromPalette(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
         }
-        buffer.blur(SEGMENT.custom1 >> (3 + SEGMENT.check1), SEGMENT.check1);
+        buffer.blur(parameters.custom1 >> (3 + parameters.check1), parameters.check1);
         return true;
     }
 

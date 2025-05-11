@@ -10,9 +10,9 @@
 // Assign a color to the central (starting pixels) based on the predominant frequencies and the volume. The color is being determined by mapping the MajorPeak from the FFT
 // and then mapping this to the HSV color circle. Currently we are sampling at 10240 Hz, so the highest frequency we can look at is 5120Hz.
 //
-// SEGMENT.custom1: the lower cut off point for the FFT. (many, most time the lowest values have very little information since they are FFT conversion artifacts. Suggested value is close to but above 0
-// SEGMENT.custom2: The high cut off point. This depends on your sound profile. Most music looks good when this slider is between 50% and 100%.
-// SEGMENT.custom3: "preamp" for the audio signal for audio10.
+// parameters.custom1: the lower cut off point for the FFT. (many, most time the lowest values have very little information since they are FFT conversion artifacts. Suggested value is close to but above 0
+// parameters.custom2: The high cut off point. This depends on your sound profile. Most music looks good when this slider is between 50% and 100%.
+// parameters.custom3: "preamp" for the audio signal for audio10.
 //
 // I suggest that for this effect you turn the brightness to 95%-100% but again it depends on your soundprofile you find yourself in.
 // Instead of using colorpalettes, This effect works on the HSV color circle with red being the lowest frequency
@@ -30,8 +30,8 @@ public:
 
     explicit FreqwaveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
                                         // Freqwave. By Andreas Pleschung.
@@ -40,16 +40,16 @@ public:
         float FFT_MajorPeak = *(float*)um_data->u_data[4];
         float volumeSmth    = *(float*)um_data->u_data[0];
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        uint8_t secondHand = micros()/(256-SEGMENT.speed)/500 % 16;
+        uint8_t secondHand = micros()/(256-parameters.speed)/500 % 16;
         if(aux0 != secondHand) {
             aux0 = secondHand;
 
-            float sensitivity = mapf(SEGMENT.custom3, 1, 31, 1, 10); // reduced resolution slider
-            float pixVal = min(255.0f, volumeSmth * (float)SEGMENT.intensity / 256.0f * sensitivity);
+            float sensitivity = mapf(parameters.custom3, 1, 31, 1, 10); // reduced resolution slider
+            float pixVal = min(255.0f, volumeSmth * (float)parameters.intensity / 256.0f * sensitivity);
             float intensity = mapf(pixVal, 0.0f, 255.0f, 0.0f, 100.0f) / 100.0f;  // make a brightness from the last avg
 
             CRGB color = 0;
@@ -62,8 +62,8 @@ public:
             if (FFT_MajorPeak < 80) {
                 color = CRGB::Black;
             } else {
-                int upperLimit = 80 + 42 * SEGMENT.custom2;
-                int lowerLimit = 80 + 3 * SEGMENT.custom1;
+                int upperLimit = 80 + 42 * parameters.custom2;
+                int lowerLimit = 80 + 3 * parameters.custom1;
                 uint8_t i =  lowerLimit!=upperLimit ? map(FFT_MajorPeak, lowerLimit, upperLimit, 0, 255) : FFT_MajorPeak; // may under/overflow - so we enforce uint8_t
                 unsigned b = min(255.0f, 255.0f * intensity);
                 color = CHSV(i, 240, (uint8_t)b); // implicit conversion to RGB supplied by FastLED

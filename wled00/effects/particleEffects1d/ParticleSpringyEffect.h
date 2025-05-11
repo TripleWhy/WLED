@@ -24,32 +24,32 @@ public:
         return Base::init(coordinate, 1, 128, true);
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setMotionBlur(220 * SEGMENT.check1); // anable motion blur
+        PartSys.setMotionBlur(220 * parameters.check1); // anable motion blur
         PartSys.setSmearBlur(50); // smear a little
-        PartSys.setUsedParticles(map(SEGMENT.custom1, 0, 255, 30 >> SEGMENT.check2, 255  >> (SEGMENT.check2*2))); // depends on density and particle size
+        PartSys.setUsedParticles(map(parameters.custom1, 0, 255, 30 >> parameters.check2, 255  >> (parameters.check2*2))); // depends on density and particle size
  // PartSys.enableParticleCollisions(true, 140); // enable particle collisions, can not be set too hard or impulses will not strech the springs if soft.
         int32_t springlength = PartSys.maxX / (PartSys.usedParticles); // spring length (spacing between particles)
-        int32_t springK = map(SEGMENT.speed, 0, 255, 5, 35); // spring constant (stiffness)
+        int32_t springK = map(parameters.speed, 0, 255, 5, 35); // spring constant (stiffness)
 
-        uint32_t settingssum = SEGMENT.custom1 + SEGMENT.check2 + PartSys.getAvailableParticles(); // note: getAvailableParticles is used to enforce update during transitions
+        uint32_t settingssum = parameters.custom1 + parameters.check2 + PartSys.getAvailableParticles(); // note: getAvailableParticles is used to enforce update during transitions
         if (aux0 != settingssum) { // number of particles changed, update distribution
             for (int32_t i = 0; i < (int32_t)PartSys.usedParticles; i++) {
                 PartSys.advPartProps[i].sat = 255; // full saturation
                 //PartSys.particleFlags[i].collide = true; // enable collision for particles
                 PartSys.particles[i].x = (i+1) * ((PartSys.maxX) / (PartSys.usedParticles)); // distribute
                 //PartSys.particles[i].vx = 0; //reset speed
-                PartSys.advPartProps[i].size = SEGMENT.check2 ? 190 : 2; // set size, small or big
+                PartSys.advPartProps[i].size = parameters.check2 ? 190 : 2; // set size, small or big
             }
             aux0 = settingssum;
         }
-        int dxlimit = (2 + ((255 - SEGMENT.speed) >> 5)) * springlength; // limit for spring length to avoid overstretching
+        int dxlimit = (2 + ((255 - parameters.speed) >> 5)) * springlength; // limit for spring length to avoid overstretching
 
         int springforce[PartSys.usedParticles]; // spring forces
         memset(springforce, 0, PartSys.usedParticles * sizeof(int32_t)); // reset spring forces
@@ -81,7 +81,7 @@ public:
             }
         }
         // apply spring forces to particles
-        bool dampenoscillations = (SEGMENT.call % (9 - (SEGMENT.speed >> 5))) == 0; // dampen oscillation if particles are slow, more damping on stiffer springs
+        bool dampenoscillations = (parameters.call % (9 - (parameters.speed >> 5))) == 0; // dampen oscillation if particles are slow, more damping on stiffer springs
         for (int32_t i = 0; i < PartSys.usedParticles; i++) {
             springforce[i] = springforce[i] / 64; // scale spring force (cannot use shifts because of negative values)
             int maxforce = 120; // limit spring force
@@ -95,8 +95,8 @@ public:
             PartSys.particles[i].ttl = 300; // reset ttl, cannot use perpetual
         }
 
-        if (SEGMENT.call % ((65 - ((SEGMENT.intensity * (1 + (SEGMENT.speed>>3))) >> 7))) == 0) // more damping for higher stiffness
-            PartSys.applyFriction((SEGMENT.intensity >> 2));
+        if (parameters.call % ((65 - ((parameters.intensity * (1 + (parameters.speed>>3))) >> 7))) == 0) // more damping for higher stiffness
+            PartSys.applyFriction((parameters.intensity >> 2));
 
         // add a small resetting force so particles return to resting position even under high damping
         for (int32_t i = 1; i < PartSys.usedParticles - 1; i++) {
@@ -106,12 +106,12 @@ public:
         }
 
         // Modes
-        if (SEGMENT.check3) { // use AR, custom 3 becomes frequency band to use, applies velocity to center particle according to loudness
+        if (parameters.check3) { // use AR, custom 3 becomes frequency band to use, applies velocity to center particle according to loudness
             um_data_t *um_data = getAudioData();
             uint8_t *fftResult = (uint8_t *)um_data->u_data[2]; // 16 bins with FFT data, log mapped already, each band contains frequency amplitude 0-255
-            uint32_t baseBin = map(SEGMENT.custom3, 0, 31, 0, 14);
+            uint32_t baseBin = map(parameters.custom3, 0, 31, 0, 14);
             uint32_t loudness = fftResult[baseBin] + fftResult[baseBin+1];
-            uint32_t threshold = 80; //150 - (SEGMENT.intensity >> 1);
+            uint32_t threshold = 80; //150 - (parameters.intensity >> 1);
             if (loudness > threshold) {
                     int offset = (PartSys.maxX >> 1) - PartSys.particles[PartSys.usedParticles>>1].x; // offset from center
                     if (abs(offset) < PartSys.maxX >> 5) // push particle around in center sector
@@ -119,45 +119,45 @@ public:
             }
         }
         else{
-            if (SEGMENT.custom3 <= 10) { // periodic pulse: 0-5 apply at start, 6-10 apply at center
+            if (parameters.custom3 <= 10) { // periodic pulse: 0-5 apply at start, 6-10 apply at center
                 if (strip.now > step) {
-                    int speed = (SEGMENT.custom3 > 5) ? (SEGMENT.custom3 - 6) : SEGMENT.custom3;
-                    step = strip.now + 7500 - ((SEGMENT.speed << 3) + (speed << 10));
-                    int amplitude = 40 + (SEGMENT.custom1 >> 2);
-                    int index = (SEGMENT.custom3 > 5) ? (PartSys.usedParticles / 2) : 0; // center or start particle
+                    int speed = (parameters.custom3 > 5) ? (parameters.custom3 - 6) : parameters.custom3;
+                    step = strip.now + 7500 - ((parameters.speed << 3) + (speed << 10));
+                    int amplitude = 40 + (parameters.custom1 >> 2);
+                    int index = (parameters.custom3 > 5) ? (PartSys.usedParticles / 2) : 0; // center or start particle
                     PartSys.particles[index].vx += amplitude;
                 }
             }
-            else if (SEGMENT.custom3 <= 30) { // sinusoidal wave: 11-20 apply at start, 21-30 apply at center
-                int index = (SEGMENT.custom3 > 20) ? (PartSys.usedParticles / 2) : 0; // center or start particle
+            else if (parameters.custom3 <= 30) { // sinusoidal wave: 11-20 apply at start, 21-30 apply at center
+                int index = (parameters.custom3 > 20) ? (PartSys.usedParticles / 2) : 0; // center or start particle
                 int restposition = 0;
                 if (index > 0) restposition = PartSys.maxX >> 1; // center
-                //int amplitude = 5 + (SEGMENT.speed >> 3) + (SEGMENT.custom1 >> 2); // amplitude depends on density
-                int amplitude = 5 + (SEGMENT.custom1 >> 2); // amplitude depends on density
-                int speed = SEGMENT.custom3 - 10 - (index ? 10 : 0); // map 11-20 and 21-30 to 1-10
-                int phase = strip.now * ((1 + (SEGMENT.speed >> 4)) * speed);
-                if (SEGMENT.check2) amplitude <<= 1; // double amplitude for XL particles
+                //int amplitude = 5 + (parameters.speed >> 3) + (parameters.custom1 >> 2); // amplitude depends on density
+                int amplitude = 5 + (parameters.custom1 >> 2); // amplitude depends on density
+                int speed = parameters.custom3 - 10 - (index ? 10 : 0); // map 11-20 and 21-30 to 1-10
+                int phase = strip.now * ((1 + (parameters.speed >> 4)) * speed);
+                if (parameters.check2) amplitude <<= 1; // double amplitude for XL particles
                 //PartSys.applyForce(PartSys.particles[index], (sin16_t(phase) * amplitude) >> 15, PartSys.advPartProps[index].forcecounter); // apply acceleration
                 PartSys.particles[index].x = restposition + ((sin16_t(phase) * amplitude) >> 12); // apply position
             }
             else {
                 if (hw_random16() < 656) { // ~1% chance to add a pulse
                     int amplitude = 60;
-                    if (SEGMENT.check2) amplitude <<= 1; // double amplitude for XL particles
+                    if (parameters.check2) amplitude <<= 1; // double amplitude for XL particles
                     PartSys.particles[PartSys.usedParticles >> 1].vx += hw_random16(amplitude << 1) - amplitude; // apply acceleration
                 }
             }
         }
 
         for (int32_t i = 0; i < PartSys.usedParticles; i++) {
-            if (SEGMENT.custom2 == 255) { // map speed to hue
+            if (parameters.custom2 == 255) { // map speed to hue
                  int speedclr = ((int8_t(abs(PartSys.particles[i].vx))) >> 2) << 4; // scale for greater color variation, dump small values to avoid flickering
                  //int speed = PartSys.particles[i].vx << 2; // +/- 512
                  if (speedclr > 240) speedclr = 240; // limit color to non-wrapping part of palette
                  PartSys.particles[i].hue = speedclr;
             }
-            else if (SEGMENT.custom2 > 0)
-                PartSys.particles[i].hue = i * (SEGMENT.custom2 >> 2); // gradient distribution
+            else if (parameters.custom2 > 0)
+                PartSys.particles[i].hue = i * (parameters.custom2 >> 2); // gradient distribution
             else {
                 // map hue to particle density
                 int deviation;

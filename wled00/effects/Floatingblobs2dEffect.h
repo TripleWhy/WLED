@@ -22,15 +22,15 @@ public:
 
     explicit Floatingblobs2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        size_t Amount = (SEGMENT.intensity>>5) + 1; // NOTE: be sure to update MAX_BLOBS if you change this
+        size_t Amount = (parameters.intensity>>5) + 1; // NOTE: be sure to update MAX_BLOBS if you change this
 
         if (aux0 != cols || aux1 != rows) {
             aux0 = cols; // re-initialise if virtual size changes
@@ -38,8 +38,8 @@ public:
             //buffer.fill(BLACK);
             for (size_t i = 0; i < MAX_BLOBS; i++) {
                 r[i]  = hw_random8(1, cols>8 ? (cols/4) : 2);
-                sX[i] = (float) hw_random8(3, cols) / (float)(256 - SEGMENT.speed); // speed x
-                sY[i] = (float) hw_random8(3, rows) / (float)(256 - SEGMENT.speed); // speed y
+                sX[i] = (float) hw_random8(3, cols) / (float)(256 - parameters.speed); // speed x
+                sY[i] = (float) hw_random8(3, rows) / (float)(256 - parameters.speed); // speed y
                 x[i]  = hw_random8(0, cols-1);
                 y[i]  = hw_random8(0, rows-1);
                 color[i] = hw_random8();
@@ -49,7 +49,7 @@ public:
             }
         }
 
-        buffer.fadeToBlackBy((SEGMENT.custom2>>3)+1);
+        buffer.fadeToBlackBy((parameters.custom2>>3)+1);
 
         // Bounce balls around
         for (size_t i = 0; i < Amount; i++) {
@@ -81,24 +81,24 @@ public:
             else                         y[i] += sY[i];
             // bounce x
             if (x[i] < 0.01f) {
-                sX[i] = (float)hw_random8(3, cols) / (256 - SEGMENT.speed);
+                sX[i] = (float)hw_random8(3, cols) / (256 - parameters.speed);
                 x[i]  = 0.01f;
             } else if (x[i] > (float)cols - 1.01f) {
-                sX[i] = (float)hw_random8(3, cols) / (256 - SEGMENT.speed);
+                sX[i] = (float)hw_random8(3, cols) / (256 - parameters.speed);
                 sX[i] = -sX[i];
                 x[i]  = (float)cols - 1.01f;
             }
             // bounce y
             if (y[i] < 0.01f) {
-                sY[i] = (float)hw_random8(3, rows) / (256 - SEGMENT.speed);
+                sY[i] = (float)hw_random8(3, rows) / (256 - parameters.speed);
                 y[i]  = 0.01f;
             } else if (y[i] > (float)rows - 1.01f) {
-                sY[i] = (float)hw_random8(3, rows) / (256 - SEGMENT.speed);
+                sY[i] = (float)hw_random8(3, rows) / (256 - parameters.speed);
                 sY[i] = -sY[i];
                 y[i]  = (float)rows - 1.01f;
             }
         }
-        buffer.blur(SEGMENT.custom1>>2);
+        buffer.blur(parameters.custom1>>2);
 
         if (step < strip.now) step = strip.now + 2000; // change colors every 2 seconds
         return true;

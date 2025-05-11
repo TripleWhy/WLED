@@ -15,11 +15,11 @@ public:
 
     using Base::Base;
 
-    constexpr bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    constexpr bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return SEGCOLOR(0);
     }
 };

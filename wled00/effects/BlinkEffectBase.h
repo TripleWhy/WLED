@@ -23,10 +23,10 @@ public:
     {
     }
 
-    bool nextFrameImpl(uint32_t color1, uint32_t color2) {
-        uint32_t cycleTime = (255 - SEGMENT.speed)*20;
+    bool nextFrameImpl(TransitionableParameters& parameters, uint32_t color1, uint32_t color2) {
+        uint32_t cycleTime = (255 - parameters.speed)*20;
         uint32_t onTime = FRAMETIME;
-        if (!strobe) onTime += ((cycleTime * SEGMENT.intensity) >> 8);
+        if (!strobe) onTime += ((cycleTime * parameters.intensity) >> 8);
         cycleTime += FRAMETIME*2;
         uint32_t it = strip.now / cycleTime;
         uint32_t rem = strip.now % cycleTime;
@@ -44,7 +44,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         if (usePalette) {
             return SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0);
         } else {

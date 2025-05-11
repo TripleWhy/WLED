@@ -15,8 +15,8 @@ public:
 
     explicit TwinkleupEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
                                      // A very short twinkle routine with fade-in and dual controls. By Andrew Tuline.
@@ -25,8 +25,8 @@ public:
 
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned ranstart = prng.random8();       // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
-            unsigned pixBri = sin8_t(ranstart + 16 * strip.now/(256-SEGMENT.speed));
-            if (prng.random8() > SEGMENT.intensity) pixBri = 0;
+            unsigned pixBri = sin8_t(ranstart + 16 * strip.now/(256-parameters.speed));
+            if (prng.random8() > parameters.intensity) pixBri = 0;
             buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(prng.random8()+strip.now/100, false, PALETTE_SOLID_WRAP, 0), pixBri));
         }
 

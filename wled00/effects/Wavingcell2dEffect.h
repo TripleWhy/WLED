@@ -19,26 +19,26 @@ public:
 
     explicit Wavingcell2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        uint32_t t = (strip.now*(SEGMENT.speed + 1))>>3;
-        uint32_t aX = SEGMENT.custom1/16 + 9;
-        uint32_t aY = SEGMENT.custom2/16 + 1;
-        uint32_t aZ = SEGMENT.custom3 + 1;
+        uint32_t t = (strip.now*(parameters.speed + 1))>>3;
+        uint32_t aX = parameters.custom1/16 + 9;
+        uint32_t aY = parameters.custom2/16 + 1;
+        uint32_t aZ = parameters.custom3 + 1;
          for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
                 uint32_t wave = sin8_t((x * aX) + sin8_t((((y<<8) + t) * aY)>>8)) + cos8_t(y * aZ); // bit shifts to increase temporal resolution
-                uint8_t colorIndex = wave + (t>>(8-(SEGMENT.check2*3)));
+                uint8_t colorIndex = wave + (t>>(8-(parameters.check2*3)));
                 buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, colorIndex));
             }
         }
-        buffer.blur(SEGMENT.intensity);
+        buffer.blur(parameters.intensity);
         return true;
     }
 

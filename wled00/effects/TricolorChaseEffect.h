@@ -18,14 +18,14 @@ public:
 
     explicit TricolorChaseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 50 + ((255 - SEGMENT.speed)<<1);
+        uint32_t cycleTime = 50 + ((255 - parameters.speed)<<1);
         uint32_t it = strip.now / cycleTime;  // iterator
-        unsigned width = (1 + (SEGMENT.intensity>>4)); // value of 1-16 for each colour
+        unsigned width = (1 + (parameters.intensity>>4)); // value of 1-16 for each colour
         unsigned index = it % (width*3);
 
         for (unsigned i = 0; i < coordinate.width; i++, index++) {

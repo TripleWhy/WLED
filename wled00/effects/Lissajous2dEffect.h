@@ -20,28 +20,28 @@ public:
 
     explicit Lissajous2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        buffer.fadeToBlackBy(SEGMENT.intensity);
-        uint_fast16_t phase = (strip.now * (1 + SEGENV.custom3)) /32;  // allow user to control rotation speed
+        buffer.fadeToBlackBy(parameters.intensity);
+        uint_fast16_t phase = (strip.now * (1 + parameters.custom3)) /32;  // allow user to control rotation speed
 
         //for (int i=0; i < 4*(cols+rows); i ++) {
         for (int i=0; i < 256; i ++) {
-            //float xlocn = float(sin8_t(now/4+i*(SEGMENT.speed>>5))) / 255.0f;
+            //float xlocn = float(sin8_t(now/4+i*(parameters.speed>>5))) / 255.0f;
             //float ylocn = float(cos8_t(now/4+i*2)) / 255.0f;
-            uint_fast8_t xlocn = sin8_t(phase/2 + (i*SEGMENT.speed)/32);
+            uint_fast8_t xlocn = sin8_t(phase/2 + (i*parameters.speed)/32);
             uint_fast8_t ylocn = cos8_t(phase/2 + i*2);
             xlocn = (cols < 2) ? 1 : (map(2*xlocn, 0,511, 0,2*(cols-1)) +1) /2;    // softhack007: "(2* ..... +1) /2" for proper rounding
             ylocn = (rows < 2) ? 1 : (map(2*ylocn, 0,511, 0,2*(rows-1)) +1) /2;    // "rows > 1" is needed to avoid div/0 in map()
             buffer.setPixelColor((uint8_t)xlocn, (uint8_t)ylocn, SEGMENT.color_from_palette(strip.now/100+i, false, PALETTE_SOLID_WRAP, 0));
         }
-        buffer.blur(SEGMENT.custom1 >> (1 + SEGMENT.check1 * 3), SEGMENT.check1);
+        buffer.blur(parameters.custom1 >> (1 + parameters.check1 * 3), parameters.check1);
         return true;
     }
 

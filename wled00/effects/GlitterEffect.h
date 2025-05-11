@@ -16,16 +16,16 @@ public:
 
     explicit GlitterEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        if (!SEGMENT.check2) { // use "* Color 1" palette for solid background (replacing "Solid glitter")
+        if (!parameters.check2) { // use "* Color 1" palette for solid background (replacing "Solid glitter")
             unsigned counter = 0;
-            if (SEGMENT.speed != 0) {
+            if (parameters.speed != 0) {
                 // animate palette
-                counter = (strip.now * ((SEGMENT.speed >> 3) +1)) & 0xFFFF;
+                counter = (strip.now * ((parameters.speed >> 3) +1)) & 0xFFFF;
                 counter = counter >> 8;
             }
             for (unsigned i = 0; i < coordinate.width; i++) {
@@ -33,7 +33,7 @@ public:
                 buffer.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, true, 255));
             }
         }
-        if (SEGMENT.intensity > hw_random8()) buffer.setPixelColor(hw_random16(coordinate.width), SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);
+        if (parameters.intensity > hw_random8()) buffer.setPixelColor(hw_random16(coordinate.width), SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);
         return true;
     }
 

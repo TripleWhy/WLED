@@ -23,8 +23,8 @@ public:
 
     explicit ExplodingFireworksEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -53,7 +53,7 @@ public:
         buffer.fadeOut(252);
 
         Spark& flare = sparks.front(); //first spark is flare data
-        float gravity = -0.0004f - (SEGMENT.speed/800000.0f); // m/s/s
+        float gravity = -0.0004f - (parameters.speed/800000.0f); // m/s/s
         gravity *= rows;
 
         if (aux0 < 2) { //FLARE
@@ -138,7 +138,7 @@ public:
                         buffer.setPixelColor(int(sparks[i].posX), rows - int(sparks[i].pos) - 1, c);
                     }
                 }
-                if (SEGMENT.check3)
+                if (parameters.check3)
                     buffer.blur(16);
                 dying_gravity *= .8f; // as sparks burn out they fall slower
             } else {

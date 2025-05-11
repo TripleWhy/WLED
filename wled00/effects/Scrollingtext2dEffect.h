@@ -18,8 +18,8 @@ public:
 
     explicit Scrollingtext2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -28,7 +28,7 @@ public:
 
         unsigned letterWidth, rotLW;
         unsigned letterHeight, rotLH;
-        switch (map(SEGMENT.custom2, 0, 255, 1, 5)) {
+        switch (map(parameters.custom2, 0, 255, 1, 5)) {
             default:
             case 1: letterWidth = 4; letterHeight =  6; break;
             case 2: letterWidth = 5; letterHeight =  8; break;
@@ -37,7 +37,7 @@ public:
             case 5: letterWidth = 5; letterHeight = 12; break;
         }
         // letters are rotated
-        if (((SEGMENT.custom3+1)>>3) % 2) {
+        if (((parameters.custom3+1)>>3) % 2) {
             rotLH = letterWidth;
             rotLW = letterHeight;
         } else {
@@ -84,14 +84,14 @@ public:
 
         const int  numberOfLetters = strlen(text);
         int width = (numberOfLetters * rotLW);
-        int yoffset = map(SEGMENT.intensity, 0, 255, -rows/2, rows/2) + (rows-rotLH)/2;
+        int yoffset = map(parameters.intensity, 0, 255, -rows/2, rows/2) + (rows-rotLH)/2;
         if (width <= cols) {
             // scroll vertically (e.g. ^^ Way out ^^) if it fits
-            int speed = map(SEGMENT.speed, 0, 255, 5000, 1000);
+            int speed = map(parameters.speed, 0, 255, 5000, 1000);
             int frac = strip.now % speed + 1;
-            if (SEGMENT.intensity == 255) {
+            if (parameters.intensity == 255) {
                 yoffset = (2 * frac * rows)/speed - rows;
-            } else if (SEGMENT.intensity == 0) {
+            } else if (parameters.intensity == 0) {
                 yoffset = rows - (2 * frac * rows)/speed;
             }
         }
@@ -99,20 +99,20 @@ public:
         if (step < strip.now) {
             // calculate start offset
             if (width > cols) {
-                if (SEGMENT.check3) {
+                if (parameters.check3) {
                     if (aux0 == 0) aux0  = width + cols - 1;
                     else                --aux0;
                 } else                ++aux0 %= width + cols;
             } else                    aux0  = (cols + width)/2;
             ++aux1 &= 0xFF; // color shift
-            step = strip.now + map(SEGMENT.speed, 0, 255, 250, 50); // shift letters every ~250ms to ~50ms
+            step = strip.now + map(parameters.speed, 0, 255, 250, 50); // shift letters every ~250ms to ~50ms
         }
 
-        if (!SEGMENT.check2) buffer.fadeOut(255 - (SEGMENT.custom1>>4));  // trail
+        if (!parameters.check2) buffer.fadeOut(255 - (parameters.custom1>>4));  // trail
         bool usePaletteGradient = false;
         uint32_t col1 = SEGMENT.color_from_palette(aux1, false, PALETTE_SOLID_WRAP, 0);
         uint32_t col2 = BLACK;
-        if (SEGMENT.check1) { // use gradient
+        if (parameters.check1) { // use gradient
             if(SEGMENT.palette == 0) { // use colors for gradient
             col1 = SEGCOLOR(0);
             col2 = SEGCOLOR(2);
@@ -123,7 +123,7 @@ public:
         for (int i = 0; i < numberOfLetters; i++) {
             int xoffset = int(cols) - int(aux0) + rotLW*i;
             if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-            buffer.drawCharacter(text[i], xoffset, yoffset, letterWidth, letterHeight, col1, col2, map(SEGMENT.custom3, 0, 31, -2, 2), usePaletteGradient);
+            buffer.drawCharacter(text[i], xoffset, yoffset, letterWidth, letterHeight, col1, col2, map(parameters.custom3, 0, 31, -2, 2), usePaletteGradient);
         }
         return true;
     }

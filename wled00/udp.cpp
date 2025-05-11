@@ -42,14 +42,14 @@ void notify(byte callMode, bool followUp)
   udpOut[0] = 0; //0: wled notifier protocol 1: WARLS protocol
   udpOut[1] = callMode;
   udpOut[2] = bri;
-  uint32_t col = mainseg.colors[0];
+  uint32_t col = mainseg.transitionableParameters.colors[0];
   udpOut[3] = R(col);
   udpOut[4] = G(col);
   udpOut[5] = B(col);
   udpOut[6] = nightlightActive;
   udpOut[7] = nightlightDelayMins;
   udpOut[8] = mainseg.getEffectId();
-  udpOut[9] = mainseg.speed;
+  udpOut[9] = mainseg.transitionableParameters.speed;
   udpOut[10] = W(col);
   //compatibilityVersionByte:
   //0: old 1: supports white 2: supports secondary color
@@ -58,16 +58,16 @@ void notify(byte callMode, bool followUp)
   //9: supports sync groups, 37 byte packet 10: supports CCT, 39 byte packet 11: per segment options, variable packet length (40+MAX_NUM_SEGMENTS*3)
   //12: enhanced effect sliders, 2D & mapping options
   udpOut[11] = 12;
-  col = mainseg.colors[1];
+  col = mainseg.transitionableParameters.colors[1];
   udpOut[12] = R(col);
   udpOut[13] = G(col);
   udpOut[14] = B(col);
   udpOut[15] = W(col);
-  udpOut[16] = mainseg.intensity;
+  udpOut[16] = mainseg.transitionableParameters.intensity;
   udpOut[17] = (transitionDelay >> 0) & 0xFF;
   udpOut[18] = (transitionDelay >> 8) & 0xFF;
   udpOut[19] = mainseg.palette;
-  col = mainseg.colors[2];
+  col = mainseg.transitionableParameters.colors[2];
   udpOut[20] = R(col);
   udpOut[21] = G(col);
   udpOut[22] = B(col);
@@ -119,26 +119,26 @@ void notify(byte callMode, bool followUp)
     udpOut[9 +ofs] = selseg.options & 0x8F; //only take into account selected, mirrored, on, reversed, reverse_y (for 2D); ignore freeze, reset, transitional
     udpOut[10+ofs] = selseg.opacity;
     udpOut[11+ofs] = selseg.getEffectId();
-    udpOut[12+ofs] = selseg.speed;
-    udpOut[13+ofs] = selseg.intensity;
+    udpOut[12+ofs] = selseg.transitionableParameters.speed;
+    udpOut[13+ofs] = selseg.transitionableParameters.intensity;
     udpOut[14+ofs] = selseg.palette;
-    udpOut[15+ofs] = R(selseg.colors[0]);
-    udpOut[16+ofs] = G(selseg.colors[0]);
-    udpOut[17+ofs] = B(selseg.colors[0]);
-    udpOut[18+ofs] = W(selseg.colors[0]);
-    udpOut[19+ofs] = R(selseg.colors[1]);
-    udpOut[20+ofs] = G(selseg.colors[1]);
-    udpOut[21+ofs] = B(selseg.colors[1]);
-    udpOut[22+ofs] = W(selseg.colors[1]);
-    udpOut[23+ofs] = R(selseg.colors[2]);
-    udpOut[24+ofs] = G(selseg.colors[2]);
-    udpOut[25+ofs] = B(selseg.colors[2]);
-    udpOut[26+ofs] = W(selseg.colors[2]);
+    udpOut[15+ofs] = R(selseg.transitionableParameters.colors[0]);
+    udpOut[16+ofs] = G(selseg.transitionableParameters.colors[0]);
+    udpOut[17+ofs] = B(selseg.transitionableParameters.colors[0]);
+    udpOut[18+ofs] = W(selseg.transitionableParameters.colors[0]);
+    udpOut[19+ofs] = R(selseg.transitionableParameters.colors[1]);
+    udpOut[20+ofs] = G(selseg.transitionableParameters.colors[1]);
+    udpOut[21+ofs] = B(selseg.transitionableParameters.colors[1]);
+    udpOut[22+ofs] = W(selseg.transitionableParameters.colors[1]);
+    udpOut[23+ofs] = R(selseg.transitionableParameters.colors[2]);
+    udpOut[24+ofs] = G(selseg.transitionableParameters.colors[2]);
+    udpOut[25+ofs] = B(selseg.transitionableParameters.colors[2]);
+    udpOut[26+ofs] = W(selseg.transitionableParameters.colors[2]);
     udpOut[27+ofs] = selseg.cct;
     udpOut[28+ofs] = (selseg.options>>8) & 0xFF; //mirror_y, transpose, 2D mapping & sound
-    udpOut[29+ofs] = selseg.custom1;
-    udpOut[30+ofs] = selseg.custom2;
-    udpOut[31+ofs] = selseg.custom3 | (selseg.check1<<5) | (selseg.check2<<6) | (selseg.check3<<7);
+    udpOut[29+ofs] = selseg.transitionableParameters.custom1;
+    udpOut[30+ofs] = selseg.transitionableParameters.custom2;
+    udpOut[31+ofs] = selseg.transitionableParameters.custom3 | (selseg.transitionableParameters.check1<<5) | (selseg.transitionableParameters.check2<<6) | (selseg.transitionableParameters.check3<<7);
     udpOut[32+ofs] = selseg.startY >> 8;    // ATM always 0 as Segment::startY is 8-bit
     udpOut[33+ofs] = selseg.startY & 0xFF;
     udpOut[34+ofs] = selseg.stopY >> 8;     // ATM always 0 as Segment::stopY is 8-bit
@@ -308,8 +308,8 @@ static void parseNotifyPacket(const uint8_t *udpIn) {
       if (applyEffects) {
         DEBUG_PRINTF_P(PSTR("Apply effect: %u\n"), id);
         selseg.setMode(udpIn[11+ofs]);
-        selseg.speed     = udpIn[12+ofs];
-        selseg.intensity = udpIn[13+ofs];
+        selseg.transitionableParameters.speed     = udpIn[12+ofs];
+        selseg.transitionableParameters.intensity = udpIn[13+ofs];
       }
       if (receiveNotificationPalette || !someSel) {
         DEBUG_PRINTF_P(PSTR("Apply palette: %u\n"), id);
@@ -330,12 +330,12 @@ static void parseNotifyPacket(const uint8_t *udpIn) {
         selseg.options = (selseg.options & 0b0000000000110001U) | (udpIn[28+ofs]<<8) | (udpIn[9 +ofs] & 0b11001110U); // ignore selected, freeze, reset
         if (applyEffects) {
           DEBUG_PRINTF_P(PSTR("Apply sliders: %u\n"), id);
-          selseg.custom1 = udpIn[29+ofs];
-          selseg.custom2 = udpIn[30+ofs];
-          selseg.custom3 = udpIn[31+ofs] & 0x1F;
-          selseg.check1  = (udpIn[31+ofs]>>5) & 0x1;
-          selseg.check1  = (udpIn[31+ofs]>>6) & 0x1;
-          selseg.check1  = (udpIn[31+ofs]>>7) & 0x1;
+          selseg.transitionableParameters.custom1 = udpIn[29+ofs];
+          selseg.transitionableParameters.custom2 = udpIn[30+ofs];
+          selseg.transitionableParameters.custom3 = udpIn[31+ofs] & 0x1F;
+          selseg.transitionableParameters.check1  = (udpIn[31+ofs]>>5) & 0x1;
+          selseg.transitionableParameters.check1  = (udpIn[31+ofs]>>6) & 0x1;
+          selseg.transitionableParameters.check1  = (udpIn[31+ofs]>>7) & 0x1;
         }
       }
       if (receiveSegmentBounds) {
@@ -360,8 +360,8 @@ static void parseNotifyPacket(const uint8_t *udpIn) {
       if (!seg.isActive() || !seg.isSelected()) continue;
       if (applyEffects) {
         seg.setMode(udpIn[8]);
-        seg.speed = udpIn[9];
-        if (version > 2) seg.intensity = udpIn[16];
+        seg.transitionableParameters.speed = udpIn[9];
+        if (version > 2) seg.transitionableParameters.intensity = udpIn[16];
       }
       if (version > 4 && receiveNotificationPalette) seg.setPalette(udpIn[19]);
     }

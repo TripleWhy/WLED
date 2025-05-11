@@ -64,8 +64,6 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 #endif
 #define FPS_CALC_SHIFT 7 // bit shift for fixed point math
 
-#define NUM_COLORS       3 /* number of colors per segment */
-
 // segment options
 #define NO_OPTIONS   (uint16_t)0x0000
 #define TRANSPOSED   (uint16_t)0x0100 // rotated 90deg & reversed
@@ -74,7 +72,6 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 #define RESET_REQ    (uint16_t)0x0020
 #define FROZEN       (uint16_t)0x0010
 #define MIRROR       (uint16_t)0x0008
-#define SEGMENT_ON   (uint16_t)0x0004
 #define REVERSE      (uint16_t)0x0002
 #define SELECTED     (uint16_t)0x0001
 
@@ -339,15 +336,13 @@ typedef struct Segment {
     uint16_t start; // start index / start X coordinate 2D (left)
     uint16_t stop;  // stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
     uint16_t offset;
-    uint8_t  speed;
-    uint8_t  intensity;
     uint8_t  palette;
     union {
       uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
       struct {
         bool    selected    : 1;  //     0 : selected
         bool    reverse     : 1;  //     1 : reversed
-        bool    on          : 1;  //     2 : is On
+        bool    unusedOption: 1;  //     2 : unused
         bool    mirror      : 1;  //     3 : mirrored
         bool    freeze      : 1;  //     4 : paused/frozen
         bool    reset       : 1;  //     5 : indicates that Segment runtime requires reset
@@ -361,15 +356,7 @@ typedef struct Segment {
     };
     uint8_t  grouping, spacing;
     uint8_t  opacity;
-    uint32_t colors[NUM_COLORS];
     uint8_t  cct;                 //0==1900K, 255==10091K
-    uint8_t  custom1, custom2;    // custom FX parameters/sliders
-    struct {
-      uint8_t custom3 : 5;        // reduced range slider (0-31)
-      bool    check1  : 1;        // checkmark 1
-      bool    check2  : 1;        // checkmark 2
-      bool    check3  : 1;        // checkmark 3
-    };
     uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
     uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
     // note: two bytes of padding are added here
@@ -377,23 +364,9 @@ typedef struct Segment {
 
     // runtime data
     unsigned long next_time;  // millis() of next update
-    uint32_t call;  // call counter
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
 
-    typedef struct TemporarySegmentData {
-      uint16_t _optionsT;
-      uint32_t _colorT[NUM_COLORS];
-      uint8_t  _speedT;
-      uint8_t  _intensityT;
-      uint8_t  _custom1T, _custom2T;   // custom FX parameters/sliders
-      struct {
-        uint8_t _custom3T : 5;        // reduced range slider (0-31)
-        bool    _check1T  : 1;        // checkmark 1
-        bool    _check2T  : 1;        // checkmark 2
-        bool    _check3T  : 1;        // checkmark 3
-      };
-      uint32_t _callT;
-    } tmpsegd_t;
+    TransitionableParameters transitionableParameters;
 
   private:
     uint8_t targetEffectId;
@@ -432,8 +405,8 @@ typedef struct Segment {
     // transition data, valid only if transitional==true, holds values during transition (72 bytes)
     struct Transition {
       #ifndef WLED_DISABLE_MODE_BLEND
-      tmpsegd_t     _segT;        // previous segment environment
-      SegmentAllocator<Effect>::unique_ptr _effectT;       // previous mode/effect
+      TransitionableParameters _transitionableParametersT;           // previous segment environment
+      SegmentAllocator<Effect>::unique_ptr _effectT; // previous mode/effect
       #else
       uint32_t      _colorT[NUM_COLORS];
       #endif
@@ -462,25 +435,30 @@ typedef struct Segment {
       start(sStart),
       stop(sStop),
       offset(0),
-      speed(DEFAULT_SPEED),
-      intensity(DEFAULT_INTENSITY),
       palette(0),
-      options(SELECTED | SEGMENT_ON),
+      options(SELECTED),
       grouping(1),
       spacing(0),
       opacity(255),
-      colors{DEFAULT_COLOR,BLACK,BLACK},
       cct(127),
-      custom1(DEFAULT_C1),
-      custom2(DEFAULT_C2),
-      custom3(DEFAULT_C3),
-      check1(false),
-      check2(false),
-      check3(false),
       startY(0),
       stopY(1),
       name(nullptr),
-      call(0),
+      transitionableParameters{
+        {DEFAULT_COLOR,BLACK,BLACK},
+        DEFAULT_SPEED,
+        DEFAULT_INTENSITY,
+        DEFAULT_C1,
+        DEFAULT_C2,
+        {
+          DEFAULT_C3,
+          false,
+          false,
+          false,
+        },
+        0u,
+        true,
+      },
       _capabilities(0),
       _default_palette(0),
       _t(nullptr)
@@ -517,7 +495,6 @@ typedef struct Segment {
 #endif
 
     inline uint8_t  getEffectId()        const { return (effect != nullptr) ? effect->getEffectId() : 0u; }
-    inline bool     getOption(uint8_t n) const { return ((options >> n) & 0x01); }
     inline bool     isSelected()         const { return selected; }
     inline bool     isInTransition()     const { return _t != nullptr; }
     inline bool     isActive()           const { return stop > start; }
@@ -543,7 +520,6 @@ typedef struct Segment {
     inline static unsigned vStripCount()                   { return Segment::_vStripCount; }
     inline static uint32_t getCurrentColor(unsigned i)     { return Segment::_currentColors[i]; } // { return i < 3 ? Segment::_currentColors[i] : 0; }
     inline static const CRGBPalette16 &getCurrentPalette() { return Segment::_currentPalette; }
-    inline static uint8_t getCurrentBrightness()           { return Segment::_segBri; }
     static void handleRandomPalette();
 
     template<EffectDimensionality dimensionality>
@@ -577,6 +553,7 @@ typedef struct Segment {
     Segment &setColor(uint8_t slot, uint32_t c);
     Segment &setCCT(uint16_t k);
     Segment &setOpacity(uint8_t o);
+    void setOn(bool val);
     Segment &setOption(uint8_t n, bool val);
     Segment &setMode(uint8_t fx, bool loadDefaults = false);
     Segment &setPalette(uint8_t pal);
@@ -597,17 +574,12 @@ typedef struct Segment {
     void     startTransition(uint16_t dur, SegmentAllocator<Effect>::unique_ptr&& oldEffect = nullptr); // transition has to start before actual segment values change
     void     stopTransition();                  // ends transition mode by destroying transition structure (does nothing if not in transition)
     inline void handleTransition() { updateTransitionProgress(); if (progress() == 0xFFFFU) stopTransition(); }
-    #ifndef WLED_DISABLE_MODE_BLEND
-    void     swapSegenv(tmpsegd_t &tmpSegD);    // copies segment data into specifed buffer, if buffer is not a transition buffer, segment data is overwritten from transition buffer
-    void     restoreSegenv(const tmpsegd_t &tmpSegD); // restores segment data from buffer, if buffer is not transition buffer, changed values are copied to transition buffer
-    #endif
     [[gnu::hot]] void updateTransitionProgress();            // set current progression of transition
     inline uint16_t progress() const { return Segment::_transitionprogress; }  // transition progression between 0-65535
     [[gnu::hot]] uint8_t  currentBri(bool useCct = false) const; // current segment brightness/CCT (blended while in transition)
     void ensureEffect();
     Effect* getTransitionEffect() const;                         // while in transition: Old mode, nullptr otherwise
     Effect* getCurrentEffect() const;                            // Currently active effect/mode. While in transition: New mode.
-    [[gnu::hot]] uint32_t currentColor(uint8_t slot) const;      // currently active segment color (blended while in transition)
     CRGBPalette16 &loadPalette(CRGBPalette16 &tgt, uint8_t pal);
     void     loadOldPalette(); // loads old FX palette into _currentPalette
 

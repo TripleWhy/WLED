@@ -15,13 +15,13 @@ public:
 
     explicit Noise161Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         unsigned scale = 320;                                       // the "zoom factor" for the noise
-        step += (1 + SEGMENT.speed/16);
+        step += (1 + parameters.speed/16);
 
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned shift_x = beatsin8_t(11);                          // the x position of the noise field swings @ 17 bpm

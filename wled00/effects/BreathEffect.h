@@ -18,9 +18,9 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         unsigned var = 0;
-        unsigned counter = (strip.now * ((SEGMENT.speed >> 3) +10)) & 0xFFFFU;
+        unsigned counter = (strip.now * ((parameters.speed >> 3) +10)) & 0xFFFFU;
         counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
         if (counter < 16384) {
           if (counter > 8192) counter = 8192 - (counter - 8192);
@@ -31,7 +31,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0), lum);
     }
 

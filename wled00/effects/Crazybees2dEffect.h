@@ -48,11 +48,11 @@ public:
 
     explicit Crazybees2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         if ((coordinate.width < 3) || (coordinate.height < 3)) {
             return false;
         }
-        if (!Base::nextFrameImpl(coordinate)) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -61,7 +61,7 @@ public:
 
         const byte n = MIN(MAX_BEES, (rows * cols) / 256 + 1);
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             prng.setSeed(strip.now);
             for (size_t i = 0; i < n; i++) {
                 bee[i].posX = prng.random8(0, cols);
@@ -71,9 +71,9 @@ public:
         }
 
         if (strip.now > step) {
-            step = strip.now + (FRAMETIME * 16 / ((SEGMENT.speed>>4)+1));
-            buffer.fadeToBlackBy(32 + ((SEGMENT.check1*SEGMENT.intensity) / 25));
-            buffer.blur(SEGMENT.intensity / (2 + SEGMENT.check1 * 9), SEGMENT.check1);
+            step = strip.now + (FRAMETIME * 16 / ((parameters.speed>>4)+1));
+            buffer.fadeToBlackBy(32 + ((parameters.check1*parameters.intensity) / 25));
+            buffer.blur(parameters.intensity / (2 + parameters.check1 * 9), parameters.check1);
             for (size_t i = 0; i < n; i++) {
                 uint32_t flowerCcolor = SEGMENT.color_from_palette(bee[i].hue, false, true, 255);
                 buffer.addPixelColor(bee[i].aimX + 1, bee[i].aimY, flowerCcolor);

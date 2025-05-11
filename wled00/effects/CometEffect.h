@@ -18,16 +18,16 @@ public:
 
     explicit CometEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned counter = (strip.now * ((SEGMENT.speed >>2) +1)) & 0xFFFF;
+        unsigned counter = (strip.now * ((parameters.speed >>2) +1)) & 0xFFFF;
         unsigned index = (counter * coordinate.width) >> 16;
-        if (SEGENV.call == 0) aux0 = index;
+        if (parameters.call == 0) aux0 = index;
 
-        buffer.fadeOut(SEGMENT.intensity);
+        buffer.fadeOut(parameters.intensity);
 
         buffer.setPixelColor( index, SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
         if (index > aux0) {

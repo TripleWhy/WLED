@@ -19,19 +19,19 @@ public:
 
     explicit MidnoiseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         um_data_t *um_data = getAudioData();
         float   volumeSmth   = *(float*)  um_data->u_data[0];
 
-        buffer.fadeOut(SEGMENT.speed);
-        buffer.fadeOut(SEGMENT.speed);
+        buffer.fadeOut(parameters.speed);
+        buffer.fadeOut(parameters.speed);
 
-        float tmpSound2 = volumeSmth * (float)SEGMENT.intensity / 256.0;  // Too sensitive.
-        tmpSound2 *= (float)SEGMENT.intensity / 128.0;              // Reduce sensitivity/length.
+        float tmpSound2 = volumeSmth * (float)parameters.intensity / 256.0;  // Too sensitive.
+        tmpSound2 *= (float)parameters.intensity / 128.0;              // Reduce sensitivity/length.
 
         unsigned maxLen = mapf(tmpSound2, 0, 127, 0, coordinate.width/2);
         if (maxLen >coordinate.width/2) maxLen = coordinate.width/2;

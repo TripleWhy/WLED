@@ -16,12 +16,12 @@ public:
 
     explicit LakeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned sp = SEGMENT.speed/10;
+        unsigned sp = parameters.speed/10;
         int wave1 = beatsin8_t(sp +2, -64,64);
         int wave2 = beatsin8_t(sp +1, -64,64);
         int wave3 = beatsin8_t(sp +2,   0,80);

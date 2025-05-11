@@ -36,45 +36,45 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setMotionBlur(SEGMENT.custom1);
-        if (SEGMENT.check1)
+        PartSys.setMotionBlur(parameters.custom1);
+        if (parameters.check1)
             PartSys.setSmearBlur(120); // enable smear blur
         else
             PartSys.setSmearBlur(0); // disable smear blur
-        PartSys.setParticleSize(SEGMENT.check3); // 1 or 2 pixel rendering
-        PartSys.setColorByPosition(SEGMENT.check2); // color fixed by position
-        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 10, 255)); // set percentage of particles to use
+        PartSys.setParticleSize(parameters.check3); // 1 or 2 pixel rendering
+        PartSys.setColorByPosition(parameters.check2); // color fixed by position
+        PartSys.setUsedParticles(map(parameters.intensity, 0, 255, 10, 255)); // set percentage of particles to use
 
         uint32_t deadparticles = 0;
         //kill out of bounds and moving away plus change color
         for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
-            if (((SEGMENT.call & 0x07) == 0) && PartSys.particleFlags[i].outofbounds) { //check if out of bounds particle move away from strip, only update every 8th frame
+            if (((parameters.call & 0x07) == 0) && PartSys.particleFlags[i].outofbounds) { //check if out of bounds particle move away from strip, only update every 8th frame
                 if ((int32_t)PartSys.particles[i].vx * PartSys.particles[i].x > 0) PartSys.particles[i].ttl = 0; //particle is moving away, kill it
             }
             PartSys.particleFlags[i].perpetual = true; //particles do not age
-            if (SEGMENT.call % (32 / (1 + (SEGMENT.custom2 >> 3))) == 0)
-                 PartSys.particles[i].hue += 2 + (SEGMENT.custom2 >> 5);
+            if (parameters.call % (32 / (1 + (parameters.custom2 >> 3))) == 0)
+                 PartSys.particles[i].hue += 2 + (parameters.custom2 >> 5);
             //note: updating speed on the fly is not accurately possible, since it is unknown which particles are assigned to which spot
-            if (aux0 != SEGMENT.speed) { //speed changed
+            if (aux0 != parameters.speed) { //speed changed
                 //update all particle speed by setting them to current value
-                 PartSys.particles[i].vx = PartSys.particles[i].vx > 0 ? SEGMENT.speed >> 3 : -SEGMENT.speed >> 3;
+                 PartSys.particles[i].vx = PartSys.particles[i].vx > 0 ? parameters.speed >> 3 : -parameters.speed >> 3;
             }
             if (PartSys.particles[i].ttl == 0) deadparticles++; // count dead particles
         }
-        aux0 = SEGMENT.speed;
+        aux0 = parameters.speed;
 
         //generate a spotlight: generates particles just outside of view
-        if (deadparticles > 5 && (SEGMENT.call & 0x03) == 0) {
+        if (deadparticles > 5 && (parameters.call & 0x03) == 0) {
             //random color, random type
             SpotType type = static_cast<SpotType>(hw_random16(static_cast<uint32_t>(SpotType::COUNT)));
-            int8_t speed = 2 + hw_random16(2 + (SEGMENT.speed >> 1)) + (SEGMENT.speed >> 4);
+            int8_t speed = 2 + hw_random16(2 + (parameters.speed >> 1)) + (parameters.speed >> 4);
             int32_t width = hw_random16(1, 10);
             uint32_t ttl = 300; //ttl is particle brightness (below perpetual is set so it does not age, i.e. ttl stays at this value)
             int32_t position;

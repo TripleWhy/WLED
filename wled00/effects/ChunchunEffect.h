@@ -19,15 +19,15 @@ public:
 
     explicit ChunchunEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         buffer.fadeOut(254); // add a bit of trail
-        unsigned counter = strip.now * (6 + (SEGMENT.speed >> 4));
+        unsigned counter = strip.now * (6 + (parameters.speed >> 4));
         unsigned numBirds = 2 + (coordinate.width >> 3);  // 2 + 1/8 of a segment
-        unsigned span = (SEGMENT.intensity << 8) / numBirds;
+        unsigned span = (parameters.intensity << 8) / numBirds;
 
         for (unsigned i = 0; i < numBirds; i++)
         {

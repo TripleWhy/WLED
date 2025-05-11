@@ -31,8 +31,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -40,15 +40,15 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setUsedParticles(1 + ((SEGMENT.intensity * 255) >> 8));
-        PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
-        PartSys.setGravity(map(SEGMENT.custom3, 0, 31, 1, 30));
+        PartSys.setUsedParticles(1 + ((parameters.intensity * 255) >> 8));
+        PartSys.setMotionBlur(parameters.custom2); // anable motion blur
+        PartSys.setGravity(map(parameters.custom3, 0, 31, 1, 30));
         PartSys.enableParticleCollisions(true, 32); // hardness value found by experimentation on different settings
 
-        uint32_t colormode = SEGMENT.custom1 >> 5; // 0-7
+        uint32_t colormode = parameters.custom1 >> 5; // 0-7
 
-        if ((SEGMENT.intensity | (PartSys.getAvailableParticles() << 8)) != settingTracker) { // initialize, getAvailableParticles changes while in FX transition
-            settingTracker = SEGMENT.intensity | (PartSys.getAvailableParticles() << 8);
+        if ((parameters.intensity | (PartSys.getAvailableParticles() << 8)) != settingTracker) { // initialize, getAvailableParticles changes while in FX transition
+            settingTracker = parameters.intensity | (PartSys.getAvailableParticles() << 8);
             for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
                 PartSys.particleFlags[i].reversegrav = true; // resting particles dont fall
                 direction = 0; // down
@@ -77,19 +77,19 @@ public:
                 PartSys.setColorByPosition(true); // color fixed by position
             else {
                 PartSys.setColorByPosition(false);
-                uint8_t basehue = ((SEGMENT.custom1 & 0x1F) << 3); // use 5 LSBs to select color
+                uint8_t basehue = ((parameters.custom1 & 0x1F) << 3); // use 5 LSBs to select color
                 switch(colormode) {
                     case 0: PartSys.particles[i].hue = 120; break; // fixed at 120, if flip is activated, this can make red and green (use palette 34)
                     case 1: PartSys.particles[i].hue = basehue; break; // fixed selectable color
                     case 2: // 2 colors inverleaved (same code as 3)
-                    case 3: PartSys.particles[i].hue = ((SEGMENT.custom1 & 0x1F) << 1) + (i % colormode)*74; break; // interleved colors (every 2 or 3 particles)
+                    case 3: PartSys.particles[i].hue = ((parameters.custom1 & 0x1F) << 1) + (i % colormode)*74; break; // interleved colors (every 2 or 3 particles)
                     case 4: PartSys.particles[i].hue = basehue + (i * 255) / PartSys.usedParticles;  break; // gradient palette colors
                     case 5: PartSys.particles[i].hue = basehue + (i * 1024) / PartSys.usedParticles;  break; // multi gradient palette colors
                     case 6: PartSys.particles[i].hue = i + (strip.now >> 3);  break; // disco! moving color gradient
                     default: break;
                 }
             }
-            if (SEGMENT.check1 && !PartSys.particleFlags[i].reversegrav) // flip color when fallen
+            if (parameters.check1 && !PartSys.particleFlags[i].reversegrav) // flip color when fallen
                 PartSys.particles[i].hue += 120;
         }
         // re-order particles in case collisions flipped particles (highest number index particle is on the "bottom")
@@ -113,10 +113,10 @@ public:
         if (aux1 == 0) { // countdown passed, run
             if (strip.now >= step) { // drop a particle, do not drop more often than every second frame or particles tangle up quite badly
                 // set next drop time
-                if (SEGMENT.check3 && direction) // fast reset
+                if (parameters.check3 && direction) // fast reset
                     step = strip.now + 100; // drop one particle every 100ms
                 else // normal interval
-                    step = strip.now + max(20, SEGMENT.speed * 20); // map speed slider from 0.1s to 5s
+                    step = strip.now + max(20, parameters.speed * 20); // map speed slider from 0.1s to 5s
                 if (aux0 < PartSys.usedParticles) {
                     PartSys.particleFlags[aux0].reversegrav = direction; // let this particle fall or rise
                     PartSys.particleFlags[aux0].fixed = false; // unpin
@@ -131,7 +131,7 @@ public:
                     aux0++;
             }
         }
-        else if (SEGMENT.check2) // auto reset
+        else if (parameters.check2) // auto reset
             aux1--; // countdown
 
         PartSys.update(buffer); // update and render

@@ -45,8 +45,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -55,34 +55,34 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setWrapX(SEGMENT.check1);   // cylinder
-        PartSys.setBounceX(SEGMENT.check2); // walls
-        PartSys.setBounceY(SEGMENT.check3); // ground
-        PartSys.setWallHardness(SEGMENT.custom2);
+        PartSys.setWrapX(parameters.check1);   // cylinder
+        PartSys.setBounceX(parameters.check2); // walls
+        PartSys.setBounceY(parameters.check3); // ground
+        PartSys.setWallHardness(parameters.custom2);
         numSprays = min((int32_t)PartSys.sources.size(), max((int32_t)(coordinate.width - 1) / 6, (int32_t)2)); // number of sprays depends on segment width
-        if (SEGMENT.custom2 > 0) // collisions enabled
-            PartSys.enableParticleCollisions(true, SEGMENT.custom2); // enable collisions and set particle collision hardness
+        if (parameters.custom2 > 0) // collisions enabled
+            PartSys.enableParticleCollisions(true, parameters.custom2); // enable collisions and set particle collision hardness
         else {
             PartSys.enableParticleCollisions(false);
             PartSys.setWallHardness(120); // set hardness (for ground bounce) to fixed value if not using collisions
         }
 
         for (i = 0; i < numSprays; i++) {
-                PartSys.sources[i].source.hue += 1 + hw_random16(SEGMENT.custom1>>1); // change hue of spray source
+                PartSys.sources[i].source.hue += 1 + hw_random16(parameters.custom1>>1); // change hue of spray source
         }
 
-        if (SEGMENT.call % (12 - (SEGMENT.intensity >> 5)) == 0 && SEGMENT.intensity > 0) { // every nth frame, emit particles, do not emit if intensity is zero
+        if (parameters.call % (12 - (parameters.intensity >> 5)) == 0 && parameters.intensity > 0) { // every nth frame, emit particles, do not emit if intensity is zero
             for (i = 0; i < numSprays; i++) {
-                PartSys.sources[i].vy = -SEGMENT.speed >> 3; // emitting speed, down
-                //PartSys.sources[i].source.x = map(SEGMENT.custom3, 0, 31, 0, ((coordinate.width - 1) - numSprays * 2) * PS_P_RADIUS) + i * PS_P_RADIUS * 2; // emitter position
-                PartSys.sources[i].source.x = map(SEGMENT.custom3, 0, 31, 0, ((coordinate.width - 1) - numSprays) * PS_P_RADIUS) + i * PS_P_RADIUS * 2; // emitter position
+                PartSys.sources[i].vy = -parameters.speed >> 3; // emitting speed, down
+                //PartSys.sources[i].source.x = map(parameters.custom3, 0, 31, 0, ((coordinate.width - 1) - numSprays * 2) * PS_P_RADIUS) + i * PS_P_RADIUS * 2; // emitter position
+                PartSys.sources[i].source.x = map(parameters.custom3, 0, 31, 0, ((coordinate.width - 1) - numSprays) * PS_P_RADIUS) + i * PS_P_RADIUS * 2; // emitter position
                 PartSys.sources[i].source.y = PartSys.maxY + (PS_P_RADIUS * ((i<<2) + 4)); // source y position, few pixels above the top to increase spreading before entering the matrix
-                PartSys.sources[i].var = (SEGMENT.custom1 >> 3); // emiting variation 0-32
+                PartSys.sources[i].var = (parameters.custom1 >> 3); // emiting variation 0-32
                 PartSys.sprayEmit(PartSys.sources[i]);
             }
         }
 
-        if (SEGMENT.call % 20 == 0)
+        if (parameters.call % 20 == 0)
             PartSys.applyFriction(1); // add just a tiny amount of friction to help smooth things
 
         PartSys.update(buffer);   // update and render

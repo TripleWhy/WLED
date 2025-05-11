@@ -20,15 +20,15 @@ public:
 
     explicit FunkyPlank2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        int NUMB_BANDS = map(SEGMENT.custom1, 0, 255, 1, 16);
+        int NUMB_BANDS = map(parameters.custom1, 0, 255, 1, 16);
         int barWidth = (cols / NUMB_BANDS);
         int bandInc = 1;
         if (barWidth == 0) {
@@ -40,11 +40,11 @@ public:
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        uint8_t secondHand = micros()/(256-SEGMENT.speed)/500+1 % 64;
+        uint8_t secondHand = micros()/(256-parameters.speed)/500+1 % 64;
         if (aux0 != secondHand) {                        // Triggered millis timing.
             aux0 = secondHand;
 

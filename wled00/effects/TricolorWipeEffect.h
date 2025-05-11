@@ -18,12 +18,12 @@ public:
 
     explicit TricolorWipeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 1000 + (255 - SEGMENT.speed)*200;
+        uint32_t cycleTime = 1000 + (255 - parameters.speed)*200;
         uint32_t perc = strip.now % cycleTime;
         unsigned prog = (perc * 65535) / cycleTime;
         unsigned ledIndex = (prog * coordinate.width * 3) >> 16;

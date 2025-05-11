@@ -849,21 +849,21 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
   }
 
   // temporary values, write directly to segments, globals are updated by setValuesFromFirstSelectedSeg()
-  uint32_t col0    = selseg.colors[0];
-  uint32_t col1    = selseg.colors[1];
-  uint32_t col2    = selseg.colors[2];
+  uint32_t col0    = selseg.transitionableParameters.colors[0];
+  uint32_t col1    = selseg.transitionableParameters.colors[1];
+  uint32_t col2    = selseg.transitionableParameters.colors[2];
   byte colIn[4]    = {R(col0), G(col0), B(col0), W(col0)};
   byte colInSec[4] = {R(col1), G(col1), B(col1), W(col1)};
   byte effectIn    = selseg.getEffectId();
-  byte speedIn     = selseg.speed;
-  byte intensityIn = selseg.intensity;
+  byte speedIn     = selseg.transitionableParameters.speed;
+  byte intensityIn = selseg.transitionableParameters.intensity;
   byte paletteIn   = selseg.palette;
-  byte custom1In   = selseg.custom1;
-  byte custom2In   = selseg.custom2;
-  byte custom3In   = selseg.custom3;
-  byte check1In    = selseg.check1;
-  byte check2In    = selseg.check2;
-  byte check3In    = selseg.check3;
+  byte custom1In   = selseg.transitionableParameters.custom1;
+  byte custom2In   = selseg.transitionableParameters.custom2;
+  byte custom3In   = selseg.transitionableParameters.custom3;
+  byte check1In    = selseg.transitionableParameters.check1;
+  byte check2In    = selseg.transitionableParameters.check2;
+  byte check3In    = selseg.transitionableParameters.check3;
   uint16_t startI  = selseg.start;
   uint16_t stopI   = selseg.stop;
   uint16_t startY  = selseg.startY;
@@ -899,7 +899,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
   pos = req.indexOf(F("SB=")); //Segment brightness/opacity
   if (pos > 0) {
     byte segbri = getNumVal(&req, pos);
-    selseg.setOption(SEG_OPTION_ON, segbri); // use transition
+    selseg.setOn(segbri); // use transition
     if (segbri) {
       selseg.setOpacity(segbri);
     }
@@ -908,9 +908,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
   pos = req.indexOf(F("SW=")); //segment power
   if (pos > 0) {
     switch (getNumVal(&req, pos)) {
-      case 0:  selseg.setOption(SEG_OPTION_ON, false);      break; // use transition
-      case 1:  selseg.setOption(SEG_OPTION_ON, true);       break; // use transition
-      default: selseg.setOption(SEG_OPTION_ON, !selseg.on); break; // use transition
+      case 0:  selseg.setOn(false);      break; // use transition
+      case 1:  selseg.setOn(true);       break; // use transition
+      default: selseg.setOn(!selseg.transitionableParameters.on); break; // use transition
     }
   }
 
@@ -1060,18 +1060,18 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
     Segment& seg = strip.getSegment(i);
     if (i != selectedSeg && (singleSegment || !seg.isActive() || !seg.isSelected())) continue; // skip non main segments if not applying to all
     if (fxModeChanged)    seg.setMode(effectIn, req.indexOf(F("FXD="))>0);  // apply defaults if FXD= is specified
-    if (speedChanged)     seg.speed     = speedIn;
-    if (intensityChanged) seg.intensity = intensityIn;
+    if (speedChanged)     seg.transitionableParameters.speed     = speedIn;
+    if (intensityChanged) seg.transitionableParameters.intensity = intensityIn;
     if (paletteChanged)   seg.setPalette(paletteIn);
     if (col0Changed)      seg.setColor(0, col0);
     if (col1Changed)      seg.setColor(1, col1);
     if (col2Changed)      seg.setColor(2, col2);
-    if (custom1Changed)   seg.custom1   = custom1In;
-    if (custom2Changed)   seg.custom2   = custom2In;
-    if (custom3Changed)   seg.custom3   = custom3In;
-    if (check1Changed)    seg.check1    = (bool)check1In;
-    if (check2Changed)    seg.check2    = (bool)check2In;
-    if (check3Changed)    seg.check3    = (bool)check3In;
+    if (custom1Changed)   seg.transitionableParameters.custom1   = custom1In;
+    if (custom2Changed)   seg.transitionableParameters.custom2   = custom2In;
+    if (custom3Changed)   seg.transitionableParameters.custom3   = custom3In;
+    if (check1Changed)    seg.transitionableParameters.check1    = (bool)check1In;
+    if (check2Changed)    seg.transitionableParameters.check2    = (bool)check2In;
+    if (check3Changed)    seg.transitionableParameters.check3    = (bool)check3In;
   }
 
   //set advanced overlay

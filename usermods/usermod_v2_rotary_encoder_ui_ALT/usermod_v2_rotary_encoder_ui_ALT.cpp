@@ -793,11 +793,11 @@ void RotaryEncoderUIUsermod::changeEffectSpeed(bool increase) {
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive()) continue;
-      seg.speed = effectSpeed;
+      seg.transitionableParameters.speed = effectSpeed;
     }
   } else {
     Segment& seg = strip.getSegment(strip.getMainSegmentId());
-    seg.speed = effectSpeed;
+    seg.transitionableParameters.speed = effectSpeed;
   }
   lampUdated();
 #ifdef USERMOD_FOUR_LINE_DISPLAY
@@ -821,11 +821,11 @@ void RotaryEncoderUIUsermod::changeEffectIntensity(bool increase) {
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive()) continue;
-      seg.intensity = effectIntensity;
+      seg.transitionableParameters.intensity = effectIntensity;
     }
   } else {
     Segment& seg = strip.getSegment(strip.getMainSegmentId());
-    seg.intensity = effectIntensity;
+    seg.transitionableParameters.intensity = effectIntensity;
   }
   lampUdated();
 #ifdef USERMOD_FOUR_LINE_DISPLAY
@@ -849,25 +849,25 @@ void RotaryEncoderUIUsermod::changeCustom(uint8_t par, bool increase) {
     uint8_t id = strip.getFirstSelectedSegId();
     Segment& sid = strip.getSegment(id);
     switch (par) {
-      case 3:  val = sid.custom3 = max(min((increase ? sid.custom3+fadeAmount : sid.custom3-fadeAmount), 255), 0); break;
-      case 2:  val = sid.custom2 = max(min((increase ? sid.custom2+fadeAmount : sid.custom2-fadeAmount), 255), 0); break;
-      default: val = sid.custom1 = max(min((increase ? sid.custom1+fadeAmount : sid.custom1-fadeAmount), 255), 0); break;
+      case 3:  val = sid.transitionableParameters.custom3 = max(min((increase ? sid.transitionableParameters.custom3+fadeAmount : sid.transitionableParameters.custom3-fadeAmount), 255), 0); break;
+      case 2:  val = sid.transitionableParameters.custom2 = max(min((increase ? sid.transitionableParameters.custom2+fadeAmount : sid.transitionableParameters.custom2-fadeAmount), 255), 0); break;
+      default: val = sid.transitionableParameters.custom1 = max(min((increase ? sid.transitionableParameters.custom1+fadeAmount : sid.transitionableParameters.custom1-fadeAmount), 255), 0); break;
     }
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive() || i == id) continue;
       switch (par) {
-        case 3:  seg.custom3 = sid.custom3; break;
-        case 2:  seg.custom2 = sid.custom2; break;
-        default: seg.custom1 = sid.custom1; break;
+        case 3:  seg.transitionableParameters.custom3 = sid.transitionableParameters.custom3; break;
+        case 2:  seg.transitionableParameters.custom2 = sid.transitionableParameters.custom2; break;
+        default: seg.transitionableParameters.custom1 = sid.transitionableParameters.custom1; break;
       }
     }
   } else {
     Segment& seg = strip.getMainSegment();
     switch (par) {
-      case 3:  val = seg.custom3 = max(min((increase ? seg.custom3+fadeAmount : seg.custom3-fadeAmount), 255), 0); break;
-      case 2:  val = seg.custom2 = max(min((increase ? seg.custom2+fadeAmount : seg.custom2-fadeAmount), 255), 0); break;
-      default: val = seg.custom1 = max(min((increase ? seg.custom1+fadeAmount : seg.custom1-fadeAmount), 255), 0); break;
+      case 3:  val = seg.transitionableParameters.custom3 = max(min((increase ? seg.transitionableParameters.custom3+fadeAmount : seg.transitionableParameters.custom3-fadeAmount), 255), 0); break;
+      case 2:  val = seg.transitionableParameters.custom2 = max(min((increase ? seg.transitionableParameters.custom2+fadeAmount : seg.transitionableParameters.custom2-fadeAmount), 255), 0); break;
+      default: val = seg.transitionableParameters.custom1 = max(min((increase ? seg.transitionableParameters.custom1+fadeAmount : seg.transitionableParameters.custom1-fadeAmount), 255), 0); break;
     }
   }
   lampUdated();
@@ -924,11 +924,11 @@ void RotaryEncoderUIUsermod::changeHue(bool increase){
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive()) continue;
-      seg.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+      seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
     }
   } else {
     Segment& seg = strip.getSegment(strip.getMainSegmentId());
-    seg.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+    seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
   }
   lampUdated();
 #ifdef USERMOD_FOUR_LINE_DISPLAY
@@ -953,11 +953,11 @@ void RotaryEncoderUIUsermod::changeSat(bool increase){
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive()) continue;
-      seg.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+      seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
     }
   } else {
     Segment& seg = strip.getSegment(strip.getMainSegmentId());
-    seg.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+    seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
   }
   lampUdated();
 #ifdef USERMOD_FOUR_LINE_DISPLAY

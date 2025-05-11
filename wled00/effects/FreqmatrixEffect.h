@@ -18,8 +18,8 @@ public:
 
     explicit FreqmatrixEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
                                     // Freqmatrix. By Andreas Pleschung.
@@ -28,16 +28,16 @@ public:
         float FFT_MajorPeak = *(float*)um_data->u_data[4];
         float volumeSmth    = *(float*)um_data->u_data[0];
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        uint8_t secondHand = micros()/(256-SEGMENT.speed)/500 % 16;
+        uint8_t secondHand = micros()/(256-parameters.speed)/500 % 16;
         if(aux0 != secondHand) {
             aux0 = secondHand;
 
-            uint8_t sensitivity = map(SEGMENT.custom3, 0, 31, 1, 10); // reduced resolution slider
-            int pixVal = (volumeSmth * SEGMENT.intensity * sensitivity) / 256.0f;
+            uint8_t sensitivity = map(parameters.custom3, 0, 31, 1, 10); // reduced resolution slider
+            int pixVal = (volumeSmth * parameters.intensity * sensitivity) / 256.0f;
             if (pixVal > 255) pixVal = 255;
 
             float intensity = map(pixVal, 0, 255, 0, 100) / 100.0f;  // make a brightness from the last avg
@@ -52,8 +52,8 @@ public:
             if (FFT_MajorPeak < 80) {
                 color = CRGB::Black;
             } else {
-                int upperLimit = 80 + 42 * SEGMENT.custom2;
-                int lowerLimit = 80 + 3 * SEGMENT.custom1;
+                int upperLimit = 80 + 42 * parameters.custom2;
+                int lowerLimit = 80 + 3 * parameters.custom1;
                 uint8_t i =  lowerLimit!=upperLimit ? map(FFT_MajorPeak, lowerLimit, upperLimit, 0, 255) : FFT_MajorPeak;  // may under/overflow - so we enforce uint8_t
                 unsigned b = 255 * intensity;
                 if (b > 255) b = 255;

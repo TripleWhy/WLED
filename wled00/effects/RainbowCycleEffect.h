@@ -18,14 +18,14 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        multiplier = (16 << (SEGMENT.intensity /29));
-        counter = (strip.now * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        multiplier = (16 << (parameters.intensity /29));
+        counter = (strip.now * ((parameters.speed >> 2) +2)) & 0xFFFF;
         counter = counter >> 8;
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         //intensity/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
         uint8_t index = (coordinate.getXAbsolute() * multiplier / coordinate.width) + counter;
         return SEGMENT.color_wheel(index);

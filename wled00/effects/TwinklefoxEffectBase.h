@@ -22,7 +22,7 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         // "PRNG16" is the pseudorandom number generator
         // It MUST be reset to the same starting value each time
         // this function is called, so that the sequence of 'random'
@@ -30,8 +30,8 @@ public:
         PRNG16 = 11337;
 
         // Calculate speed
-        if (SEGMENT.speed > 100) aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
-        else aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
+        if (parameters.speed > 100) aux0 = 3 + ((255 - parameters.speed) >> 3);
+        else aux0 = 22 + ((100 - parameters.speed) >> 1);
 
         // Set up the background color, "bg".
         bg = SEGCOLOR(1);
@@ -49,7 +49,7 @@ public:
     }
 
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
         unsigned myclockoffset16= PRNG16; // use that number as clock offset
         PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
@@ -61,7 +61,7 @@ public:
         // We now have the adjusted 'clock' for this pixel, now we call
         // the function that computes what color the pixel should be based
         // on the "brightness = f( time )" idea.
-        CRGBW c = twinklefox_one_twinkle(myclock30, myunique8, cat);
+        CRGBW c = twinklefox_one_twinkle(parameters, myclock30, myunique8, cat);
 
         unsigned cbright = c.getAverageLight();
         int deltabright = cbright - backgroundBrightness;
@@ -85,7 +85,7 @@ private:
     //
     //  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
     //  Colors are chosen from a palette. Read more about this effect using the link above!
-    CRGBW twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
+    CRGBW twinklefox_one_twinkle(TransitionableParameters& parameters, uint32_t ms, uint8_t salt, bool cat)
     {
         // Overall twinkle speed (changed)
         unsigned ticks = ms / aux0;
@@ -98,7 +98,7 @@ private:
         // Overall twinkle density.
         // 0 (NONE lit) to 8 (ALL lit at once).
         // Default is 5.
-        unsigned twinkleDensity = (SEGMENT.intensity >> 5) +1;
+        unsigned twinkleDensity = (parameters.intensity >> 5) +1;
 
         unsigned bright = 0;
         if (((slowcycle8 & 0x0E)/2) < twinkleDensity) {
@@ -123,7 +123,7 @@ private:
         CRGBW c;
         if (bright > 0) {
             c = ColorFromPalette(SEGPALETTE, hue, bright, NOBLEND);
-            if (!SEGMENT.check1) {
+            if (!parameters.check1) {
                 // This code takes a pixel, and if its in the 'fading down'
                 // part of the cycle, it adjusts the color a little bit like the
                 // way that incandescent bulbs fade toward 'red' as they dim.

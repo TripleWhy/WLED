@@ -19,16 +19,16 @@ public:
 
     explicit Distortionwaves2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        uint8_t speed = SEGMENT.speed/32;
-        uint8_t scale = SEGMENT.intensity/32;
+        uint8_t speed = parameters.speed/32;
+        uint8_t scale = parameters.intensity/32;
 
         uint8_t  w = 2;
 

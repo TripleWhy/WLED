@@ -19,21 +19,21 @@ public:
 
     explicit BlurzEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
             aux0 = 0;
         }
 
-        int fadeoutDelay = (256 - SEGMENT.speed) / 32;
-        if ((fadeoutDelay <= 1 ) || ((SEGENV.call % fadeoutDelay) == 0)) buffer.fadeOut(SEGMENT.speed);
+        int fadeoutDelay = (256 - parameters.speed) / 32;
+        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fadeOut(parameters.speed);
 
         step += FRAMETIME;
         if (step > SPEED_FORMULA_L) {
@@ -42,7 +42,7 @@ public:
             ++(aux0) %= 16; // make sure it doesn't cross 16
 
             step = 1;
-            buffer.blur(SEGMENT.intensity); // note: blur > 210 results in a alternating pattern, this could be fixed by mapping but some may like it (very old bug)
+            buffer.blur(parameters.intensity); // note: blur > 210 results in a alternating pattern, this could be fixed by mapping but some may like it (very old bug)
         }
         return true;
     }

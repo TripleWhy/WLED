@@ -108,13 +108,13 @@ class Animated_Staircase : public Usermod {
         Segment &seg = strip.getSegment(i);
         if (!seg.isActive()) continue; // skip gaps
         if (i >= onIndex && i < offIndex) {
-          seg.setOption(SEG_OPTION_ON, true);
+          seg.setOn(true);
           // We may need to copy mode and colors from segment 0 to make sure
           // changes are propagated even when the config is changed during a wipe
           // seg.setMode(mainsegment.mode);
-          // seg.setColor(0, mainsegment.colors[0]);
+          // seg.setColor(0, mainsegment.transitionableParameters.colors[0]);
         } else {
-          seg.setOption(SEG_OPTION_ON, false);
+          seg.setOn(false);
         }
         // Always mark segments as "transitional", we are animating the staircase
         //seg.setOption(SEG_OPTION_TRANSITIONAL, true); // not needed anymore as setOption() does it
@@ -305,7 +305,7 @@ class Animated_Staircase : public Usermod {
         for (int i = 0; i <= strip.getLastActiveSegmentId(); i++) {
           Segment &seg = strip.getSegment(i);
           if (!seg.isActive()) continue; // skip vector gaps
-          seg.setOption(SEG_OPTION_ON, true);
+          seg.setOn(true);
         }
         strip.trigger();  // force strip update
         stateChanged = true;  // inform external devices/UI of change

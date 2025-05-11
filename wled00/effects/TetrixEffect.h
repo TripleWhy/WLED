@@ -28,8 +28,8 @@ public:
 
     explicit TetrixEffect(const EffectInformation& ei) : Base{ei, true} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-      if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+      if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -38,7 +38,7 @@ public:
       }
 
       for (unsigned y=0; y < coordinate.height; ++y)
-          runStrip(y, coordinate.width, &drops[y]);
+          runStrip(parameters, y, coordinate.width, &drops[y]);
       return true;
     }
 
@@ -46,10 +46,10 @@ private:
     // virtualStrip idea by @ewowi (Ewoud Wijma)
     // requires virtual strip # to be embedded into upper 16 bits of index in setPixelcolor()
     // the following functions will not work on virtual strips: fill(), fade_out(), fadeToBlack(), blur()
-    void runStrip(unsigned y, unsigned width, Tetris *drop) {
-      const bool oneColor = SEGMENT.check1;
+    void runStrip(TransitionableParameters& parameters, unsigned y, unsigned width, Tetris *drop) {
+      const bool oneColor = parameters.check1;
       // initialize dropping on first call or segment full
-      if (SEGENV.call == 0) {
+      if (parameters.call == 0) {
         drop->stack = 0;                  // reset brick stack size
         drop->step = strip.now + 2000;    // start by fading out strip
         if (oneColor) drop->col = 0;      // use only one color from palette
@@ -59,13 +59,13 @@ private:
         // speed calculation: a single brick should reach bottom of strip in X seconds
         // if the speed is set to 1 this should take 5s and at 255 it should take 0.25s
         // as this is dependant on width it should be taken into account and the fact that effect runs every FRAMETIME s
-        int speed = SEGMENT.speed ? SEGMENT.speed : hw_random8(1,255);
+        int speed = parameters.speed ? parameters.speed : hw_random8(1,255);
         speed = map(speed, 1, 255, 5000, 250); // time taken for full (width) drop
         drop->speed = float(width * FRAMETIME) / float(speed); // set speed
         drop->pos   = width;             // start at end of segment (no need to subtract 1)
         if (!oneColor) drop->col = hw_random8(0,15)<<4;   // limit color choices so there is enough HUE gap
         drop->step  = 1;                  // drop state (0 init, 1 forming, 2 falling)
-        drop->brick = (SEGMENT.intensity ? (SEGMENT.intensity>>5)+1 : hw_random8(1,5)) * (1+(width>>6));  // size of brick
+        drop->brick = (parameters.intensity ? (parameters.intensity>>5)+1 : hw_random8(1,5)) * (1+(width>>6));  // size of brick
       }
 
       if (drop->step == 1) {              // forming

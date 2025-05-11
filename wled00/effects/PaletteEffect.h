@@ -39,14 +39,14 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         const bool isMatrix = strip.isMatrix;
         const int cols = coordinate.width;
         const int rows = isMatrix ? coordinate.width : strip.getActiveSegmentsNum();
 
-        const int  inputRotation        = SEGMENT.custom1;
-        const bool inputAnimateRotation = SEGMENT.check2;
-        const bool inputAssumeSquare    = SEGMENT.check3;
+        const int  inputRotation        = parameters.custom1;
+        const bool inputAnimateRotation = parameters.check2;
+        const bool inputAssumeSquare    = parameters.check3;
 
         const angleType theta = (!inputAnimateRotation) ? ((inputRotation + 128) * maxAngle / staticRotationScale) : (((strip.now * ((inputRotation >> 4) +1)) & 0xFFFF) * animatedRotationScale);
         sinTheta = sinFunction(theta);
@@ -71,15 +71,15 @@ public:
         return true;
     }
 
-    constexpr void nextRowImpl(const EffectCoordinate& coordinate) {
+    constexpr void nextRowImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         // translate, scale, rotate
         ytCosTheta = mathType((wideMathType(cosTheta) * wideMathType(mathType(coordinate.getYAbsolute()) * sInt16Scale - centerY * maxYIn))/wideMathType(maxYIn * scale));
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        const int  inputSize            = SEGMENT.intensity;
-        const bool inputAnimateShift    = SEGMENT.check1;
-        const int  inputShift           = SEGMENT.speed;
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        const int  inputSize            = parameters.intensity;
+        const bool inputAnimateShift    = parameters.check1;
+        const int  inputShift           = parameters.speed;
 
         const mathType xtSinTheta = mathType((wideMathType(sinTheta) * wideMathType(mathType(coordinate.getXAbsolute()) * sInt16Scale - centerX * maxXIn))/wideMathType(maxXIn * scale));
         // Map the pixel coordinate to an imaginary-rectangle-coordinate.

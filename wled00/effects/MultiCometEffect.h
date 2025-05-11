@@ -22,17 +22,17 @@ public:
 
     explicit MultiCometEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 10 + (uint32_t)(255 - SEGMENT.speed);
+        uint32_t cycleTime = 10 + (uint32_t)(255 - parameters.speed);
         uint32_t it = strip.now / cycleTime;
         if (step == it)
             return true;
 
-        buffer.fadeOut(SEGMENT.intensity/2 + 128);
+        buffer.fadeOut(parameters.intensity/2 + 128);
 
         for (unsigned i=0; i < MAX_COMETS; i++) {
             if(comets[i] < coordinate.width) {

@@ -21,8 +21,8 @@ public:
 
     explicit Ghostrider2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -50,7 +50,7 @@ public:
         if (strip.now > step) {
             step = strip.now + 1024 / (cols+rows);
 
-            buffer.fadeToBlackBy((SEGMENT.speed>>2)+64);
+            buffer.fadeToBlackBy((parameters.speed>>2)+64);
 
             CRGB color = CRGB::White;
             buffer.wuPixel(coordinate, gPosX * 256 / 10, gPosY * 256 / 10, color);
@@ -83,7 +83,7 @@ public:
                 }
                 buffer.wuPixel(coordinate, lightersPosX[i] * 256 / 10, lightersPosY[i] * 256 / 10, ColorFromPalette(SEGPALETTE, (256 - time[i])));
             }
-            buffer.blur(SEGMENT.intensity>>3);
+            buffer.blur(parameters.intensity>>3);
         }
         return true;
     }

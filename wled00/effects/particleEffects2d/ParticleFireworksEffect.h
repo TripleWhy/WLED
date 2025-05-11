@@ -39,20 +39,20 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         uint32_t numRockets;
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        numRockets = map(SEGMENT.speed, 0 , 255, 4, min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES));
+        numRockets = map(parameters.speed, 0 , 255, 4, min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES));
 
-        PartSys.setWrapX(SEGMENT.check1);
-        PartSys.setBounceY(SEGMENT.check2);
-        PartSys.setGravity(map(SEGMENT.custom3, 0, 31, SEGMENT.check2 ? 1 : 0, 10)); // if bounded, set gravity to minimum of 1 or they will bounce at top
-        PartSys.setMotionBlur(map(SEGMENT.custom2, 0, 255, 0, 245)); // anable motion blur
+        PartSys.setWrapX(parameters.check1);
+        PartSys.setBounceY(parameters.check2);
+        PartSys.setGravity(map(parameters.custom3, 0, 31, parameters.check2 ? 1 : 0, 10)); // if bounded, set gravity to minimum of 1 or they will bounce at top
+        PartSys.setMotionBlur(map(parameters.custom2, 0, 255, 0, 245)); // anable motion blur
 
         // update the rockets, set the speed state
         for (uint32_t j = 0; j < numRockets; j++) {
@@ -65,10 +65,10 @@ public:
                     else if (PartSys.sources[j].source.vy < 0) { // rocket is exploded and time is up (ttl=0 and negative speed), relaunch it
                         PartSys.sources[j].source.y = PS_P_RADIUS; // start from bottom
                         PartSys.sources[j].source.x = (PartSys.maxX >> 2) + hw_random(PartSys.maxX >> 1); // centered half
-                        PartSys.sources[j].source.vy = (SEGMENT.custom3) + hw_random16(SEGMENT.custom1 >> 3) + 5; // rocket speed TODO: need to adjust for segment height
+                        PartSys.sources[j].source.vy = (parameters.custom3) + hw_random16(parameters.custom1 >> 3) + 5; // rocket speed TODO: need to adjust for segment height
                         PartSys.sources[j].source.vx = hw_random16(7) - 3; // not perfectly straight up
                         PartSys.sources[j].source.sat = 30; // low saturation -> exhaust is off-white
-                        PartSys.sources[j].source.ttl = hw_random16(SEGMENT.custom1) + (SEGMENT.custom1 >> 1); // set fuse time
+                        PartSys.sources[j].source.ttl = hw_random16(parameters.custom1) + (parameters.custom1 >> 1); // set fuse time
                         PartSys.sources[j].maxLife = 40; // exhaust particle life
                         PartSys.sources[j].minLife = 10;
                         PartSys.sources[j].vx = 0;  // emitting speed
@@ -100,25 +100,25 @@ public:
                 PartSys.sources[j].source.sat = hw_random16(55) + 200;
                 PartSys.sources[j].maxLife = 200;
                 PartSys.sources[j].minLife = 100;
-                PartSys.sources[j].source.ttl = hw_random16((2000 - ((uint32_t)SEGMENT.speed << 2))) + 550 - (SEGMENT.speed << 1); // standby time til next launch
-                PartSys.sources[j].var = ((SEGMENT.intensity >> 4) + 5); // speed variation around vx,vy (+/- var)
+                PartSys.sources[j].source.ttl = hw_random16((2000 - ((uint32_t)parameters.speed << 2))) + 550 - (parameters.speed << 1); // standby time til next launch
+                PartSys.sources[j].var = ((parameters.intensity >> 4) + 5); // speed variation around vx,vy (+/- var)
                 PartSys.sources[j].source.vy = -1; // set speed negative so it will emit no more particles after this explosion until relaunch
                 #ifdef ESP8266
-                emitparticles = hw_random16(SEGMENT.intensity >> 3) + (SEGMENT.intensity >> 3) + 5; // defines the size of the explosion
+                emitparticles = hw_random16(parameters.intensity >> 3) + (parameters.intensity >> 3) + 5; // defines the size of the explosion
                 #else
-                emitparticles = hw_random16(SEGMENT.intensity >> 2) + (SEGMENT.intensity >> 2) + 5; // defines the size of the explosion
+                emitparticles = hw_random16(parameters.intensity >> 2) + (parameters.intensity >> 2) + 5; // defines the size of the explosion
                 #endif
 
                 if (hw_random() & 1) { // 50% chance for circular explosion
                     circularexplosion = true;
-                    speed = 2 + hw_random16(3) + ((SEGMENT.intensity >> 6));
+                    speed = 2 + hw_random16(3) + ((parameters.intensity >> 6));
                     currentspeed = speed;
                     angleincrement = 2730 + hw_random16(5461); // minimum 15° + random(30°)
                     angle = hw_random16(); // random start angle
                     baseangle = angle; // save base angle for modulation
                     percircle = 0xFFFF / angleincrement + 1; // number of particles to make complete circles
                     hueincrement = hw_random16() & 127; // &127 is equivalent to %128
-                    int circles = 1 + hw_random16(3) + ((SEGMENT.intensity >> 6));
+                    int circles = 1 + hw_random16(3) + ((parameters.intensity >> 6));
                     frequency = hw_random16() & 127; // modulation frequency (= "waves per circle"), x.4 fixed point
                     emitparticles = percircle * circles;
                     PartSys.sources[j].var = angle & 1; // 0 or 1 variation, angle is random
@@ -133,7 +133,7 @@ public:
                     counter++;
                     if (counter > percircle) { // full circle completed, increase speed
                         counter = 0;
-                        speed += 3 + ((SEGMENT.intensity >> 6)); // increase speed to form a second wave
+                        speed += 3 + ((parameters.intensity >> 6)); // increase speed to form a second wave
                         PartSys.sources[j].source.hue += hueincrement; // new color for next circle
                         PartSys.sources[j].source.sat = 100 + hw_random16(156);
                     }
@@ -150,7 +150,7 @@ public:
                 PartSys.sources[j].source.y = 1000; // reset position so gravity wont pull it to the ground and bounce it (vy MUST stay negative until relaunch)
             circularexplosion = false; // reset for next rocket
         }
-        if (SEGMENT.check3) { // fast speed, move particles twice
+        if (parameters.check3) { // fast speed, move particles twice
             for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
                 PartSys.particleMoveUpdate(PartSys.particles[i], PartSys.particleFlags[i], nullptr, nullptr);
             }

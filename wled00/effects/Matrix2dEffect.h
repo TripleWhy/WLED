@@ -20,8 +20,8 @@ public:
 
     explicit Matrix2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -34,17 +34,17 @@ public:
             return false;
         }
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
             step = 0;
         }
 
-        uint8_t fade = map(SEGMENT.custom1, 0, 255, 50, 250);    // equals trail size
-        uint8_t speed = (256-SEGMENT.speed) >> map(min(rows, 150), 0, 150, 0, 3);    // slower speeds for small displays
+        uint8_t fade = map(parameters.custom1, 0, 255, 50, 250);    // equals trail size
+        uint8_t speed = (256-parameters.speed) >> map(min(rows, 150), 0, 150, 0, 3);    // slower speeds for small displays
 
         uint32_t spawnColor;
         uint32_t trailColor;
-        if (SEGMENT.check1) {
+        if (parameters.check1) {
             spawnColor = SEGCOLOR(0);
             trailColor = SEGCOLOR(1);
         } else {
@@ -77,7 +77,7 @@ public:
             }
 
             // spawn new falling code
-            if (hw_random8() <= SEGMENT.intensity || emptyScreen) {
+            if (hw_random8() <= parameters.intensity || emptyScreen) {
                 uint8_t spawnX = hw_random8(cols);
                 buffer.setPixelColor(spawnX, 0, spawnColor);
                 // update hint for next run

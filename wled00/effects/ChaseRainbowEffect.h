@@ -21,13 +21,13 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         unsigned color_sep = 256 / coordinate.width;
         if (color_sep == 0) color_sep = 1;                                           // correction for segments longer than 256 LEDs
-        unsigned color_index = SEGENV.call & 0xFF;
+        unsigned color_index = parameters.call & 0xFF;
         uint32_t color = SEGMENT.color_wheel(((step * color_sep) + color_index) & 0xFF);
 
-        return Base::nextFrameImpl(coordinate, color, SEGCOLOR(0), SEGCOLOR(1));
+        return Base::nextFrameImpl(parameters, coordinate, color, SEGCOLOR(0), SEGCOLOR(1));
     }
 };
 

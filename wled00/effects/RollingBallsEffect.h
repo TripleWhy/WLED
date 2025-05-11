@@ -31,17 +31,17 @@ public:
 
     explicit RollingBallsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         // number of balls based on intensity setting to max of 16 (cycles colors)
         // non-chosen color is a random color
-        unsigned numBalls = SEGMENT.intensity/16 + 1;
+        unsigned numBalls = parameters.intensity/16 + 1;
         bool hasCol2 = SEGCOLOR(2);
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(hasCol2 ? BLACK : SEGCOLOR(1));                    // start clean
             for (unsigned i = 0; i < maxNumBalls; i++) {
                 balls[i].lastBounceUpdate = strip.now;
@@ -52,11 +52,11 @@ public:
             }
         }
 
-        float cfac = float(scale8(8, 255-SEGMENT.speed) +1)*20000.0f; // this uses the Aircoookie conversion factor for scaling time using speed slider
+        float cfac = float(scale8(8, 255-parameters.speed) +1)*20000.0f; // this uses the Aircoookie conversion factor for scaling time using speed slider
 
-        if (SEGMENT.check3) buffer.fadeOut(250); // 2-8 pixel trails (optional)
+        if (parameters.check3) buffer.fadeOut(250); // 2-8 pixel trails (optional)
         else {
-        	if (!SEGMENT.check2) buffer.fill(hasCol2 ? BLACK : SEGCOLOR(1)); // don't fill with background color if user wants to see trails
+        	if (!parameters.check2) buffer.fill(hasCol2 ? BLACK : SEGCOLOR(1)); // don't fill with background color if user wants to see trails
         }
 
         for (unsigned i = 0; i < numBalls; i++) {
@@ -74,7 +74,7 @@ public:
                 balls[i].height = thisHeight;
             }
             // check for collisions
-            if (SEGMENT.check1) {
+            if (parameters.check1) {
                 for (unsigned j = i+1; j < numBalls; j++) {
                     if (balls[j].velocity != balls[i].velocity) {
                         //  tcollided + balls[j].lastBounceUpdate is acutal time of collision (this keeps precision with long to float conversions)

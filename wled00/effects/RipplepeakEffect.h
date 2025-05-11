@@ -29,8 +29,8 @@ public:
 
     explicit RipplepeakEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -44,18 +44,18 @@ public:
 
         // printUmData();
 
-        if (SEGENV.call == 0) {
-            SEGMENT.custom1 = *binNum;
-            SEGMENT.custom2 = *maxVol * 2;
+        if (parameters.call == 0) {
+            parameters.custom1 = *binNum;
+            parameters.custom2 = *maxVol * 2;
         }
 
-        *binNum = SEGMENT.custom1;                              // Select a bin.
-        *maxVol = SEGMENT.custom2 / 2;                          // Our volume comparator.
+        *binNum = parameters.custom1;                              // Select a bin.
+        *maxVol = parameters.custom2 / 2;                          // Our volume comparator.
 
         buffer.fadeOut(240);                                  // Lower frame rate means less effective fading than FastLED
         buffer.fadeOut(240);
 
-        for (int i = 0; i < SEGMENT.intensity/16; i++) {   // Limit the number of ripples.
+        for (int i = 0; i < parameters.intensity/16; i++) {   // Limit the number of ripples.
             if (samplePeak) ripples[i].state = 255;
 
             switch (ripples[i].state) {

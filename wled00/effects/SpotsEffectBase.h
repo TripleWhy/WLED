@@ -12,16 +12,16 @@ private:
 public:
     explicit SpotsEffectBase(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate, uint16_t threshold) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, uint16_t threshold) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        if (!SEGMENT.check2)
+        if (!parameters.check2)
             buffer.fill(SEGCOLOR(1));
 
         unsigned maxZones = coordinate.width >> 2;
-        unsigned zones = 1 + ((SEGMENT.intensity * maxZones) >> 8);
+        unsigned zones = 1 + ((parameters.intensity * maxZones) >> 8);
         unsigned zoneLen = coordinate.width / zones;
         unsigned offset = (coordinate.width - zones * zoneLen) >> 1;
 

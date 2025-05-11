@@ -19,21 +19,21 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         if (!colorIndexes.resize(coordinate.width)) {
             return false;
         }
 
-        if(SEGENV.call == 0) {
+        if(parameters.call == 0) {
             for (unsigned i = 0; i < coordinate.width; i++) colorIndexes[i] = hw_random8();
         }
 
-        uint32_t cycleTime = 50 + (255 - SEGMENT.speed)*15;
+        uint32_t cycleTime = 50 + (255 - parameters.speed)*15;
         uint32_t it = strip.now / cycleTime;
-        if (it != step && SEGMENT.speed != 0) //new color
+        if (it != step && parameters.speed != 0) //new color
         {
             for (unsigned i = 0; i < coordinate.width; i++) {
-                if (hw_random8() <= SEGMENT.intensity) colorIndexes[i] = hw_random8(); // random color index
+                if (hw_random8() <= parameters.intensity) colorIndexes[i] = hw_random8(); // random color index
             }
             step = it;
         }
@@ -41,9 +41,9 @@ public:
         return false;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         uint32_t color = SEGMENT.color_wheel(colorIndexes[coordinate.getXAbsolute()]);
-        if (SEGMENT.check1) {
+        if (parameters.check1) {
             color = color_blend(currentColor.getColor(), color, 16);
         }
         return color;

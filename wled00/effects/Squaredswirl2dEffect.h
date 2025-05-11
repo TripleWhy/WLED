@@ -22,8 +22,8 @@ public:
 
     explicit Squaredswirl2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -32,8 +32,8 @@ public:
 
         const uint8_t kBorderWidth = 2;
 
-        buffer.fadeToBlackBy(1 + SEGMENT.intensity / 5);
-        buffer.blur(SEGMENT.custom3>>1);
+        buffer.fadeToBlackBy(1 + parameters.intensity / 5);
+        buffer.blur(parameters.custom3>>1);
 
         // Use two out-of-sync sine waves
         int i = beatsin8_t(19, kBorderWidth, cols-kBorderWidth);

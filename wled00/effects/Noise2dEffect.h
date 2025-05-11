@@ -20,19 +20,19 @@ public:
 
     explicit Noise2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        const unsigned scale  = SEGMENT.intensity+2;
+        const unsigned scale  = parameters.intensity+2;
 
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
-                uint8_t pixelHue8 = perlin8(x * scale, y * scale, strip.now / (16 - SEGMENT.speed/16));
+                uint8_t pixelHue8 = perlin8(x * scale, y * scale, strip.now / (16 - parameters.speed/16));
                 buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, pixelHue8));
             }
         }

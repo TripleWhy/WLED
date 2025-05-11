@@ -20,15 +20,15 @@ public:
 
     explicit Metaballs2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        float speed = 0.25f * (1+(SEGMENT.speed>>6));
+        float speed = 0.25f * (1+(parameters.speed>>6));
 
         // get some 2 random moving points
         int x2 = map(perlin8(strip.now * speed, 25355, 685), 0, 255, 0, cols-1);

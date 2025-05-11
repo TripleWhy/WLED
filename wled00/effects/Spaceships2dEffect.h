@@ -20,8 +20,8 @@ public:
 
     explicit Spaceships2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -38,7 +38,7 @@ public:
             step = tb + hw_random8(4);
         }
 
-        buffer.fadeToBlackBy(map(SEGMENT.speed, 0, 255, 248, 16));
+        buffer.fadeToBlackBy(map(parameters.speed, 0, 255, 248, 16));
         buffer.movePixels(aux0, 1);
 
         for (size_t i = 0; i < 8; i++) {
@@ -53,7 +53,7 @@ public:
                 buffer.addPixelColor(x, y-1, color);
             }
         }
-        buffer.blur(SEGMENT.intensity >> 3, SEGMENT.check1);
+        buffer.blur(parameters.intensity >> 3, parameters.check1);
         return true;
     }
 

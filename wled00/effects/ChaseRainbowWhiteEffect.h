@@ -21,12 +21,12 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         uint16_t n = step;
         uint16_t m = (step + 1) % coordinate.width;
-        uint32_t color2 = SEGMENT.color_wheel(((n * 256 / coordinate.width) + (SEGENV.call & 0xFF)) & 0xFF);
-        uint32_t color3 = SEGMENT.color_wheel(((m * 256 / coordinate.width) + (SEGENV.call & 0xFF)) & 0xFF);
+        uint32_t color2 = SEGMENT.color_wheel(((n * 256 / coordinate.width) + (parameters.call & 0xFF)) & 0xFF);
+        uint32_t color3 = SEGMENT.color_wheel(((m * 256 / coordinate.width) + (parameters.call & 0xFF)) & 0xFF);
 
-        return Base::nextFrameImpl(coordinate, SEGCOLOR(0), color2, color3);
+        return Base::nextFrameImpl(parameters, coordinate, SEGCOLOR(0), color2, color3);
     }
 };

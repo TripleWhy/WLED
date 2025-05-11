@@ -15,17 +15,17 @@ public:
 
     explicit Fillnoise8Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        if (SEGENV.call == 0) step = hw_random();
+        if (parameters.call == 0) step = hw_random();
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned index = perlin8(i * coordinate.width, step + i * coordinate.width);
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
-        step += beatsin8_t(SEGMENT.speed, 1, 6); //10,1,4
+        step += beatsin8_t(parameters.speed, 1, 6); //10,1,4
         return true;
     }
 

@@ -32,18 +32,18 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         uint32_t i;
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setParticleSize(SEGMENT.custom3<<3);
-        PartSys.setWallHardness(min(SEGMENT.custom2, (uint8_t)200)); // wall hardness is 200 or more
-        PartSys.enableParticleCollisions(true, max(2, (int)SEGMENT.custom2)); // enable collisions and set particle collision hardness
-        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 2, 153)); // 1% - 60%
+        PartSys.setParticleSize(parameters.custom3<<3);
+        PartSys.setWallHardness(min(parameters.custom2, (uint8_t)200)); // wall hardness is 200 or more
+        PartSys.enableParticleCollisions(true, max(2, (int)parameters.custom2)); // enable collisions and set particle collision hardness
+        PartSys.setUsedParticles(map(parameters.intensity, 0, 255, 2, 153)); // 1% - 60%
         // add in new particles if amount has changed
         for (i = 0; i < PartSys.usedParticles; i++) {
             if (PartSys.particles[i].ttl < 260) { // initialize handed over particles and dead particles
@@ -57,31 +57,31 @@ public:
             }
         }
 
-        if (SEGMENT.call % (((255 - SEGMENT.speed) >> 6) + 1) == 0 && SEGMENT.speed > 0) { // how often the force is applied depends on speed setting
+        if (parameters.call % (((255 - parameters.speed) >> 6) + 1) == 0 && parameters.speed > 0) { // how often the force is applied depends on speed setting
             int32_t xgravity;
             int32_t ygravity;
-            int32_t increment = (SEGMENT.speed >> 6) + 1;
+            int32_t increment = (parameters.speed >> 6) + 1;
 
-            if (SEGMENT.check2) { // washing machine
-                int speed = tristate_square8(strip.now >> 7, 90, 15) / ((400 - SEGMENT.speed) >> 3);
+            if (parameters.check2) { // washing machine
+                int speed = tristate_square8(strip.now >> 7, 90, 15) / ((400 - parameters.speed) >> 3);
                 aux0 += speed;
                 if (speed == 0) aux0 = 190; //down (= 270°)
             }
             else
                 aux0 -= increment;
 
-            if (SEGMENT.check1) { // random, use perlin noise
+            if (parameters.check1) { // random, use perlin noise
                 xgravity = ((int16_t)perlin8(aux0) - 127);
                 ygravity = ((int16_t)perlin8(aux0 + 10000) - 127);
                 // scale the gravity force
-                xgravity = (xgravity * SEGMENT.custom1) / 128;
-                ygravity = (ygravity * SEGMENT.custom1) / 128;
+                xgravity = (xgravity * parameters.custom1) / 128;
+                ygravity = (ygravity * parameters.custom1) / 128;
             }
             else { // go in a circle
-                xgravity = ((int32_t)(SEGMENT.custom1) * cos16_t(aux0 << 8)) / 0xFFFF;
-                ygravity = ((int32_t)(SEGMENT.custom1) * sin16_t(aux0 << 8)) / 0xFFFF;
+                xgravity = ((int32_t)(parameters.custom1) * cos16_t(aux0 << 8)) / 0xFFFF;
+                ygravity = ((int32_t)(parameters.custom1) * sin16_t(aux0 << 8)) / 0xFFFF;
             }
-            if (SEGMENT.check3) { // sloshing, y force is always downwards
+            if (parameters.check3) { // sloshing, y force is always downwards
                 if (ygravity > 0)
                     ygravity = -ygravity;
             }
@@ -89,7 +89,7 @@ public:
             PartSys.applyForce(xgravity, ygravity);
         }
 
-        if ((SEGMENT.call & 0x0F) == 0) // every 16th frame
+        if ((parameters.call & 0x0F) == 0) // every 16th frame
             PartSys.applyFriction(1);
 
         PartSys.update(buffer);   // update and render

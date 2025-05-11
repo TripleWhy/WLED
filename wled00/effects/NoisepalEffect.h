@@ -18,10 +18,10 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        scale = 15 + (SEGMENT.intensity >> 2); //default was 30
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        scale = 15 + (parameters.intensity >> 2); //default was 30
 
-        unsigned changePaletteMs = 4000 + SEGMENT.speed *10; //between 4 - 6.5sec
+        unsigned changePaletteMs = 4000 + parameters.speed *10; //between 4 - 6.5sec
         if (strip.now - step > changePaletteMs)
         {
             step = strip.now;
@@ -45,7 +45,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         const unsigned index = perlin8(i*scale, aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
         return ColorFromPalette(palettes[0], index, 255, LINEARBLEND);  // Use my own palette.

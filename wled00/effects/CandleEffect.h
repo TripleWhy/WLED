@@ -19,12 +19,12 @@ public:
 
     explicit CandleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        bool multi = SEGMENT.check3 && coordinate.width;
+        bool multi = parameters.check3 && coordinate.width;
         if (multi) {
             const unsigned dataSize = max(1, (int)coordinate.width -1) *3; //max. 1365 pixels (ESP8266)
             if (!data.resize(dataSize)) {
@@ -33,16 +33,16 @@ public:
         }
 
         //max. flicker range controlled by intensity
-        unsigned valrange = SEGMENT.intensity;
+        unsigned valrange = parameters.intensity;
         unsigned rndval = valrange >> 1; //max 127
 
         //step (how much to move closer to target per frame) coarsely set by speed
         unsigned speedFactor = 4;
-        if (SEGMENT.speed > 252) { //epilepsy
+        if (parameters.speed > 252) { //epilepsy
             speedFactor = 1;
-        } else if (SEGMENT.speed > 99) { //regular candle (mode called every ~25 ms, so 4 frames to have a new target every 100ms)
+        } else if (parameters.speed > 99) { //regular candle (mode called every ~25 ms, so 4 frames to have a new target every 100ms)
             speedFactor = 2;
-        } else if (SEGMENT.speed > 49) { //slower fade
+        } else if (parameters.speed > 49) { //slower fade
             speedFactor = 3;
         } //else 4 (slowest)
 

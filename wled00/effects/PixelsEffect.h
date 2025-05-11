@@ -20,8 +20,8 @@ public:
 
     explicit PixelsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -33,9 +33,9 @@ public:
 
         myVals[strip.now%32] = volumeSmth;    // filling values semi randomly
 
-        buffer.fadeOut(64+(SEGMENT.speed>>1));
+        buffer.fadeOut(64+(parameters.speed>>1));
 
-        for (int i=0; i <SEGMENT.intensity/8; i++) {
+        for (int i=0; i <parameters.intensity/8; i++) {
             unsigned segLoc = hw_random16(coordinate.width);                    // 16 bit for larger strands of LED's.
             buffer.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(myVals[i%32]+i*4, false, PALETTE_SOLID_WRAP, 0), uint8_t(volumeSmth)));
         }

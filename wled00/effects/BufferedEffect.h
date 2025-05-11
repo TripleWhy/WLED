@@ -40,7 +40,7 @@ protected:
     }
 
 public:
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         if constexpr (dimensionality == EffectDimensionality::d1) {
             return buffer.resize(coordinate.width);
         } else {
@@ -48,7 +48,7 @@ public:
         }
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         if constexpr (dimensionality == EffectDimensionality::d1) {
             return buffer.getPixelColor(coordinate.getXAbsolute());
         } else {

@@ -23,8 +23,8 @@ public:
         return PartSys.init(coordinate.width, coordinate.height, requestedsources, advanced, sizecontrol);
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
         if (PartSys.isInitialized()) {

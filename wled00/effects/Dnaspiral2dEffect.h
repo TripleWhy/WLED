@@ -20,20 +20,20 @@ public:
 
     explicit DnaSpiral2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        unsigned speeds = SEGMENT.speed/2 + 7;
-        unsigned freq = SEGMENT.intensity/8;
+        unsigned speeds = parameters.speed/2 + 7;
+        unsigned freq = parameters.intensity/8;
 
         uint32_t ms = strip.now / 20;
         buffer.fadeToBlackBy(135);
@@ -60,7 +60,7 @@ public:
                 buffer.setPixelColor(x1, i, WHITE);
             }
         }
-        buffer.blur(((uint16_t)SEGMENT.custom1 * 3) / (6 + SEGMENT.check1), SEGMENT.check1);
+        buffer.blur(((uint16_t)parameters.custom1 * 3) / (6 + parameters.check1), parameters.check1);
         return true;
     }
 

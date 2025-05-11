@@ -20,16 +20,16 @@ public:
 
     explicit Plasmaball2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        buffer.fadeToBlackBy(SEGMENT.custom1>>2);
-        uint_fast32_t t = (strip.now * 8) / (256 - SEGMENT.speed);  // optimized to avoid float
+        buffer.fadeToBlackBy(parameters.custom1>>2);
+        uint_fast32_t t = (strip.now * 8) / (256 - parameters.speed);  // optimized to avoid float
         for (int i = 0; i < cols; i++) {
             unsigned thisVal = perlin8(i * 30, t, t);
             unsigned thisMax = map(thisVal, 0, 255, 0, cols-1);
@@ -49,7 +49,7 @@ public:
                                                                             (rows - 1 - cy == 0)) ? ColorFromPalette(SEGPALETTE, beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
             }
         }
-        buffer.blur(SEGMENT.custom2>>5);
+        buffer.blur(parameters.custom2>>5);
         return true;
     }
 

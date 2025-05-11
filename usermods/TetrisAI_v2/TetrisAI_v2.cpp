@@ -112,25 +112,25 @@ uint16_t mode_2DTetrisAI()
   const uint16_t rows = SEGMENT.virtualHeight();
 
   //range 0 - 1024ms => 1024/255 ~ 4
-  uint16_t msDelayMove = 1024 - (4 * SEGMENT.speed);
+  uint16_t msDelayMove = 1024 - (4 * SEGMENT.transitionableParameters.speed);
   int16_t msDelayGameOver = msDelayMove / 4;
 
   //range 0 - 2 (not including current)
-  uint8_t nLookAhead = SEGMENT.intensity ? (SEGMENT.intensity >> 7) + 2 : 1;
+  uint8_t nLookAhead = SEGMENT.transitionableParameters.intensity ? (SEGMENT.transitionableParameters.intensity >> 7) + 2 : 1;
   //range 0 - 16
-  tetrisai_data->colorInc = SEGMENT.custom2 >> 4;
+  tetrisai_data->colorInc = SEGMENT.transitionableParameters.custom2 >> 4;
 
   if (tetrisai_data->tetris.nLookAhead != nLookAhead
     || tetrisai_data->segcols != cols
     || tetrisai_data->segrows != rows
-    || tetrisai_data->showNext != SEGMENT.check1
-    || tetrisai_data->showBorder != SEGMENT.check2
+    || tetrisai_data->showNext != SEGMENT.transitionableParameters.check1
+    || tetrisai_data->showBorder != SEGMENT.transitionableParameters.check2
   )
   {
     tetrisai_data->segcols = cols;
     tetrisai_data->segrows = rows;
-    tetrisai_data->showNext = SEGMENT.check1;
-    tetrisai_data->showBorder = SEGMENT.check2;
+    tetrisai_data->showNext = SEGMENT.transitionableParameters.check1;
+    tetrisai_data->showBorder = SEGMENT.transitionableParameters.check2;
 
     //not more than 32 columns and 255 rows as this is the limit of this implementation
     uint8_t gridWidth = cols > 32 ? 32 : cols;
@@ -173,9 +173,9 @@ uint16_t mode_2DTetrisAI()
     SEGMENT.fill(SEGCOLOR(1));
   }
 
-  if (tetrisai_data->intelligence != SEGMENT.custom1)
+  if (tetrisai_data->intelligence != SEGMENT.transitionableParameters.custom1)
   {
-    tetrisai_data->intelligence = SEGMENT.custom1;
+    tetrisai_data->intelligence = SEGMENT.transitionableParameters.custom1;
     float dui = 0.2f - (0.2f * (tetrisai_data->intelligence / 255.0f));
 
     tetrisai_data->tetris.ai.aHeight = -0.510066f + dui;
@@ -205,14 +205,14 @@ uint16_t mode_2DTetrisAI()
   }
   else if (tetrisai_data->tetris.state == TetrisAIGame::FIND_BEST_MOVE)
   {
-    if (SEGMENT.check3)
+    if (SEGMENT.transitionableParameters.check3)
     {
       if(tetrisai_data->mistaceCountdown == 0)
       {
         tetrisai_data->tetris.ai.findWorstMove = true;
         tetrisai_data->tetris.poll();
         tetrisai_data->tetris.ai.findWorstMove = false;
-        tetrisai_data->mistaceCountdown = SEGMENT.custom3;
+        tetrisai_data->mistaceCountdown = SEGMENT.transitionableParameters.custom3;
       }
       tetrisai_data->mistaceCountdown--;      
     }

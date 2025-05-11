@@ -118,15 +118,15 @@ public:
 
     explicit AuroraEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         //Intensity slider changed or first call
-        if(previousIntensity != SEGMENT.intensity || SEGENV.call == 0 || waves.size() != wavecount) {
-            wavecount = map(SEGMENT.intensity, 0, 255, 2, W_MAX_COUNT);
-            previousIntensity = SEGMENT.intensity;
+        if(previousIntensity != parameters.intensity || parameters.call == 0 || waves.size() != wavecount) {
+            wavecount = map(parameters.intensity, 0, 255, 2, W_MAX_COUNT);
+            previousIntensity = parameters.intensity;
 
             if (!waves.resize(wavecount)) {
                 return false;
@@ -139,7 +139,7 @@ public:
 
         for (int i = 0; i < wavecount; i++) {
             //Update values of wave
-            waves[i].update(coordinate.width, SEGMENT.speed);
+            waves[i].update(coordinate.width, parameters.speed);
 
             if(!(waves[i].stillAlive())) {
                 //If a wave dies, reinitialize it starts over.

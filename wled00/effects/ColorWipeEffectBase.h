@@ -23,8 +23,8 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        uint32_t cycleTime = 750 + (255 - parameters.speed)*150;
         uint32_t perc = strip.now % cycleTime;
         unsigned prog = (perc * 65535) / cycleTime;
         if (prog > 32767) {
@@ -41,7 +41,7 @@ public:
         }
 
         if (useRandomColors) {
-            if (SEGENV.call == 0) {
+            if (parameters.call == 0) {
                 colorIndex[0] = hw_random8();
                 step = 3;
             }
@@ -62,12 +62,12 @@ public:
 
         ledIndex = (prog * coordinate.width) >> 15;
         rem = (prog * coordinate.width) * 2; //mod 0xFFFF
-        rem /= (SEGMENT.intensity +1);
+        rem /= (parameters.intensity +1);
         if (rem > 255) rem = 255;
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         if (!useRandomColors) {
             col[0] = SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);

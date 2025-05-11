@@ -20,30 +20,30 @@ public:
 
     explicit ColoredBursts2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             aux0 = 0; // start with red hue
         }
 
-        const bool dot  = SEGMENT.check3;
-        const bool grad = SEGMENT.check1;
+        const bool dot  = parameters.check3;
+        const bool grad = parameters.check1;
 
-        byte numLines = SEGMENT.intensity/16 + 1;
+        byte numLines = parameters.intensity/16 + 1;
 
         aux0++;  // hue
-        buffer.fadeToBlackBy(40 - SEGMENT.check2 * 8);
+        buffer.fadeToBlackBy(40 - parameters.check2 * 8);
         for (size_t i = 0; i < numLines; i++) {
-            byte x1 = beatsin8_t(2 + SEGMENT.speed/16, 0, (cols - 1));
-            byte x2 = beatsin8_t(1 + SEGMENT.speed/16, 0, (rows - 1));
-            byte y1 = beatsin8_t(5 + SEGMENT.speed/16, 0, (cols - 1), 0, i * 24);
-            byte y2 = beatsin8_t(3 + SEGMENT.speed/16, 0, (rows - 1), 0, i * 48 + 64);
+            byte x1 = beatsin8_t(2 + parameters.speed/16, 0, (cols - 1));
+            byte x2 = beatsin8_t(1 + parameters.speed/16, 0, (rows - 1));
+            byte y1 = beatsin8_t(5 + parameters.speed/16, 0, (cols - 1), 0, i * 24);
+            byte y2 = beatsin8_t(3 + parameters.speed/16, 0, (rows - 1), 0, i * 48 + 64);
             uint32_t color = ColorFromPalette(SEGPALETTE, i * 255 / numLines + (aux0&0xFF), 255, LINEARBLEND);
 
             byte xsteps = abs8(x1 - y1) + 1;
@@ -65,7 +65,7 @@ public:
                 buffer.setPixelColor(y1, y2, DARKSLATEGRAY);
             }
         }
-        buffer.blur(SEGMENT.custom3>>1, SEGMENT.check2);
+        buffer.blur(parameters.custom3>>1, parameters.check2);
         return true;
     }
 

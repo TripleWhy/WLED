@@ -18,20 +18,20 @@ public:
 
     explicit FlowEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         unsigned counter = 0;
-        if (SEGMENT.speed != 0)
+        if (parameters.speed != 0)
         {
-            counter = strip.now * ((SEGMENT.speed >> 2) +1);
+            counter = strip.now * ((parameters.speed >> 2) +1);
             counter = counter >> 8;
         }
 
         unsigned maxZones = coordinate.width / 6; //only looks good if each zone has at least 6 LEDs
-        unsigned zones = (SEGMENT.intensity * maxZones) >> 8;
+        unsigned zones = (parameters.intensity * maxZones) >> 8;
         if (zones & 0x01) zones++; //zones must be even
         if (zones < 2) zones = 2;
         unsigned zoneLen = coordinate.width / zones;

@@ -18,8 +18,8 @@ public:
 
     explicit NoisemeterEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
                                     // Noisemeter. By Andrew Tuline.
@@ -28,11 +28,11 @@ public:
         float   volumeSmth   = *(float*)  um_data->u_data[0];
         int volumeRaw    = *(int16_t*)um_data->u_data[1];
 
-        //uint8_t fadeRate = map(SEGMENT.speed,0,255,224,255);
-        uint8_t fadeRate = map(SEGMENT.speed,0,255,200,254);
+        //uint8_t fadeRate = map(parameters.speed,0,255,224,255);
+        uint8_t fadeRate = map(parameters.speed,0,255,200,254);
         buffer.fadeOut(fadeRate);
 
-        float tmpSound2 = volumeRaw * 2.0 * (float)SEGMENT.intensity / 255.0;
+        float tmpSound2 = volumeRaw * 2.0 * (float)parameters.intensity / 255.0;
         unsigned maxLen = mapf(tmpSound2, 0, 255, 0, coordinate.width); // map to pixels availeable in current segment              // Still a bit too sensitive.
         if (maxLen < 0) maxLen = 0;
         if (maxLen > coordinate.width) maxLen = coordinate.width;

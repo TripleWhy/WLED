@@ -32,8 +32,8 @@ public:
 
     explicit PopcornEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -48,20 +48,20 @@ public:
         }
 
         bool hasCol2 = SEGCOLOR(2);
-        if (!SEGMENT.check2)
+        if (!parameters.check2)
             buffer.fill(hasCol2 ? BLACK : SEGCOLOR(1));
 
         for (unsigned stripNr=0; stripNr<strips; stripNr++)
-            runStrip(coordinate, stripNr, &popcorn[stripNr * usablePopcorns], usablePopcorns);
+            runStrip(parameters, coordinate, stripNr, &popcorn[stripNr * usablePopcorns], usablePopcorns);
         return true;
     }
 
 private:
-    void runStrip(const EffectCoordinate& coordinate, uint16_t stripNr, Spark* popcorn, unsigned usablePopcorns) {
-        float gravity = -0.0001f - (SEGMENT.speed/200000.0f); // m/s/s
+    void runStrip(TransitionableParameters& parameters, const EffectCoordinate& coordinate, uint16_t stripNr, Spark* popcorn, unsigned usablePopcorns) {
+        float gravity = -0.0001f - (parameters.speed/200000.0f); // m/s/s
         gravity *= coordinate.width;
 
-        unsigned numPopcorn = SEGMENT.intensity * usablePopcorns / 255;
+        unsigned numPopcorn = parameters.intensity * usablePopcorns / 255;
         if (numPopcorn == 0)
             numPopcorn = 1;
 

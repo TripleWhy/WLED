@@ -18,16 +18,16 @@ public:
 
     explicit SinelonEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        const bool rainbow = SEGMENT.check1;
-        const bool dual    = SEGMENT.check2;
-        buffer.fadeOut(SEGMENT.intensity);
-        unsigned pos = beatsin16_t(SEGMENT.speed/10,0,coordinate.width-1);
-        if (SEGENV.call == 0) aux0 = pos;
+        const bool rainbow = parameters.check1;
+        const bool dual    = parameters.check2;
+        buffer.fadeOut(parameters.intensity);
+        unsigned pos = beatsin16_t(parameters.speed/10,0,coordinate.width-1);
+        if (parameters.call == 0) aux0 = pos;
         uint32_t color1 = SEGMENT.color_from_palette(pos, true, false, 0);
         uint32_t color2 = SEGCOLOR(2);
         if (rainbow) {

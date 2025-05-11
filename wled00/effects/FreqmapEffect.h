@@ -19,8 +19,8 @@ public:
 
     explicit FreqmapEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -32,9 +32,9 @@ public:
         float my_magnitude  = *(float*)um_data->u_data[5] / 4.0f;
         if (FFT_MajorPeak < 1) FFT_MajorPeak = 1;                                         // log10(0) is "forbidden" (throws exception)
 
-        if (SEGENV.call == 0) buffer.fill(BLACK);
-        int fadeoutDelay = (256 - SEGMENT.speed) / 32;
-        if ((fadeoutDelay <= 1 ) || ((SEGENV.call % fadeoutDelay) == 0)) buffer.fadeOut(SEGMENT.speed);
+        if (parameters.call == 0) buffer.fill(BLACK);
+        int fadeoutDelay = (256 - parameters.speed) / 32;
+        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fadeOut(parameters.speed);
 
         int locn = (log10f((float)FFT_MajorPeak) - 1.78f) * (float)coordinate.width/(MAX_FREQ_LOG10 - 1.78f);  // log10 frequency range is from 1.78 to 3.71. Let's scale to coordinate.width.
         if (locn < 1) locn = 0; // avoid underflow
@@ -45,7 +45,7 @@ public:
 
         uint8_t bright = (uint8_t)my_magnitude;
 
-        buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), bright));
+        buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(parameters.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), bright));
         return true;
     }
 

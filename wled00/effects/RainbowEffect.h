@@ -18,19 +18,19 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        unsigned counter = (strip.now * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        unsigned counter = (strip.now * ((parameters.speed >> 2) +2)) & 0xFFFF;
         counter = counter >> 8;
 
-        if (SEGMENT.intensity < 128){
-          color = color_blend(SEGMENT.color_wheel(counter),WHITE,uint8_t(128-SEGMENT.intensity));
+        if (parameters.intensity < 128){
+          color = color_blend(SEGMENT.color_wheel(counter),WHITE,uint8_t(128-parameters.intensity));
         } else {
           color = SEGMENT.color_wheel(counter);
         }
         return true;
     }
 
-    constexpr uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    constexpr uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return color;
     }
 

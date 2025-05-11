@@ -68,7 +68,7 @@ void SetDefaultColors(uint8_t mode) {
  * used to set the target roll for relevant effects.
  */
 static uint8_t* GetCurrentRollTarget() {
-  return &strip.getFirstSelectedSeg().custom2;
+  return &strip.getFirstSelectedSeg().transitionableParameters.custom2;
 }
 
 /**

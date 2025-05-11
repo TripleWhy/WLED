@@ -19,11 +19,11 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        uint32_t cycleTime = 200 + (255 - SEGMENT.speed)*50;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        uint32_t cycleTime = 200 + (255 - parameters.speed)*50;
         uint32_t it = strip.now / cycleTime;
         uint32_t rem = strip.now % cycleTime;
-        unsigned fadedur = (cycleTime * SEGMENT.intensity) >> 8;
+        unsigned fadedur = (cycleTime * parameters.intensity) >> 8;
 
         uint32_t fade = 255;
         if (fadedur) {
@@ -31,7 +31,7 @@ public:
             if (fade > 255) fade = 255;
         }
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             colorWheelIndex = hw_random8();
             step = 2;
         }
@@ -46,7 +46,7 @@ public:
         return true;
     }
 
-    constexpr uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    constexpr uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return color;
     }
 

@@ -15,8 +15,8 @@ void HttpPullLightControl::setup() {
   DEBUG_PRINTLN(F("Starting a nice chase so we now it is booting."));
   Segment& seg = strip.getMainSegment();
   seg.setMode(28); // Set to chase
-  seg.speed = 200;
-  seg.intensity = 255;
+  seg.transitionableParameters.speed = 200;
+  seg.transitionableParameters.intensity = 255;
   seg.setPalette(128);
   seg.setColor(0, 5263440);
   seg.setColor(1, 0);

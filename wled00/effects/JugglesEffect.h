@@ -18,8 +18,8 @@ public:
 
     explicit JugglesEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
                                          // Juggles. By Andrew Tuline.
@@ -29,9 +29,9 @@ public:
         buffer.fadeOut(224); // 6.25%
         uint8_t my_sampleAgc = fmax(fmin(volumeSmth, 255.0), 0);
 
-        for (size_t i=0; i<SEGMENT.intensity/32+1U; i++) {
+        for (size_t i=0; i<parameters.intensity/32+1U; i++) {
             // if coordinate.width equals 1, we will always set color to the first and only pixel, but the effect is still good looking
-            buffer.setPixelColor(beatsin16_t(SEGMENT.speed/4+i*2,0,coordinate.width-1), color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(strip.now/4+i*2, false, PALETTE_SOLID_WRAP, 0), my_sampleAgc));
+            buffer.setPixelColor(beatsin16_t(parameters.speed/4+i*2,0,coordinate.width-1), color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(strip.now/4+i*2, false, PALETTE_SOLID_WRAP, 0), my_sampleAgc));
         }
         return true;
     }

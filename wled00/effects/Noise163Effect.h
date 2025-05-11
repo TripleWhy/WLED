@@ -15,13 +15,13 @@ public:
 
     explicit Noise163Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         unsigned scale = 800;                                       // the "zoom factor" for the noise
-        step += (1 + SEGMENT.speed);
+        step += (1 + parameters.speed);
 
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned shift_x = 4223;                                  // no movement along x and y

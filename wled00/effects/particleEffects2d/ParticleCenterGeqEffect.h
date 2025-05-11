@@ -42,8 +42,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -55,21 +55,21 @@ public:
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t *)um_data->u_data[2]; // 16 bins with FFT data, log mapped already, each band contains frequency amplitude 0-255
-        uint32_t threshold = 300 - SEGMENT.intensity;
+        uint32_t threshold = 300 - parameters.intensity;
 
-        if (SEGMENT.check2)
-            aux0 += SEGMENT.custom1 << 2;
+        if (parameters.check2)
+            aux0 += parameters.custom1 << 2;
         else
-            aux0 -= SEGMENT.custom1 << 2;
+            aux0 -= parameters.custom1 << 2;
 
         uint16_t angleoffset = (uint16_t)0xFFFF / (uint16_t)numSprays;
         uint32_t j = hw_random16(numSprays); // start with random spray so all get a chance to emit a particle if maximum number of particles alive is reached.
         for (i = 0; i < numSprays; i++) {
-            if (SEGMENT.call % (32 - (SEGMENT.custom2 >> 3)) == 0 && SEGMENT.custom2 > 0)
-                PartSys.sources[j].source.hue += 1 + (SEGMENT.custom2 >> 4);
+            if (parameters.call % (32 - (parameters.custom2 >> 3)) == 0 && parameters.custom2 > 0)
+                PartSys.sources[j].source.hue += 1 + (parameters.custom2 >> 4);
 
-            PartSys.sources[j].var = SEGMENT.custom3 >> 2;
-            int8_t emitspeed = 5 + (((uint32_t)fftResult[j] * ((uint32_t)SEGMENT.speed + 20)) >> 10); // emit speed according to loudness of band
+            PartSys.sources[j].var = parameters.custom3 >> 2;
+            int8_t emitspeed = 5 + (((uint32_t)fftResult[j] * ((uint32_t)parameters.speed + 20)) >> 10); // emit speed according to loudness of band
             uint16_t emitangle = j * angleoffset + aux0;
 
             uint32_t emitparticles = 0;

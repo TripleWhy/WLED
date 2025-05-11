@@ -35,26 +35,26 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 128)); // minimum 10%, maximum 50% of available particles (note: PS ensures at least 1)
-        PartSys.enableParticleCollisions(SEGMENT.check2);
+        PartSys.setUsedParticles(map(parameters.intensity, 0, 255, 25, 128)); // minimum 10%, maximum 50% of available particles (note: PS ensures at least 1)
+        PartSys.enableParticleCollisions(parameters.check2);
 
         for (uint32_t i = 0; i < PartSys.usedParticles; i++) { // update particles
-            if (aux0 != SEGMENT.speed || PartSys.particles[i].ttl == 0) { // speed changed or dead
-                PartSys.particles[i].vx = (int8_t)hw_random16(SEGMENT.speed >> 1) - (SEGMENT.speed >> 2); // +/- speed/4
-                PartSys.particles[i].vy = (int8_t)hw_random16(SEGMENT.speed >> 1) - (SEGMENT.speed >> 2);
+            if (aux0 != parameters.speed || PartSys.particles[i].ttl == 0) { // speed changed or dead
+                PartSys.particles[i].vx = (int8_t)hw_random16(parameters.speed >> 1) - (parameters.speed >> 2); // +/- speed/4
+                PartSys.particles[i].vy = (int8_t)hw_random16(parameters.speed >> 1) - (parameters.speed >> 2);
             }
-            if (aux1 != SEGMENT.custom1 || PartSys.particles[i].ttl == 0) // size changed or dead
-                PartSys.advPartSize[i].maxsize = 60 + (SEGMENT.custom1 >> 1) + hw_random16((SEGMENT.custom1 >> 2)); // set each particle to slightly randomized size
+            if (aux1 != parameters.custom1 || PartSys.particles[i].ttl == 0) // size changed or dead
+                PartSys.advPartSize[i].maxsize = 60 + (parameters.custom1 >> 1) + hw_random16((parameters.custom1 >> 2)); // set each particle to slightly randomized size
 
-            //PartSys.particles[i].perpetual = SEGMENT.check2; //infinite life if set
+            //PartSys.particles[i].perpetual = parameters.check2; //infinite life if set
             if (PartSys.particles[i].ttl == 0) { // find dead particle, renitialize
-                PartSys.particles[i].ttl = 300 + hw_random16(((uint16_t)SEGMENT.custom2 << 3) + 100);
+                PartSys.particles[i].ttl = 300 + hw_random16(((uint16_t)parameters.custom2 << 3) + 100);
                 PartSys.particles[i].x = hw_random(PartSys.maxX);
                 PartSys.particles[i].y = hw_random16(PartSys.maxY);
                 PartSys.particles[i].hue = hw_random16(); // set random color
@@ -69,24 +69,24 @@ public:
                 PartSys.advPartSize[i].wobblespeed = 1 + hw_random16(3);
             }
             //PartSys.advPartSize[i].asymmetry++;
-            PartSys.advPartSize[i].pulsate = SEGMENT.check3;
-            PartSys.advPartSize[i].wobble = SEGMENT.check1;
+            PartSys.advPartSize[i].pulsate = parameters.check3;
+            PartSys.advPartSize[i].wobble = parameters.check1;
         }
-        aux0 = SEGMENT.speed; //write state back
-        aux1 = SEGMENT.custom1;
+        aux0 = parameters.speed; //write state back
+        aux1 = parameters.custom1;
 
         #ifdef USERMOD_AUDIOREACTIVE
         um_data_t *um_data;
         if (UsermodManager::getUMData(&um_data, USERMOD_ID_AUDIOREACTIVE)) { // get AR data, do not use simulated data
             uint8_t volumeSmth = (uint8_t)(*(float*)um_data->u_data[0]);
             for (uint32_t i = 0; i < PartSys.usedParticles; i++) { // update particles
-                if (SEGMENT.check3) //pulsate selected
+                if (parameters.check3) //pulsate selected
                     PartSys.advPartProps[i].size = volumeSmth;
             }
         }
         #endif
 
-        PartSys.setMotionBlur(((SEGMENT.custom3) << 3) + 7);
+        PartSys.setMotionBlur(((parameters.custom3) << 3) + 7);
         PartSys.update(buffer); // update and render
         return true;
     }

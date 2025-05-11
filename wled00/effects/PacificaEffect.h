@@ -38,8 +38,8 @@ public:
 
     explicit PacificaEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -64,8 +64,8 @@ public:
         // Increment the four "color index start" counters, one for each wave layer.
         // Each is incremented at a different speed, and the speeds vary over time.
         unsigned sCIStart1 = aux0, sCIStart2 = aux1, sCIStart3 = step & 0xFFFF, sCIStart4 = (step >> 16);
-        uint32_t deltams = (FRAMETIME >> 2) + ((FRAMETIME * SEGMENT.speed) >> 7);
-        uint64_t deltat = (strip.now >> 2) + ((strip.now * SEGMENT.speed) >> 7);
+        uint32_t deltams = (FRAMETIME >> 2) + ((FRAMETIME * parameters.speed) >> 7);
+        uint64_t deltat = (strip.now >> 2) + ((strip.now * parameters.speed) >> 7);
         strip.now = deltat;
 
         unsigned speedfactor1 = beatsin16_t(3, 179, 269);
@@ -89,10 +89,10 @@ public:
         for (unsigned i = 0; i < coordinate.width; i++) {
             CRGB c = CRGB(2, 6, 10);
             // Render each of four layers, with different scales and speeds, that vary over time
-            c += pacifica_one_layer(i, pacifica_palette_1, sCIStart1, beatsin16_t(3, 11 * 256, 14 * 256), beatsin8_t(10, 70, 130), 0-beat16(301));
-            c += pacifica_one_layer(i, pacifica_palette_2, sCIStart2, beatsin16_t(4,  6 * 256,  9 * 256), beatsin8_t(17, 40,  80),   beat16(401));
-            c += pacifica_one_layer(i, pacifica_palette_3, sCIStart3,                         6 * 256 , beatsin8_t(9, 10,38)   , 0-beat16(503));
-            c += pacifica_one_layer(i, pacifica_palette_3, sCIStart4,                         5 * 256 , beatsin8_t(8, 10,28)   ,   beat16(601));
+            c += pacifica_one_layer(parameters, i, pacifica_palette_1, sCIStart1, beatsin16_t(3, 11 * 256, 14 * 256), beatsin8_t(10, 70, 130), 0-beat16(301));
+            c += pacifica_one_layer(parameters, i, pacifica_palette_2, sCIStart2, beatsin16_t(4,  6 * 256,  9 * 256), beatsin8_t(17, 40,  80),   beat16(401));
+            c += pacifica_one_layer(parameters, i, pacifica_palette_3, sCIStart3,                         6 * 256 , beatsin8_t(9, 10,38)   , 0-beat16(503));
+            c += pacifica_one_layer(parameters, i, pacifica_palette_3, sCIStart4,                         5 * 256 , beatsin8_t(8, 10,28)   ,   beat16(601));
 
             // Add extra 'white' to areas where the four layers of light have lined up brightly
             unsigned threshold = scale8( sin8_t( wave), 20) + basethreshold;
@@ -118,13 +118,13 @@ public:
 
 private:
     // Add one layer of waves into the led array
-    static CRGB pacifica_one_layer(uint16_t i, const CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
+    static CRGB pacifica_one_layer(TransitionableParameters& parameters, uint16_t i, const CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
     {
         unsigned ci = cistart;
         unsigned waveangle = ioff;
         unsigned wavescale_half = (wavescale >> 1) + 20;
 
-        waveangle += ((120 + SEGMENT.intensity) * i); //original 250 * i
+        waveangle += ((120 + parameters.intensity) * i); //original 250 * i
         unsigned s16 = sin16_t(waveangle) + 32768;
         unsigned cs = scale16(s16, wavescale_half) + wavescale_half;
         ci += (cs * i);

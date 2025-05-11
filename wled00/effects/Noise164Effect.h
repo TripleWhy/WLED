@@ -16,12 +16,12 @@ public:
 
     explicit Noise164Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t stp = (strip.now * SEGMENT.speed) >> 7;
+        uint32_t stp = (strip.now * parameters.speed) >> 7;
         for (unsigned i = 0; i < coordinate.width; i++) {
             int index = perlin16(uint32_t(i) << 12, stp);
             buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));

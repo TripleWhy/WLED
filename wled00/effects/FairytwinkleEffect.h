@@ -20,7 +20,7 @@ private:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         if (!flashers.resize(coordinate.width)) {
             return false;
         }
@@ -28,12 +28,12 @@ private:
         now16 = strip.now & 0xFFFF;
         PRNG16 = 5100 + strip.getCurrSegmentId();
 
-        riseFallTime = 400 + (255-SEGMENT.speed)*3;
-        maxDur = riseFallTime/100 + ((255 - SEGMENT.intensity) >> 2) + 13 + ((255 - SEGMENT.intensity) >> 1);
+        riseFallTime = 400 + (255-parameters.speed)*3;
+        maxDur = riseFallTime/100 + ((255 - parameters.intensity) >> 2) + 13 + ((255 - parameters.intensity) >> 1);
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned f = coordinate.getXAbsolute();
         uint16_t stateTime = now16 - flashers[f].stateStart;
         //random on/off time reached, switch state
@@ -41,15 +41,15 @@ private:
             flashers[f].stateOn = !flashers[f].stateOn;
             bool init = !flashers[f].stateDur;
             if (flashers[f].stateOn) {
-                flashers[f].stateDur = riseFallTime/100 + ((255 - SEGMENT.intensity) >> 2) + hw_random8(12 + ((255 - SEGMENT.intensity) >> 1)) +1;
+                flashers[f].stateDur = riseFallTime/100 + ((255 - parameters.intensity) >> 2) + hw_random8(12 + ((255 - parameters.intensity) >> 1)) +1;
             } else {
-                flashers[f].stateDur = riseFallTime/100 + hw_random8(3 + ((255 - SEGMENT.speed) >> 6)) +1;
+                flashers[f].stateDur = riseFallTime/100 + hw_random8(3 + ((255 - parameters.speed) >> 6)) +1;
             }
             flashers[f].stateStart = now16;
             stateTime = 0;
             if (init) {
                 flashers[f].stateStart -= riseFallTime; //start lit
-                flashers[f].stateDur = riseFallTime/100 + hw_random8(12 + ((255 - SEGMENT.intensity) >> 1)) +5; //fire up a little quicker
+                flashers[f].stateDur = riseFallTime/100 + hw_random8(12 + ((255 - parameters.intensity) >> 1)) +5; //fire up a little quicker
                 stateTime = riseFallTime;
             }
         }

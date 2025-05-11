@@ -19,20 +19,20 @@ public:
 
     explicit PercentEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
 
-        unsigned percent = SEGMENT.intensity;
+        unsigned percent = parameters.intensity;
         percent = constrain(percent, 0, 200);
         unsigned active_leds = (percent < 100) ? roundf(coordinate.width * percent / 100.0f)
                                                                                      : roundf(coordinate.width * (200 - percent) / 100.0f);
-        const bool oneColor = SEGMENT.check1;
+        const bool oneColor = parameters.check1;
 
-        unsigned size = (1 + ((SEGMENT.speed * coordinate.width) >> 11));
-        if (SEGMENT.speed == 255) size = 255;
+        unsigned size = (1 + ((parameters.speed * coordinate.width) >> 11));
+        if (parameters.speed == 255) size = 255;
 
         if (percent <= 100) {
             for (unsigned i = 0; i < coordinate.width; i++) {

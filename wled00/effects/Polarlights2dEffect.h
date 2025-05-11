@@ -21,30 +21,30 @@ public:
 
     explicit PolarLights2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
             step = 0;
         }
 
         float adjustHeight = (float)map(rows, 8, 32, 28, 12); // maybe use mapf() ???
         unsigned adjScale = map(cols, 8, 64, 310, 63);
-        unsigned _scale = map(SEGMENT.intensity, 0, 255, 30, adjScale);
-        int _speed = map(SEGMENT.speed, 0, 255, 128, 16);
+        unsigned _scale = map(parameters.intensity, 0, 255, 30, adjScale);
+        int _speed = map(parameters.speed, 0, 255, 128, 16);
 
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
                 step++;
                 uint8_t palindex = qsub8(perlin8((step%2) + x * _scale, y * 16 + step % 16, step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
                 uint8_t palbrightness = palindex;
-                if(SEGMENT.check1) palindex = 255 - palindex; //flip palette
+                if(parameters.check1) palindex = 255 - palindex; //flip palette
                 buffer.setPixelColor(x, y, SEGMENT.color_from_palette(palindex, false, false, 255, palbrightness));
             }
         }

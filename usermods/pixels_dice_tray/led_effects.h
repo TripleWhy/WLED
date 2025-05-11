@@ -28,10 +28,10 @@ static constexpr uint8_t USER_ANY_DIE = 0xFF;
 static pixels::RollEvent GetLastRollForSegment() {
   // If an invalid die is selected, fallback to using the most recent roll from
   // any die.
-  if (SEGMENT.custom1 >= MAX_NUM_DICE) {
+  if (SEGMENT.transitionableParameters.custom1 >= MAX_NUM_DICE) {
     return GetLastRoll();
   } else {
-    return last_die_events[SEGMENT.custom1];
+    return last_die_events[SEGMENT.transitionableParameters.custom1];
   }
 }
 
@@ -42,8 +42,8 @@ static pixels::RollEvent GetLastRollForSegment() {
 // paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
 #define PALETTE_SOLID_WRAP   (strip.paletteBlend == 1 || strip.paletteBlend == 3)
 static uint16_t running_copy(uint32_t color1, uint32_t color2, bool theatre = false) {
-  int width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
-  uint32_t cycleTime = 50 + (255 - SEGMENT.speed);
+  int width = (theatre ? 3 : 1) + (SEGMENT.transitionableParameters.intensity >> 4);  // window
+  uint32_t cycleTime = 50 + (255 - SEGMENT.transitionableParameters.speed);
   uint32_t it = strip.now / cycleTime;
   bool usePalette = color1 == SEGCOLOR(0);
 
@@ -113,7 +113,7 @@ static uint16_t check_roll() {
   if (roll.state != pixels::RollState::ON_FACE) {
     return running_copy(SEGCOLOR(0), SEGCOLOR(2));
   } else {
-    if (roll.current_face + 1 >= SEGMENT.custom2) {
+    if (roll.current_face + 1 >= SEGMENT.transitionableParameters.custom2) {
       return mode_glitter();
     } else {
       return mode_gravcenter();

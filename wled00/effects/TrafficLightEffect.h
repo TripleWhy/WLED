@@ -18,8 +18,8 @@ public:
 
     explicit TrafficLightEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -30,17 +30,17 @@ public:
         {
             switch (aux0)
             {
-                case 0: buffer.setPixelColor(i, 0x00FF0000); mdelay = 150 + (100 * (uint32_t)(255 - SEGMENT.speed));break;
-                case 1: buffer.setPixelColor(i, 0x00FF0000); mdelay = 150 + (20 * (uint32_t)(255 - SEGMENT.speed)); buffer.setPixelColor(i+1, 0x00EECC00); break;
-                case 2: buffer.setPixelColor(i+2, 0x0000FF00); mdelay = 150 + (100 * (uint32_t)(255 - SEGMENT.speed));break;
-                case 3: buffer.setPixelColor(i+1, 0x00EECC00); mdelay = 150 + (20 * (uint32_t)(255 - SEGMENT.speed));break;
+                case 0: buffer.setPixelColor(i, 0x00FF0000); mdelay = 150 + (100 * (uint32_t)(255 - parameters.speed));break;
+                case 1: buffer.setPixelColor(i, 0x00FF0000); mdelay = 150 + (20 * (uint32_t)(255 - parameters.speed)); buffer.setPixelColor(i+1, 0x00EECC00); break;
+                case 2: buffer.setPixelColor(i+2, 0x0000FF00); mdelay = 150 + (100 * (uint32_t)(255 - parameters.speed));break;
+                case 3: buffer.setPixelColor(i+1, 0x00EECC00); mdelay = 150 + (20 * (uint32_t)(255 - parameters.speed));break;
             }
         }
 
         if (strip.now - step > mdelay)
         {
             aux0++;
-            if (aux0 == 1 && SEGMENT.intensity > 140) aux0 = 2; //skip Red + Amber, to get US-style sequence
+            if (aux0 == 1 && parameters.intensity > 140) aux0 = 2; //skip Red + Amber, to get US-style sequence
             if (aux0 > 3) aux0 = 0;
             step = strip.now;
         }

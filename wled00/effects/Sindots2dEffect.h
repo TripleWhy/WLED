@@ -20,28 +20,28 @@ public:
 
     explicit Sindots2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        buffer.fadeToBlackBy((SEGMENT.custom1>>3) + (SEGMENT.check1 * 24));
+        buffer.fadeToBlackBy((parameters.custom1>>3) + (parameters.check1 * 24));
 
-        byte t1 = strip.now / (257 - SEGMENT.speed); // 20;
+        byte t1 = strip.now / (257 - parameters.speed); // 20;
         byte t2 = sin8_t(t1) / 4 * 2;
         for (int i = 0; i < 13; i++) {
-            int x = sin8_t(t1 + i * SEGMENT.intensity/8)*(cols-1)/255;  // max index now 255x15/255=15!
-            int y = sin8_t(t2 + i * SEGMENT.intensity/8)*(rows-1)/255;  // max index now 255x15/255=15!
+            int x = sin8_t(t1 + i * parameters.intensity/8)*(cols-1)/255;  // max index now 255x15/255=15!
+            int y = sin8_t(t2 + i * parameters.intensity/8)*(rows-1)/255;  // max index now 255x15/255=15!
             buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
         }
-        buffer.blur(SEGMENT.custom2 >> (3 + SEGMENT.check1), SEGMENT.check1);
+        buffer.blur(parameters.custom2 >> (3 + parameters.check1), parameters.check1);
         return true;
     }
 

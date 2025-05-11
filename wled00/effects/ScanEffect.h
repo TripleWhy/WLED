@@ -18,18 +18,18 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        uint32_t cycleTime = 750 + (255 - parameters.speed)*150;
         uint32_t perc = strip.now % cycleTime;
         int prog = (perc * 65535) / cycleTime;
-        size = 1 + ((SEGMENT.intensity * coordinate.width) >> 9);
+        size = 1 + ((parameters.intensity * coordinate.width) >> 9);
         int ledIndex = (prog * ((coordinate.width *2) - size *2)) >> 16;
         led_offset = static_cast<unsigned>(std::abs(ledIndex - (static_cast<int>(coordinate.width) - static_cast<int>(size))));
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        const bool dual = SEGMENT.check3;
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        const bool dual = parameters.check3;
 
         const unsigned x = coordinate.getXAbsolute();
         if (led_offset <= x && x < led_offset + size) {
@@ -41,7 +41,7 @@ public:
                 return SEGMENT.color_from_palette(x2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0);
             }
         }
-        if (SEGMENT.check2) {
+        if (parameters.check2) {
             return currentColor.getColor();
         }
         return SEGCOLOR(1);

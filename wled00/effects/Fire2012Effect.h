@@ -43,8 +43,8 @@ public:
 
     explicit Fire2012Effect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -57,12 +57,12 @@ public:
         const uint32_t it = strip.now >> 5; //div 32
 
         for (unsigned stripNr=0; stripNr<strips; stripNr++)
-            runStrip(coordinate, stripNr, &heat[stripNr * coordinate.width], it);
+            runStrip(parameters, coordinate, stripNr, &heat[stripNr * coordinate.width], it);
 
         if (SEGMENT.is2D()) {
-            uint8_t blurAmount = SEGMENT.custom2 >> 2;
+            uint8_t blurAmount = parameters.custom2 >> 2;
             if (blurAmount > 48) blurAmount += blurAmount-48;             // extra blur when slider > 192  (bush burn)
-            if (blurAmount < 16) buffer.blur2d(0, SEGMENT.custom2 >> 1);  // no side-burn when slider < 64 (faster)
+            if (blurAmount < 16) buffer.blur2d(0, parameters.custom2 >> 1);  // no side-burn when slider < 64 (faster)
             else buffer.blur(blurAmount);
         }
 
@@ -72,12 +72,12 @@ public:
     }
 
 private:
-    void runStrip(const EffectCoordinate& coordinate, uint16_t stripNr, byte* heat, uint32_t it) {
+    void runStrip(TransitionableParameters& parameters, const EffectCoordinate& coordinate, uint16_t stripNr, byte* heat, uint32_t it) {
         const uint8_t ignition = MAX(3,coordinate.width/10);  // ignition area: 10% of segment length or minimum 3 pixels
 
         // Step 1.  Cool down every cell a little
         for (unsigned i = 0; i < coordinate.width; i++) {
-            uint8_t cool = (it != step) ? hw_random8((((20 + SEGMENT.speed/3) * 16) / coordinate.width)+2) : hw_random8(4);
+            uint8_t cool = (it != step) ? hw_random8((((20 + parameters.speed/3) * 16) / coordinate.width)+2) : hw_random8(4);
             uint8_t minTemp = (i<ignition) ? (ignition-i)/4 + 16 : 0;  // should not become black in ignition area
             uint8_t temp = qsub8(heat[i], cool);
             heat[i] = temp<minTemp ? minTemp : temp;
@@ -90,9 +90,9 @@ private:
             }
 
             // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-            if (hw_random8() <= SEGMENT.intensity) {
+            if (hw_random8() <= parameters.intensity) {
                 uint8_t y = hw_random8(ignition);
-                uint8_t boost = (17+SEGMENT.custom3) * (ignition - y/2) / ignition; // integer math!
+                uint8_t boost = (17+parameters.custom3) * (ignition - y/2) / ignition; // integer math!
                 heat[y] = qadd8(heat[y], hw_random8(96+2*boost,207+boost));
             }
         }

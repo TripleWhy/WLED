@@ -18,8 +18,8 @@ public:
 
     explicit IcuEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -29,9 +29,9 @@ public:
         }
 
         unsigned dest = step & 0xFFFF;
-        unsigned space = (SEGMENT.intensity >> 3) +2;
+        unsigned space = (parameters.intensity >> 3) +2;
 
-        if (!SEGMENT.check2) buffer.fill(SEGCOLOR(1));
+        if (!parameters.check2) buffer.fill(SEGCOLOR(1));
 
         byte pindex = map(dest, 0, coordinate.width-coordinate.width/space, 0, 255);
         uint32_t col = SEGMENT.color_from_palette(pindex, false, false, 0);

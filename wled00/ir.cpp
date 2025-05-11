@@ -120,27 +120,27 @@ static void changeEffectSpeed(int8_t amount)
       for (unsigned i = 0; i < strip.getSegmentsNum(); i++) {
         Segment& seg = strip.getSegment(i);
         if (!seg.isActive() || !seg.isSelected()) continue;
-        seg.speed = effectSpeed;
+        seg.transitionableParameters.speed = effectSpeed;
       }
       setValuesFromFirstSelectedSeg();
     } else {
-      strip.getMainSegment().speed = effectSpeed;
+      strip.getMainSegment().transitionableParameters.speed = effectSpeed;
       setValuesFromMainSeg();
     }
   } else { // if Effect == "solid Color", change the hue of the primary color
     Segment& sseg = irApplyToAllSelected ? strip.getFirstSelectedSeg() : strip.getMainSegment();
-    CRGBW newcolor = CRGBW(sseg.colors[0]);
+    CRGBW newcolor = CRGBW(sseg.transitionableParameters.colors[0]);
     newcolor.adjust_hue(amount);
-    newcolor.w = W(sseg.colors[0]);
+    newcolor.w = W(sseg.transitionableParameters.colors[0]);
     if (irApplyToAllSelected) {
       for (unsigned i = 0; i < strip.getSegmentsNum(); i++) {
         Segment& seg = strip.getSegment(i);
         if (!seg.isActive() || !seg.isSelected()) continue;
-        seg.colors[0] = newcolor.color32;
+        seg.transitionableParameters.colors[0] = newcolor.color32;
       }
       setValuesFromFirstSelectedSeg();
     } else {
-      strip.getMainSegment().colors[0] = newcolor.color32;
+      strip.getMainSegment().transitionableParameters.colors[0] = newcolor.color32;
       setValuesFromMainSeg();
     }
   }
@@ -160,30 +160,30 @@ static void changeEffectIntensity(int8_t amount)
       for (unsigned i = 0; i < strip.getSegmentsNum(); i++) {
         Segment& seg = strip.getSegment(i);
         if (!seg.isActive() || !seg.isSelected()) continue;
-        seg.intensity = effectIntensity;
+        seg.transitionableParameters.intensity = effectIntensity;
       }
       setValuesFromFirstSelectedSeg();
     } else {
-      strip.getMainSegment().speed = effectIntensity;
+      strip.getMainSegment().transitionableParameters.speed = effectIntensity;
       setValuesFromMainSeg();
     }
   } else { // if Effect == "solid Color", change the saturation of the primary color
     Segment& sseg = irApplyToAllSelected ? strip.getFirstSelectedSeg() : strip.getMainSegment();
 
-    CHSV32 prim_hsv = CRGBW(sseg.colors[0]);
+    CHSV32 prim_hsv = CRGBW(sseg.transitionableParameters.colors[0]);
     int32_t new_val = (int32_t)prim_hsv.s + amount;
     prim_hsv.s = (byte)constrain(new_val,0,255);  // constrain to 0-255
     CRGBW newcolor = prim_hsv;
-    newcolor.w = W(sseg.colors[0]);
+    newcolor.w = W(sseg.transitionableParameters.colors[0]);
     if (irApplyToAllSelected) {
       for (unsigned i = 0; i < strip.getSegmentsNum(); i++) {
         Segment& seg = strip.getSegment(i);
         if (!seg.isActive() || !seg.isSelected()) continue;
-        seg.colors[0] = newcolor;
+        seg.transitionableParameters.colors[0] = newcolor;
       }
       setValuesFromFirstSelectedSeg();
     } else {
-      strip.getMainSegment().colors[0] = newcolor;
+      strip.getMainSegment().transitionableParameters.colors[0] = newcolor;
       setValuesFromMainSeg();
     }
   }
@@ -238,10 +238,10 @@ static void changeColor(uint32_t c, int16_t cct=-1)
 static void changeWhite(int8_t amount, int16_t cct=-1)
 {
   Segment& seg = irApplyToAllSelected ? strip.getFirstSelectedSeg() : strip.getMainSegment();
-  byte r = R(seg.colors[0]);
-  byte g = G(seg.colors[0]);
-  byte b = B(seg.colors[0]);
-  byte w = relativeChange(W(seg.colors[0]), amount, 5);
+  byte r = R(seg.transitionableParameters.colors[0]);
+  byte g = G(seg.transitionableParameters.colors[0]);
+  byte b = B(seg.transitionableParameters.colors[0]);
+  byte w = relativeChange(W(seg.transitionableParameters.colors[0]), amount, 5);
   changeColor(RGBW32(r, g, b, w), cct);
 }
 
@@ -344,10 +344,10 @@ static void decodeIR24CT(uint32_t code)
 static void decodeIR40(uint32_t code)
 {
   Segment& seg = irApplyToAllSelected ? strip.getFirstSelectedSeg() : strip.getMainSegment();
-  byte r = R(seg.colors[0]);
-  byte g = G(seg.colors[0]);
-  byte b = B(seg.colors[0]);
-  byte w = W(seg.colors[0]);
+  byte r = R(seg.transitionableParameters.colors[0]);
+  byte g = G(seg.transitionableParameters.colors[0]);
+  byte b = B(seg.transitionableParameters.colors[0]);
+  byte w = W(seg.transitionableParameters.colors[0]);
   switch (code) {
     case IR40_BPLUS        : incBrightness();                            break;
     case IR40_BMINUS       : decBrightness();                            break;

@@ -19,15 +19,15 @@ public:
 
     explicit FireworksEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const uint16_t width  = coordinate.width;
         const uint16_t height = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             sparkIndex = UINT16_MAX;
             oldSparkIndex = UINT16_MAX;
         }
@@ -47,7 +47,7 @@ public:
         }
 
         for (int i=0; i<max(1, width/20); i++) {
-            if (hw_random8(129 - (SEGMENT.intensity >> 1)) == 0) {
+            if (hw_random8(129 - (parameters.intensity >> 1)) == 0) {
                 uint16_t index = hw_random16(width*height);
                 x = index % width;
                 y = index / width;

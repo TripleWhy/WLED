@@ -403,7 +403,6 @@
 //Segment option byte bits
 #define SEG_OPTION_SELECTED       0
 #define SEG_OPTION_REVERSED       1
-#define SEG_OPTION_ON             2
 #define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
 #define SEG_OPTION_FREEZE         4            //Segment contents will not be refreshed
 #define SEG_OPTION_RESET          5            //Segment runtime requires reset

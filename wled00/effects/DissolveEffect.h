@@ -19,20 +19,20 @@ public:
 
     explicit DissolveEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        const uint32_t color = SEGMENT.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0);
+        const uint32_t color = parameters.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0);
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(SEGCOLOR(1));
             dissolveToPrimary = true;
         }
 
         for (unsigned j = 0; j <= coordinate.width / 15; j++) {
-            if (hw_random8() <= SEGMENT.intensity) {
+            if (hw_random8() <= parameters.intensity) {
                 for (size_t times = 0; times < 10; times++) { //attempt to spawn a new pixel 10 times
                     unsigned i = hw_random16(coordinate.width);
                     if (dissolveToPrimary) { //dissolve to primary/palette
@@ -50,7 +50,7 @@ public:
             }
         }
 
-        if (step > (255 - SEGMENT.speed) + 15U) {
+        if (step > (255 - parameters.speed) + 15U) {
             dissolveToPrimary = !dissolveToPrimary;
             step = 0;
         } else {

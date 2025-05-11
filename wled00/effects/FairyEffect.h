@@ -30,8 +30,8 @@ public:
 
     explicit FairyEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -43,8 +43,8 @@ public:
         }
 
         //amount of flasher pixels depending on intensity (0: none, 255: every LED)
-        if (SEGMENT.intensity == 0) return true;
-        unsigned flasherDistance = ((255 - SEGMENT.intensity) / 28) +1; //1-10
+        if (parameters.intensity == 0) return true;
+        unsigned flasherDistance = ((255 - parameters.intensity) / 28) +1; //1-10
         unsigned numFlashers = (coordinate.width / flasherDistance) +1;
 
         if (!flashers.resize(numFlashers)) {
@@ -70,11 +70,11 @@ public:
                 if (stateTime > flashers[f].stateDur * 10) {
                     flashers[f].stateOn = !flashers[f].stateOn;
                     if (flashers[f].stateOn) {
-                        flashers[f].stateDur = 12 + hw_random8(12 + ((255 - SEGMENT.speed) >> 2)); //*10, 250ms to 1250ms
+                        flashers[f].stateDur = 12 + hw_random8(12 + ((255 - parameters.speed) >> 2)); //*10, 250ms to 1250ms
                     } else {
-                        flashers[f].stateDur = 20 + hw_random8(6 + ((255 - SEGMENT.speed) >> 2)); //*10, 250ms to 1250ms
+                        flashers[f].stateDur = 20 + hw_random8(6 + ((255 - parameters.speed) >> 2)); //*10, 250ms to 1250ms
                     }
-                    //flashers[f].stateDur = 51 + hw_random8(2 + ((255 - SEGMENT.speed) >> 1));
+                    //flashers[f].stateDur = 51 + hw_random8(2 + ((255 - parameters.speed) >> 1));
                     flashers[f].stateStart = now16;
                     if (stateTime < 255) {
                         flashers[f].stateStart -= 255 -stateTime; //start early to get correct bri

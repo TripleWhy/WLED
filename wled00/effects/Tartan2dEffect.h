@@ -20,15 +20,15 @@ public:
 
     explicit Tartan2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
@@ -36,17 +36,17 @@ public:
         size_t intensity;
         int offsetX = beatsin16_t(3, -360, 360);
         int offsetY = beatsin16_t(2, -360, 360);
-        int sharpness = SEGMENT.custom3 / 8; // 0-3
+        int sharpness = parameters.custom3 / 8; // 0-3
 
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
                 hue = x * beatsin16_t(10, 1, 10) + offsetY;
-                intensity = bri = sin8_t(x * SEGMENT.speed/2 + offsetX);
+                intensity = bri = sin8_t(x * parameters.speed/2 + offsetX);
                 for (int i=0; i<sharpness; i++) intensity *= bri;
                 intensity >>= 8*sharpness;
                 buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
                 hue = y * 3 + offsetX;
-                intensity = bri = sin8_t(y * SEGMENT.intensity/2 + offsetY);
+                intensity = bri = sin8_t(y * parameters.intensity/2 + offsetY);
                 for (int i=0; i<sharpness; i++) intensity *= bri;
                 intensity >>= 8*sharpness;
                 buffer.addPixelColor(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));

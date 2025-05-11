@@ -21,8 +21,8 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -36,7 +36,7 @@ public:
 
         float mySampleAvg;
         int tempsamp;
-        float segmentSampleAvg = volumeSmth * (float)SEGMENT.intensity / 255.0f;
+        float segmentSampleAvg = volumeSmth * (float)parameters.intensity / 255.0f;
 
         if(mode == 2) { //Gravimeter
             segmentSampleAvg *= 0.25; // divide by 4, to compensate for later "sensitivity" upscaling
@@ -49,7 +49,7 @@ public:
             tempsamp = constrain(mySampleAvg, 0, coordinate.width/2);     // Keep the sample from overflowing.
         }
 
-        uint8_t gravity = 8 - SEGMENT.speed/32;
+        uint8_t gravity = 8 - parameters.speed/32;
         int offset = 1;
         if(mode == 2) offset = 0;  // Gravimeter
         if (tempsamp >= topLED) topLED = tempsamp-offset;

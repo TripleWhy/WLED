@@ -35,8 +35,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -45,11 +45,11 @@ public:
         PartSys.setBounce(true);
         PartSys.setWallHardness(50);
 
-        PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
-        PartSys.setGravity(SEGMENT.custom3 >> 1); // set gravity (8 is default strength)
-        PartSys.setParticleSize(SEGMENT.check3); // 1 or 2 pixel rendering
+        PartSys.setMotionBlur(parameters.custom2); // anable motion blur
+        PartSys.setGravity(parameters.custom3 >> 1); // set gravity (8 is default strength)
+        PartSys.setParticleSize(parameters.check3); // 1 or 2 pixel rendering
 
-        if (SEGMENT.check2) { //collisions enabled
+        if (parameters.check2) { //collisions enabled
             PartSys.enableParticleCollisions(true); //enable, full hardness
         }
         else
@@ -57,11 +57,11 @@ public:
 
         PartSys.sources[0].sourceFlags.collide = false; //drops do not collide
 
-        if (SEGMENT.check1) { //rain mode, emit at random position, short life (3-8 seconds at 50fps)
-            if (SEGMENT.custom1 == 0) //splash disabled, do not bounce raindrops
+        if (parameters.check1) { //rain mode, emit at random position, short life (3-8 seconds at 50fps)
+            if (parameters.custom1 == 0) //splash disabled, do not bounce raindrops
                 PartSys.setBounce(false);
             PartSys.sources[0].var = 5;
-            PartSys.sources[0].v = -(8 + (SEGMENT.speed >> 2)); //speed + var must be < 128, inverted speed (=down)
+            PartSys.sources[0].v = -(8 + (parameters.speed >> 2)); //speed + var must be < 128, inverted speed (=down)
             // lifetime in frames
             PartSys.sources[0].minLife = 30;
             PartSys.sources[0].maxLife = 200;
@@ -69,22 +69,22 @@ public:
         }
         else { //drip
             PartSys.sources[0].var = 0;
-            PartSys.sources[0].v = -(SEGMENT.speed >> 1); //speed + var must be < 128, inverted speed (=down)
+            PartSys.sources[0].v = -(parameters.speed >> 1); //speed + var must be < 128, inverted speed (=down)
             PartSys.sources[0].minLife = 3000;
             PartSys.sources[0].maxLife = 3000;
             PartSys.sources[0].source.x = PartSys.maxX - PS_P_RADIUS_1D;
         }
 
-        if (aux1 != SEGMENT.intensity) //slider changed
+        if (aux1 != parameters.intensity) //slider changed
             aux0 = 1; //must not be zero or "% 0" happens below which crashes on ESP32
 
-        aux1 = SEGMENT.intensity; // save state
+        aux1 = parameters.intensity; // save state
 
         // every nth frame emit a particle
-        if (SEGMENT.call % aux0 == 0) {
-            int32_t interval = 300 / ((SEGMENT.intensity) + 1);
+        if (parameters.call % aux0 == 0) {
+            int32_t interval = 300 / ((parameters.intensity) + 1);
             aux0 = interval + hw_random(interval + 5);
-            // if (SEGMENT.check1) // rain mode
+            // if (parameters.check1) // rain mode
             //   PartSys.sources[0].source.hue = 0;
             // else
             PartSys.sources[0].source.hue = hw_random8(); //set random color  TODO: maybe also not random but color cycling? need another slider or checkmark for this.
@@ -93,27 +93,27 @@ public:
 
         for (uint32_t i = 0; i < PartSys.usedParticles; i++) { //check all particles
             if (PartSys.particles[i].ttl && PartSys.particleFlags[i].collide == false) { // use collision flag to identify splash particles
-                if (SEGMENT.custom1 > 0 && PartSys.particles[i].x < (PS_P_RADIUS_1D << 1)) { //splash enabled and reached bottom
+                if (parameters.custom1 > 0 && PartSys.particles[i].x < (PS_P_RADIUS_1D << 1)) { //splash enabled and reached bottom
                     PartSys.particles[i].ttl = 0; //kill origin particle
                     PartSys.sources[0].maxLife = 80;
                     PartSys.sources[0].minLife = 20;
-                    PartSys.sources[0].var = 10 + (SEGMENT.custom1 >> 3);
+                    PartSys.sources[0].var = 10 + (parameters.custom1 >> 3);
                     PartSys.sources[0].v = 0;
                     PartSys.sources[0].source.hue = PartSys.particles[i].hue;
                     PartSys.sources[0].source.x = PS_P_RADIUS_1D;
                     PartSys.sources[0].sourceFlags.collide = true; //splashes do collide if enabled
-                    for (int j = 0; j < 2 + (SEGMENT.custom1 >> 2); j++) {
+                    for (int j = 0; j < 2 + (parameters.custom1 >> 2); j++) {
                         PartSys.sprayEmit(PartSys.sources[0]);
                     }
                 }
             }
 
-            if (SEGMENT.check1) { //rain mode, fade hue to max
+            if (parameters.check1) { //rain mode, fade hue to max
                 if (PartSys.particles[i].hue < 245)
                     PartSys.particles[i].hue += 8;
             }
             //increase speed on high settings by calling the move function twice
-            if (SEGMENT.speed > 200)
+            if (parameters.speed > 200)
                 PartSys.particleMoveUpdate(PartSys.particles[i], PartSys.particleFlags[i]);
         }
 

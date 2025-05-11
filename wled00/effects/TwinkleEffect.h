@@ -20,18 +20,18 @@ public:
 
     explicit TwinkleEffect(const EffectInformation& ei) : Base{ei, true} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         buffer.fadeOut(224);
 
-        uint32_t cycleTime = 20 + (255 - SEGMENT.speed)*5;
+        uint32_t cycleTime = 20 + (255 - parameters.speed)*5;
         uint32_t it = strip.now / cycleTime;
         if (it != step)
         {
-            unsigned maxOn = map(SEGMENT.intensity, 0, 255, 1, coordinate.width); // make sure at least one LED is on
+            unsigned maxOn = map(parameters.intensity, 0, 255, 1, coordinate.width); // make sure at least one LED is on
             if (onCounter >= maxOn)
             {
                 onCounter = 0;

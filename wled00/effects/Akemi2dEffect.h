@@ -54,15 +54,15 @@ public:
 
     explicit Akemi2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        unsigned counter = (strip.now * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
+        unsigned counter = (strip.now * ((parameters.speed >> 2) +2)) & 0xFFFF;
         counter = counter >> 8;
 
         const float lightFactor  = 0.15f;
@@ -94,7 +94,7 @@ public:
                 default: color = BLACK; break;
             }
 
-            if (SEGMENT.intensity > 128 && fftResult && fftResult[0] > 128) { //dance if base is high
+            if (parameters.intensity > 128 && fftResult && fftResult[0] > 128) { //dance if base is high
                 buffer.setPixelColor(x, 0, BLACK);
                 buffer.setPixelColor(x, y+1, color);
             } else

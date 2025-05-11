@@ -21,8 +21,8 @@ public:
 
     explicit WaterfallEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -35,16 +35,16 @@ public:
 
         if (FFT_MajorPeak < 1) FFT_MajorPeak = 1;                                         // log10(0) is "forbidden" (throws exception)
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             aux0 = 255;
-            SEGMENT.custom1 = *binNum;
-            SEGMENT.custom2 = *maxVol * 2;
+            parameters.custom1 = *binNum;
+            parameters.custom2 = *maxVol * 2;
         }
 
-        *binNum = SEGMENT.custom1;                              // Select a bin.
-        *maxVol = SEGMENT.custom2 / 2;                          // Our volume comparator.
+        *binNum = parameters.custom1;                              // Select a bin.
+        *maxVol = parameters.custom2 / 2;                          // Our volume comparator.
 
-        uint8_t secondHand = micros() / (256-SEGMENT.speed)/500 + 1 % 16;
+        uint8_t secondHand = micros() / (256-parameters.speed)/500 + 1 % 16;
         if (aux0 != secondHand) {                        // Triggered millis timing.
             aux0 = secondHand;
 
@@ -56,7 +56,7 @@ public:
             if (samplePeak) {
                 buffer.setPixelColor(k, (uint32_t)CRGB(CHSV(92,92,92)));
             } else {
-                buffer.setPixelColor(k, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(pixCol+SEGMENT.intensity, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
+                buffer.setPixelColor(k, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(pixCol+parameters.intensity, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
             }
             // loop will not execute if coordinate.width equals 1
             for (unsigned i = 0; i < k; i++) {

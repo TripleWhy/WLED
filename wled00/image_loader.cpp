@@ -112,7 +112,7 @@ byte renderImageToSegment(Segment &seg) {
 
   // speed 0 = half speed, 128 = normal, 255 = full FX FPS
   // TODO: 0 = 4x slow, 64 = 2x slow, 128 = normal, 192 = 2x fast, 255 = 4x fast
-  uint32_t wait = currentFrameDelay * 2 - seg.speed * currentFrameDelay / 128;
+  uint32_t wait = currentFrameDelay * 2 - seg.transitionableParameters.speed * currentFrameDelay / 128;
 
   // TODO consider handling this on FX level with a different frametime, but that would cause slow gifs to speed up during transitions
   if (millis() - lastFrameDisplayTime < wait) return IMAGE_ERROR_WAITING;

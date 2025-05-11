@@ -19,15 +19,15 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         speed = tristate_square8(strip.now >> 7, 90, 15);
-        step += (speed * 2048) / (512 - SEGMENT.speed);
+        step += (speed * 2048) / (512 - parameters.speed);
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
-        uint8_t col = sin8_t(((SEGMENT.intensity / 25 + 1) * 255 * i / coordinate.width) + (step >> 7));
+        uint8_t col = sin8_t(((parameters.intensity / 25 + 1) * 255 * i / coordinate.width) + (step >> 7));
         return SEGMENT.color_from_palette(col, false, PALETTE_SOLID_WRAP, 3);
     }
 

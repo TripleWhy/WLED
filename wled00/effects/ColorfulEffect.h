@@ -18,14 +18,14 @@ public:
 
     explicit ColorfulEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         unsigned numColors = 4; //3, 4, or 5
         uint32_t cols[9]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC};
-        if (SEGMENT.intensity > 160 || SEGMENT.palette) { //palette or color
+        if (parameters.intensity > 160 || SEGMENT.palette) { //palette or color
             if (!SEGMENT.palette) {
                 numColors = 3;
                 for (size_t i = 0; i < 3; i++) cols[i] = SEGCOLOR(i);
@@ -36,7 +36,7 @@ public:
                     cols[i] = SEGMENT.color_from_palette(i*fac, false, true, 255);
                 }
             }
-        } else if (SEGMENT.intensity < 80) //pastel (easter) colors
+        } else if (parameters.intensity < 80) //pastel (easter) colors
         {
             cols[0] = 0x00FF8040;
             cols[1] = 0x00E5D241;
@@ -45,11 +45,11 @@ public:
         }
         for (size_t i = numColors; i < numColors*2 -1U; i++) cols[i] = cols[i-numColors];
 
-        uint32_t cycleTime = 50 + (8 * (uint32_t)(255 - SEGMENT.speed));
+        uint32_t cycleTime = 50 + (8 * (uint32_t)(255 - parameters.speed));
         uint32_t it = strip.now / cycleTime;
         if (it != step)
         {
-            if (SEGMENT.speed > 0) aux0++;
+            if (parameters.speed > 0) aux0++;
             if (aux0 >= numColors) aux0 = 0;
             step = it;
         }

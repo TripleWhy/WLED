@@ -25,8 +25,8 @@ public:
 
     explicit Julia2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -36,20 +36,20 @@ public:
         float reAl;
         float imAg;
 
-        if (SEGENV.call == 0) {           // Reset the center if we've just re-started this animation.
+        if (parameters.call == 0) {           // Reset the center if we've just re-started this animation.
             xcen = 0.;
             ycen = 0.;
             xymag = 1.0;
 
-            SEGMENT.custom1 = 128;              // Make sure the location widgets are centered to start.
-            SEGMENT.custom2 = 128;
-            SEGMENT.custom3 = 16;
-            SEGMENT.intensity = 24;
+            parameters.custom1 = 128;              // Make sure the location widgets are centered to start.
+            parameters.custom2 = 128;
+            parameters.custom3 = 16;
+            parameters.intensity = 24;
         }
 
-        xcen  = xcen  + (float)(SEGMENT.custom1 - 128)/100000.f;
-        ycen  = ycen  + (float)(SEGMENT.custom2 - 128)/100000.f;
-        xymag = xymag + (float)((SEGMENT.custom3 - 16)<<3)/100000.f; // reduced resolution slider
+        xcen  = xcen  + (float)(parameters.custom1 - 128)/100000.f;
+        ycen  = ycen  + (float)(parameters.custom2 - 128)/100000.f;
+        xymag = xymag + (float)((parameters.custom3 - 16)<<3)/100000.f; // reduced resolution slider
         if (xymag < 0.01f) xymag = 0.01f;
         if (xymag > 1.0f) xymag = 1.0f;
 
@@ -70,7 +70,7 @@ public:
         int maxIterations = 15;         // How many iterations per pixel before we give up. Make it 8 bits to match our range of colours.
         float maxCalc = 16.0;           // How big is each calculation allowed to be before we give up.
 
-        maxIterations = SEGMENT.intensity/2;
+        maxIterations = parameters.intensity/2;
 
 
         // Resize section on the fly for some animaton.
@@ -120,7 +120,7 @@ public:
             }
             y += dy;
         }
-        if(SEGMENT.check1)
+        if(parameters.check1)
             buffer.blur(100, true);
         return true;
     }

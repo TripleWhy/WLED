@@ -19,12 +19,12 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned duration = 10 + SEGMENT.speed;
+        unsigned duration = 10 + parameters.speed;
 
         uint8_t sat8 = isPride2015 ? beatsin88_t(87, 220, 250) : 255;
         unsigned brightdepth = beatsin88_t(341, 96, 224);
@@ -33,7 +33,7 @@ public:
 
         unsigned hue16 = sHue16;
         unsigned hueinc16 = isPride2015 ? beatsin88_t(113, 1, 3000) :
-                                          beatsin88_t(113, 60, 300) * SEGMENT.intensity * 10 / 255;
+                                          beatsin88_t(113, 60, 300) * parameters.intensity * 10 / 255;
 
         sPseudotime += duration * msmultiplier;
         sHue16 += duration * beatsin88_t(400, 5, 9);

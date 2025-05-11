@@ -37,8 +37,8 @@ public:
 
     explicit StarburstEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -70,7 +70,7 @@ public:
         for (unsigned j = 0; j < numStars; j++)
         {
             // speed to adjust chance of a burst, max is nearly always.
-            if (hw_random8((144-(SEGMENT.speed >> 1))) == 0 && stars[j].birth == 0)
+            if (hw_random8((144-(parameters.speed >> 1))) == 0 && stars[j].birth == 0)
             {
                 // Pick a random color and location.
                 unsigned startPos = hw_random16(coordinate.width-1);
@@ -82,7 +82,7 @@ public:
                 stars[j].birth = it;
                 stars[j].last = it;
                 // more fragments means larger burst effect
-                int num = hw_random8(3,6 + (SEGMENT.intensity >> 5));
+                int num = hw_random8(3,6 + (parameters.intensity >> 5));
 
                 for (int i=0; i < STARBURST_MAX_FRAG; i++) {
                     if (i < num)
@@ -93,7 +93,7 @@ public:
             }
         }
 
-        if (!SEGMENT.check2)
+        if (!parameters.check2)
             buffer.fill(SEGCOLOR(1));
 
         for (unsigned j=0; j<numStars; j++)

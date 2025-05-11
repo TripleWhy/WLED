@@ -16,11 +16,11 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        unsigned counter = strip.now * ((SEGMENT.speed >> 2) +8);
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        unsigned counter = strip.now * ((parameters.speed >> 2) +8);
         unsigned t = triwave16(counter);
         unsigned tr = (t >> 1) + (t >> 2);
-        return Base::nextFrameImpl(coordinate, tr);
+        return Base::nextFrameImpl(parameters, coordinate, tr);
     }
 
 private:

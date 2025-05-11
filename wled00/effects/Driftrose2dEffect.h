@@ -19,8 +19,8 @@ public:
 
     explicit Driftrose2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -31,7 +31,7 @@ public:
         const float CY = (rows-rows%2)/2.f - .5f;
         const float L = min(cols, rows) / 2.f;
 
-        buffer.fadeToBlackBy(32+(SEGMENT.speed>>3));
+        buffer.fadeToBlackBy(32+(parameters.speed>>3));
         for (size_t i = 1; i < 37; i++) {
             float angle = radians(i * 10);
             uint32_t x = (CX + (sin_t(angle) * (beatsin8_t(i, 0, L*2)-L))) * 255.f;
@@ -39,7 +39,7 @@ public:
             if(SEGMENT.palette == 0) buffer.wuPixel(coordinate, x, y, CHSV(i * 10, 255, 255));
             else buffer.wuPixel(coordinate, x, y, ColorFromPalette(SEGPALETTE, i * 10));
         }
-        buffer.blur(SEGMENT.intensity >> 4, SEGMENT.check1);
+        buffer.blur(parameters.intensity >> 4, parameters.check1);
         return true;
     }
 

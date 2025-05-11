@@ -18,17 +18,17 @@ public:
 
     explicit TwoDotsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         unsigned delay = 1 + (FRAMETIME<<3) / coordinate.width;  // longer segments should change faster
-        uint32_t it = strip.now / map(SEGMENT.speed, 0, 255, delay<<4, delay);
+        uint32_t it = strip.now / map(parameters.speed, 0, 255, delay<<4, delay);
         unsigned offset = it % coordinate.width;
-        unsigned width = ((coordinate.width*(SEGMENT.intensity+1))>>9); //max width is half the strip
+        unsigned width = ((coordinate.width*(parameters.intensity+1))>>9); //max width is half the strip
         if (!width) width = 1;
-        if (!SEGMENT.check2) buffer.fill(SEGCOLOR(2));
+        if (!parameters.check2) buffer.fill(SEGCOLOR(2));
         const uint32_t color1 = SEGCOLOR(0);
         const uint32_t color2 = (SEGCOLOR(1) == SEGCOLOR(2)) ? color1 : SEGCOLOR(1);
         for (unsigned i = 0; i < width; i++) {

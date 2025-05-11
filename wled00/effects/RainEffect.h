@@ -17,11 +17,11 @@ public:
     // explicit RainEffect(const EffectInformation& ei) : Base{ei, false} {}
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         const unsigned width  = coordinate.width;
         const unsigned height = coordinate.height;
         step += FRAMETIME;
-        if (SEGENV.call && step > SPEED_FORMULA_L) {
+        if (parameters.call && step > SPEED_FORMULA_L) {
             step = 1;
             if (SEGMENT.is2D()) {
                 buffer.movePixelsY(-1, true);  // move all pixels down
@@ -39,7 +39,7 @@ public:
             if (oldSparkIndex >= width*height) oldSparkIndex = 0;
         }
 
-        if (!Base::nextFrameImpl(coordinate)) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
         return true;

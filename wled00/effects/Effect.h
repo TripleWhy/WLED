@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "../memory/CircularAllocator.h"
+#include "../TransitionableParameters.h"
 #include "effectUtils.h"
 
 class Effect;
@@ -19,9 +19,9 @@ enum class EffectDimensionality : uint8_t {
 // Kinda emulates a v-table without needing an actual v-table.
 struct EffectInformation {
     using MakeEffectFunction    = SegmentAllocator<Effect>::unique_ptr (*)();
-    using NextFrameFunction     = bool     (*)(Effect* effect, const EffectCoordinate& coordinate);
-    using NextRowFunction       = void     (*)(Effect* effect, const EffectCoordinate& coordinate);
-    using GetPixelColorFunction = uint32_t (*)(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor);
+    using NextFrameFunction     = bool     (*)(Effect* effect, TransitionableParameters& parameters, const EffectCoordinate& coordinate);
+    using NextRowFunction       = void     (*)(Effect* effect, TransitionableParameters& parameters, const EffectCoordinate& coordinate);
+    using GetPixelColorFunction = uint32_t (*)(Effect* effect, TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor);
 
     const char* metaData;
     const uint8_t effectId;
@@ -43,14 +43,14 @@ public:
     constexpr EffectDimensionality getDimensionality() const {
         return info.dimensionality;
     }
-    constexpr bool nextFrame(const EffectCoordinate& coordinate) {
-        return info.nextFrame(this, coordinate);
+    constexpr bool nextFrame(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        return info.nextFrame(this, parameters, coordinate);
     }
-    constexpr void nextRow(const EffectCoordinate& coordinate) {
-        info.nextRow(this, coordinate);
+    constexpr void nextRow(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        info.nextRow(this, parameters, coordinate);
     }
-    constexpr uint32_t getPixelColor(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        return info.getPixelColor(this, coordinate, currentColor);
+    constexpr uint32_t getPixelColor(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        return info.getPixelColor(this, parameters, coordinate, currentColor);
     }
 
 private:
@@ -78,20 +78,20 @@ public:
         return SegmentAllocator<Effect>::unique_ptr(static_cast<Effect*>(t.release()));
     }
 
-    static bool nextFrame(Effect* effect, const EffectCoordinate& coordinate) {
-        return static_cast<T*>(effect)->nextFrameImpl(coordinate);
+    static bool nextFrame(Effect* effect, TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        return static_cast<T*>(effect)->nextFrameImpl(parameters, coordinate);
     }
 
-    static void nextRow(Effect* effect, const EffectCoordinate& coordinate) {
-        static_cast<T*>(effect)->nextRowImpl(coordinate);
+    static void nextRow(Effect* effect, TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        static_cast<T*>(effect)->nextRowImpl(parameters, coordinate);
     }
 
-    static uint32_t getPixelColor(Effect* effect, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        return static_cast<T*>(effect)->getPixelColorImpl(coordinate, currentColor);
+    static uint32_t getPixelColor(Effect* effect, TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        return static_cast<T*>(effect)->getPixelColorImpl(parameters, coordinate, currentColor);
     }
 
     // Hide by redefining this function in a sub class if needed.
-    constexpr void nextRowImpl(const EffectCoordinate& coordinate) {
+    constexpr void nextRowImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
     }
 };
 

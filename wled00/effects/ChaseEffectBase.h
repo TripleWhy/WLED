@@ -23,12 +23,12 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate, uint32_t c1, uint32_t c2, uint32_t c3) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, uint32_t c1, uint32_t c2, uint32_t c3) {
         color1 = c1;
         color2 = c2;
         color3 = c3;
 
-        uint16_t counter = strip.now * ((SEGMENT.speed >> 2) + 1);
+        uint16_t counter = strip.now * ((parameters.speed >> 2) + 1);
         uint16_t a = (counter * coordinate.width) >> 16;
 
         if (chase_random) {
@@ -42,7 +42,7 @@ public:
         step = a;
 
         // Use intensity setting to vary chase up to 1/2 string length
-        unsigned size = 1 + ((SEGMENT.intensity * coordinate.width) >> 10);
+        unsigned size = 1 + ((parameters.intensity * coordinate.width) >> 10);
 
         uint16_t b = a + size; //"trail" of chase, filled with color1
         if (b > coordinate.width) b -= coordinate.width;
@@ -51,7 +51,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
 
         //fill between points a and b with color2

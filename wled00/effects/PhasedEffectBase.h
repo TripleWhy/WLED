@@ -21,17 +21,17 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         allfreq = 16;                                          // Base frequency.
-        cutOff = (255-SEGMENT.intensity);                      // You can change the number of pixels.  AKA INTENSITY (was 192).
+        cutOff = (255-parameters.intensity);                      // You can change the number of pixels.  AKA INTENSITY (was 192).
         modVal = 5;//SEGMENT.fft1/8+1;                         // You can change the modulus. AKA FFT1 (was 5).
 
         index = strip.now/64;                                  // Set color rotation speed
-        phase += SEGMENT.speed/32.0;                           // You can change the speed of the wave. AKA SPEED (was .4)
+        phase += parameters.speed/32.0;                           // You can change the speed of the wave. AKA SPEED (was .4)
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         unsigned i = coordinate.getXAbsolute();
         if (moder)
             modVal = (perlin8(i*10 + i*10) /16);                     // Let's randomize our mod length with some Perlin noise.

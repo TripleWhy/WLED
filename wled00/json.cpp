@@ -18,19 +18,19 @@ bool differs(const Segment& segment, const std::array<std::byte, sizeof(Segment)
   if (segment.spacing != segmentBackup.spacing)     return true;
   if (segment.opacity != segmentBackup.opacity)     return true;
   if (segment.getCurrentEffect() != segmentBackup.getCurrentEffect()) return true;
-  if (segment.speed != segmentBackup.speed)         return true;
-  if (segment.intensity != segmentBackup.intensity) return true;
+  if (segment.transitionableParameters.speed != segmentBackup.transitionableParameters.speed)         return true;
+  if (segment.transitionableParameters.intensity != segmentBackup.transitionableParameters.intensity) return true;
   if (segment.palette != segmentBackup.palette)     return true;
-  if (segment.custom1 != segmentBackup.custom1)     return true;
-  if (segment.custom2 != segmentBackup.custom2)     return true;
-  if (segment.custom3 != segmentBackup.custom3)     return true;
+  if (segment.transitionableParameters.custom1 != segmentBackup.transitionableParameters.custom1)     return true;
+  if (segment.transitionableParameters.custom2 != segmentBackup.transitionableParameters.custom2)     return true;
+  if (segment.transitionableParameters.custom3 != segmentBackup.transitionableParameters.custom3)     return true;
   if (segment.startY != segmentBackup.startY)       return true;
   if (segment.stopY != segmentBackup.stopY)         return true;
 
   //bit pattern: (msb first)
   // set:2, sound:2, mapping:3, transposed, mirrorY, reverseY, [reset,] paused, mirrored, on, reverse, [selected]
   if ((segment.options & 0b1111111111011110U) != (segmentBackup.options & 0b1111111111011110U)) return true;
-  for (unsigned i = 0; i < NUM_COLORS; i++) if (segment.colors[i] != segmentBackup.colors[i])   return true;
+  for (unsigned i = 0; i < NUM_COLORS; i++) if (segment.transitionableParameters.colors[i] != segmentBackup.transitionableParameters.colors[i])   return true;
 
   return false;
 }
@@ -151,10 +151,10 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
   byte segbri = seg.opacity;
   if (getVal(elem["bri"], &segbri)) {
     if (segbri > 0) seg.setOpacity(segbri);
-    seg.setOption(SEG_OPTION_ON, segbri); // use transition
+    seg.setOn(segbri); // use transition
   }
 
-  seg.setOption(SEG_OPTION_ON, getBoolVal(elem["on"], seg.on)); // use transition
+  seg.setOn(getBoolVal(elem["on"], seg.transitionableParameters.on)); // use transition
   seg.freeze = getBoolVal(elem["frz"], seg.freeze);
 
   seg.setCCT(elem["cct"] | seg.cct);
@@ -178,10 +178,10 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
           JsonObject oCol = colarr[i];
           if (!oCol.isNull()) {
             // we have a JSON object for color {"w":123,"r":123,...}; allows individual channel control
-            rgbw[0] = oCol["r"] | R(seg.colors[i]);
-            rgbw[1] = oCol["g"] | G(seg.colors[i]);
-            rgbw[2] = oCol["b"] | B(seg.colors[i]);
-            rgbw[3] = oCol["w"] | W(seg.colors[i]);
+            rgbw[0] = oCol["r"] | R(seg.transitionableParameters.colors[i]);
+            rgbw[1] = oCol["g"] | G(seg.transitionableParameters.colors[i]);
+            rgbw[2] = oCol["b"] | B(seg.transitionableParameters.colors[i]);
+            rgbw[3] = oCol["w"] | W(seg.transitionableParameters.colors[i]);
             colValid = true;
           } else {
             byte brgbw[] = {0,0,0,0};
@@ -246,23 +246,23 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
     seg.setMode(fx, elem[F("fxdef")]);
   }
 
-  getVal(elem["sx"], &seg.speed);
-  getVal(elem["ix"], &seg.intensity);
+  getVal(elem["sx"], &seg.transitionableParameters.speed);
+  getVal(elem["ix"], &seg.transitionableParameters.intensity);
 
   uint8_t pal = seg.palette;
   if (seg.getLightCapabilities() & 1) {  // ignore palette for White and On/Off segments
     if (getVal(elem["pal"], &pal, 0, strip.getPaletteCount())) seg.setPalette(pal);
   }
 
-  getVal(elem["c1"], &seg.custom1);
-  getVal(elem["c2"], &seg.custom2);
-  uint8_t cust3 = seg.custom3;
+  getVal(elem["c1"], &seg.transitionableParameters.custom1);
+  getVal(elem["c2"], &seg.transitionableParameters.custom2);
+  uint8_t cust3 = seg.transitionableParameters.custom3;
   getVal(elem["c3"], &cust3, 0, 31); // we can't pass reference to bitfield
-  seg.custom3 = constrain(cust3, 0, 31);
+  seg.transitionableParameters.custom3 = constrain(cust3, 0, 31);
 
-  seg.check1 = getBoolVal(elem["o1"], seg.check1);
-  seg.check2 = getBoolVal(elem["o2"], seg.check2);
-  seg.check3 = getBoolVal(elem["o3"], seg.check3);
+  seg.transitionableParameters.check1 = getBoolVal(elem["o1"], seg.transitionableParameters.check1);
+  seg.transitionableParameters.check2 = getBoolVal(elem["o2"], seg.transitionableParameters.check2);
+  seg.transitionableParameters.check3 = getBoolVal(elem["o3"], seg.transitionableParameters.check3);
 
   JsonArray iarr = elem[F("i")]; //set individual LEDs
   if (!iarr.isNull()) {
@@ -542,7 +542,7 @@ void serializeSegment(const JsonObject& root, const Segment& seg, byte id, bool 
   root["grp"]    = seg.grouping;
   root[F("spc")] = seg.spacing;
   root[F("of")]  = seg.offset;
-  root["on"]     = seg.on;
+  root["on"]     = seg.transitionableParameters.on;
   root["frz"]    = seg.freeze;
   byte segbri    = seg.opacity;
   root["bri"]    = (segbri) ? segbri : 255;
@@ -559,10 +559,10 @@ void serializeSegment(const JsonObject& root, const Segment& seg, byte id, bool 
   for (size_t i = 0; i < 3; i++)
   {
     byte segcol[4]; byte* c = segcol;
-    segcol[0] = R(seg.colors[i]);
-    segcol[1] = G(seg.colors[i]);
-    segcol[2] = B(seg.colors[i]);
-    segcol[3] = W(seg.colors[i]);
+    segcol[0] = R(seg.transitionableParameters.colors[i]);
+    segcol[1] = G(seg.transitionableParameters.colors[i]);
+    segcol[2] = B(seg.transitionableParameters.colors[i]);
+    segcol[3] = W(seg.transitionableParameters.colors[i]);
     char tmpcol[22];
     sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
     strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);
@@ -571,12 +571,12 @@ void serializeSegment(const JsonObject& root, const Segment& seg, byte id, bool 
   root["col"] = serialized(colstr);
 
   root["fx"]  = seg.getEffectId();
-  root["sx"]  = seg.speed;
-  root["ix"]  = seg.intensity;
+  root["sx"]  = seg.transitionableParameters.speed;
+  root["ix"]  = seg.transitionableParameters.intensity;
   root["pal"] = seg.palette;
-  root["c1"]  = seg.custom1;
-  root["c2"]  = seg.custom2;
-  root["c3"]  = seg.custom3;
+  root["c1"]  = seg.transitionableParameters.custom1;
+  root["c2"]  = seg.transitionableParameters.custom2;
+  root["c3"]  = seg.transitionableParameters.custom3;
   root["sel"] = seg.isSelected();
   root["rev"] = seg.reverse;
   root["mi"]  = seg.mirror;
@@ -587,9 +587,9 @@ void serializeSegment(const JsonObject& root, const Segment& seg, byte id, bool 
     root[F("tp")] = seg.transpose;
   }
   #endif
-  root["o1"]  = seg.check1;
-  root["o2"]  = seg.check2;
-  root["o3"]  = seg.check3;
+  root["o1"]  = seg.transitionableParameters.check1;
+  root["o2"]  = seg.transitionableParameters.check2;
+  root["o3"]  = seg.transitionableParameters.check3;
   root["si"]  = seg.soundSim;
   root["m12"] = seg.map1D2D;
 }

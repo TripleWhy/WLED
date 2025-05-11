@@ -47,8 +47,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -60,15 +60,15 @@ public:
         numSprays = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES); // number of volcanoes
 
         // change source emitting color from time to time, emit one particle per spray
-        if (SEGMENT.call % (11 - (SEGMENT.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles (and update the sources)
+        if (parameters.call % (11 - (parameters.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles (and update the sources)
             for (i = 0; i < numSprays; i++) {
                 PartSys.sources[i].source.y = PS_P_RADIUS + 5; // reset to just above the lower edge that is allowed for bouncing particles, if zero, particles already 'bounce' at start and loose speed.
                 PartSys.sources[i].source.vy = 0; //reset speed (so no extra particlesettin is required to keep the source 'afloat')
                 PartSys.sources[i].source.hue++; // = hw_random16(); //change hue of spray source (note: random does not look good)
-                PartSys.sources[i].source.vx = PartSys.sources[i].source.vx > 0 ? (SEGMENT.custom1 >> 2) : -(SEGMENT.custom1 >> 2); // set moving speed but keep the direction given by PS
-                PartSys.sources[i].vy = SEGMENT.speed >> 2; // emitting speed (upwards)
+                PartSys.sources[i].source.vx = PartSys.sources[i].source.vx > 0 ? (parameters.custom1 >> 2) : -(parameters.custom1 >> 2); // set moving speed but keep the direction given by PS
+                PartSys.sources[i].vy = parameters.speed >> 2; // emitting speed (upwards)
                 PartSys.sources[i].vx = 0;
-                PartSys.sources[i].var = SEGMENT.custom3 >> 1; // emiting variation = nozzle size (custom 3 goes from 0-31)
+                PartSys.sources[i].var = parameters.custom3 >> 1; // emiting variation = nozzle size (custom 3 goes from 0-31)
                 PartSys.sprayEmit(PartSys.sources[i]);
                 PartSys.setWallHardness(255); // full hardness for source bounce
                 PartSys.particleMoveUpdate(PartSys.sources[i].source, PartSys.sources[i].sourceFlags, &volcanosettings); //move the source
@@ -77,12 +77,12 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setColorByAge(SEGMENT.check1);
-        PartSys.setBounceX(SEGMENT.check2);
-        PartSys.setWallHardness(SEGMENT.custom2);
+        PartSys.setColorByAge(parameters.check1);
+        PartSys.setBounceX(parameters.check2);
+        PartSys.setWallHardness(parameters.custom2);
 
-        if (SEGMENT.check3) // collisions enabled
-            PartSys.enableParticleCollisions(true, SEGMENT.custom2); // enable collisions and set particle collision hardness
+        if (parameters.check3) // collisions enabled
+            PartSys.enableParticleCollisions(true, parameters.custom2); // enable collisions and set particle collision hardness
         else
             PartSys.enableParticleCollisions(false);
 

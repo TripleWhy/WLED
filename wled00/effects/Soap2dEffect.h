@@ -27,8 +27,8 @@ public:
 
     explicit Soap2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -41,10 +41,10 @@ public:
 
         const uint32_t scale32_x = 160000U/cols;
         const uint32_t scale32_y = 160000U/rows;
-        const uint32_t mov = MIN(cols,rows)*(SEGMENT.speed+2)/2;
-        const uint8_t  smoothness = MIN(250,SEGMENT.intensity); // limit as >250 produces very little changes
+        const uint32_t mov = MIN(cols,rows)*(parameters.speed+2)/2;
+        const uint8_t  smoothness = MIN(250,parameters.intensity); // limit as >250 produces very little changes
 
-        if (SEGENV.call == 0) for (int i = 0; i < 3; i++) noisecoord[i] = hw_random(); // init
+        if (parameters.call == 0) for (int i = 0; i < 3; i++) noisecoord[i] = hw_random(); // init
         else                  for (int i = 0; i < 3; i++) noisecoord[i] += mov;
 
         for (int i = 0; i < cols; i++) {
@@ -56,7 +56,7 @@ public:
             }
         }
         // init also if dimensions changed
-        if (SEGENV.call == 0 || aux0 != cols || aux1 != rows) {
+        if (parameters.call == 0 || aux0 != cols || aux1 != rows) {
             aux0 = cols;
             aux1 = rows;
             for (int i = 0; i < cols; i++) {
@@ -66,8 +66,8 @@ public:
             }
         }
 
-        soapPixels(coordinate, true ); // rows
-        soapPixels(coordinate, false); // cols
+        soapPixels(parameters, coordinate, true ); // rows
+        soapPixels(parameters, coordinate, false); // cols
         return true;
     }
 
@@ -76,13 +76,13 @@ private:
             return x + y * coordinate.width;
     };
 
-    void soapPixels(const EffectCoordinate& coordinate, bool isRow) {
+    void soapPixels(TransitionableParameters& parameters, const EffectCoordinate& coordinate, bool isRow) {
         const int  cols = coordinate.width;
         const int  rows = coordinate.height;
         const int  tRC  = isRow ? rows : cols; // transpose if isRow
         const int  tCR  = isRow ? cols : rows; // transpose if isRow
-        const int  amplitude = max(1, (tCR - 8) >> 3) * (1 + (SEGMENT.custom1 >> 5));
-        const int  shift = 0; //(128 - SEGMENT.custom2)*2;
+        const int  amplitude = max(1, (tCR - 8) >> 3) * (1 + (parameters.custom1 >> 5));
+        const int  shift = 0; //(128 - parameters.custom2)*2;
 
         CRGB ledsbuff[tCR];
 

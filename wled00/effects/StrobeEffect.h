@@ -20,7 +20,7 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        return Base::nextFrameImpl(SEGCOLOR(0), SEGCOLOR(1));
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        return Base::nextFrameImpl(parameters, SEGCOLOR(0), SEGCOLOR(1));
     }
 };

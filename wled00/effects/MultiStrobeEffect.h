@@ -18,21 +18,21 @@ public:
 
     explicit MultiStrobeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
+        uint32_t cycleTime = 10 + (255 - parameters.speed)*2;
         uint32_t it = strip.now / cycleTime;
-        const bool moving = SEGMENT.check1;
+        const bool moving = parameters.check1;
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned palIdx = moving ? (i+it)%coordinate.width : i;
             buffer.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 1));
         }
 
-        aux0 = 50 + 20*(uint16_t)(255-SEGMENT.speed);
-        unsigned count = 2 * ((SEGMENT.intensity / 10) + 1);
+        aux0 = 50 + 20*(uint16_t)(255-parameters.speed);
+        unsigned count = 2 * ((parameters.intensity / 10) + 1);
         if(aux1 < count) {
             if((aux1 & 1) == 0) {
                 buffer.fill(SEGCOLOR(0));

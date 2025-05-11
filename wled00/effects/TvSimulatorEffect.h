@@ -21,14 +21,14 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         int nr, ng, nb, r, g, b, i, hue;
         uint8_t  sat, bri, j;
 
-        uint8_t colorSpeed     = map(SEGMENT.speed,     0, UINT8_MAX,  1, 20);
-        uint8_t colorIntensity = map(SEGMENT.intensity, 0, UINT8_MAX, 10, 30);
+        uint8_t colorSpeed     = map(parameters.speed,     0, UINT8_MAX,  1, 20);
+        uint8_t colorIntensity = map(parameters.intensity, 0, UINT8_MAX, 10, 30);
 
-        i = SEGMENT.speed << 8 | SEGMENT.intensity;
+        i = parameters.speed << 8 | parameters.intensity;
         if (i != sliderValues) {
             sliderValues = i;
             aux1 = 0;
@@ -115,7 +115,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return color;
     }
 

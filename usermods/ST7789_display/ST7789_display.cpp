@@ -198,8 +198,8 @@ class St7789DisplayUsermod : public Usermod {
         if ((((apActive) ? String(apSSID) : WiFi.SSID()) != knownSsid) ||
             (knownIp != (apActive ? IPAddress(4, 3, 2, 1) : Network.localIP())) ||
             (knownBrightness != bri) ||
-            (knownEffectSpeed != strip.getMainSegment().speed) ||
-            (knownEffectIntensity != strip.getMainSegment().intensity) ||
+            (knownEffectSpeed != strip.getMainSegment().transitionableParameters.speed) ||
+            (knownEffectIntensity != strip.getMainSegment().transitionableParameters.intensity) ||
             (knownMode != strip.getMainSegment().mode) ||
             (knownPalette != strip.getMainSegment().palette))
         {
@@ -229,8 +229,8 @@ class St7789DisplayUsermod : public Usermod {
         knownBrightness = bri;
         knownMode = strip.getMainSegment().mode;
         knownPalette = strip.getMainSegment().palette;
-        knownEffectSpeed = strip.getMainSegment().speed;
-        knownEffectIntensity = strip.getMainSegment().intensity;
+        knownEffectSpeed = strip.getMainSegment().transitionableParameters.speed;
+        knownEffectIntensity = strip.getMainSegment().transitionableParameters.intensity;
 
         tft.fillScreen(TFT_BLACK);
 

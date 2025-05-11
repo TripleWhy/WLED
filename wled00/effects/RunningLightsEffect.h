@@ -19,16 +19,16 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        x_scale = SEGMENT.intensity >> 2;
-        counter = (strip.now * SEGMENT.speed) >> 9;
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        x_scale = parameters.intensity >> 2;
+        counter = (strip.now * parameters.speed) >> 9;
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        const bool dual = SEGMENT.check2;
-        const bool moving = SEGMENT.check1;
-        const bool sawMode = SEGMENT.check3;
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+        const bool dual = parameters.check2;
+        const bool moving = parameters.check1;
+        const bool sawMode = parameters.check3;
 
         const unsigned i = coordinate.getXAbsolute();
         unsigned a = i*x_scale - counter;

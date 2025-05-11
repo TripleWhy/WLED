@@ -41,8 +41,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -53,14 +53,14 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setWrapX(SEGMENT.check1);
-        PartSys.setBounceX(SEGMENT.check2);
-        PartSys.setMotionBlur(SEGMENT.custom3<<3);
-        uint8_t hardness = map(SEGMENT.custom2, 0, 255, PS_P_MINSURFACEHARDNESS - 2, 255);
+        PartSys.setWrapX(parameters.check1);
+        PartSys.setBounceX(parameters.check2);
+        PartSys.setMotionBlur(parameters.custom3<<3);
+        uint8_t hardness = map(parameters.custom2, 0, 255, PS_P_MINSURFACEHARDNESS - 2, 255);
         PartSys.setWallHardness(hardness);
-        PartSys.enableParticleCollisions(SEGMENT.check3, hardness); // enable collisions and set particle collision hardness
+        PartSys.enableParticleCollisions(parameters.check3, hardness); // enable collisions and set particle collision hardness
         MaxNumMeteors = min(PartSys.sources.size(), (uint32_t)NUMBEROFSOURCES);
-        uint8_t numMeteors = MaxNumMeteors; // TODO: clean this up   map(SEGMENT.custom3, 0, 31, 1, MaxNumMeteors); // number of meteors to use for animation
+        uint8_t numMeteors = MaxNumMeteors; // TODO: clean this up   map(parameters.custom3, 0, 31, 1, MaxNumMeteors); // number of meteors to use for animation
 
         uint32_t emitparticles; // number of particles to emit for each rocket's state
 
@@ -78,9 +78,9 @@ public:
             else { // speed is zero, explode!
                 PartSys.sources[i].source.vy = 10; // set source speed positive so it goes into timeout and launches again
             #ifdef ESP8266
-                emitparticles = hw_random16(SEGMENT.intensity >> 3) + 5; // defines the size of the explosion
+                emitparticles = hw_random16(parameters.intensity >> 3) + 5; // defines the size of the explosion
             #else
-                emitparticles = map(SEGMENT.intensity, 0, 255, 10, hw_random16(PartSys.usedParticles>>2)); // defines the size of the explosion !!!TODO: check if this works on ESP8266, drop esp8266 def if it does
+                emitparticles = map(parameters.intensity, 0, 255, 10, hw_random16(PartSys.usedParticles>>2)); // defines the size of the explosion !!!TODO: check if this works on ESP8266, drop esp8266 def if it does
             #endif
             }
             for (int e = emitparticles; e > 0; e--) {
@@ -108,9 +108,9 @@ public:
                         PartSys.sources[i].maxLife = 250;
                         PartSys.sources[i].minLife = 50;
                         #endif
-                        PartSys.sources[i].source.ttl = hw_random16((512 - (SEGMENT.speed << 1))) + 40; // standby time til next launch (in frames)
-                        PartSys.sources[i].vy = (SEGMENT.custom1 >> 2);  // emitting speed y
-                        PartSys.sources[i].var = (SEGMENT.custom1 >> 2); // speed variation around vx,vy (+/- var)
+                        PartSys.sources[i].source.ttl = hw_random16((512 - (parameters.speed << 1))) + 40; // standby time til next launch (in frames)
+                        PartSys.sources[i].vy = (parameters.custom1 >> 2);  // emitting speed y
+                        PartSys.sources[i].var = (parameters.custom1 >> 2); // speed variation around vx,vy (+/- var)
                     }
                 }
             }

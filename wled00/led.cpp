@@ -9,17 +9,17 @@ void setValuesFromFirstSelectedSeg() { setValuesFromSegment(strip.getFirstSelect
 void setValuesFromSegment(uint8_t s)
 {
   Segment& seg = strip.getSegment(s);
-  colPri[0] = R(seg.colors[0]);
-  colPri[1] = G(seg.colors[0]);
-  colPri[2] = B(seg.colors[0]);
-  colPri[3] = W(seg.colors[0]);
-  colSec[0] = R(seg.colors[1]);
-  colSec[1] = G(seg.colors[1]);
-  colSec[2] = B(seg.colors[1]);
-  colSec[3] = W(seg.colors[1]);
+  colPri[0] = R(seg.transitionableParameters.colors[0]);
+  colPri[1] = G(seg.transitionableParameters.colors[0]);
+  colPri[2] = B(seg.transitionableParameters.colors[0]);
+  colPri[3] = W(seg.transitionableParameters.colors[0]);
+  colSec[0] = R(seg.transitionableParameters.colors[1]);
+  colSec[1] = G(seg.transitionableParameters.colors[1]);
+  colSec[2] = B(seg.transitionableParameters.colors[1]);
+  colSec[3] = W(seg.transitionableParameters.colors[1]);
   effectCurrent   = seg.getEffectId();
-  effectSpeed     = seg.speed;
-  effectIntensity = seg.intensity;
+  effectSpeed     = seg.transitionableParameters.speed;
+  effectIntensity = seg.transitionableParameters.intensity;
   effectPalette   = seg.palette;
 }
 
@@ -35,14 +35,14 @@ void applyValuesToSelectedSegs()
     Segment& seg = strip.getSegment(i);
     if (i != firstSel && (!seg.isActive() || !seg.isSelected())) continue;
 
-    if (effectSpeed     != selsegPrev.speed)     {seg.speed     = effectSpeed;     stateChanged = true;}
-    if (effectIntensity != selsegPrev.intensity) {seg.intensity = effectIntensity; stateChanged = true;}
+    if (effectSpeed     != selsegPrev.transitionableParameters.speed)     {seg.transitionableParameters.speed     = effectSpeed;     stateChanged = true;}
+    if (effectIntensity != selsegPrev.transitionableParameters.intensity) {seg.transitionableParameters.intensity = effectIntensity; stateChanged = true;}
     if (effectPalette   != selsegPrev.palette)   {seg.setPalette(effectPalette);}
     if (effectCurrent   != selsegPrev.getEffectId()) {seg.setMode(effectCurrent);}
     uint32_t col0 = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
     uint32_t col1 = RGBW32(colSec[0], colSec[1], colSec[2], colSec[3]);
-    if (col0 != selsegPrev.colors[0])            {seg.setColor(0, col0);}
-    if (col1 != selsegPrev.colors[1])            {seg.setColor(1, col1);}
+    if (col0 != selsegPrev.transitionableParameters.colors[0])            {seg.setColor(0, col0);}
+    if (col1 != selsegPrev.transitionableParameters.colors[1])            {seg.setColor(1, col1);}
   }
 }
 

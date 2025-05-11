@@ -32,20 +32,20 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         uint32_t i;
         // set particle system properties
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setWrapX(SEGMENT.check1);
-        PartSys.setBounceX(SEGMENT.check2);
-        PartSys.setBounceY(SEGMENT.check3);
+        PartSys.setWrapX(parameters.check1);
+        PartSys.setBounceX(parameters.check2);
+        PartSys.setBounceY(parameters.check3);
         //PartSys.enableParticleCollisions(false);
-        PartSys.setWallHardness(SEGMENT.custom2);
-        PartSys.setGravity(SEGMENT.custom3 << 2); // set gravity strength
+        PartSys.setWallHardness(parameters.custom2);
+        PartSys.setGravity(parameters.custom3 << 2); // set gravity strength
 
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t *)um_data->u_data[2]; // 16 bins with FFT data, log mapped already, each band contains frequency amplitude 0-255
@@ -53,12 +53,12 @@ public:
         //map the bands into 16 positions on x axis, emit some particles according to frequency loudness
         i = 0;
         uint32_t binwidth = (PartSys.maxX + 1)>>4; //emit poisition variation for one bin (+/-) is equal to width/16 (for 16 bins)
-        uint32_t threshold = 300 - SEGMENT.intensity;
+        uint32_t threshold = 300 - parameters.intensity;
         uint32_t emitparticles = 0;
 
         for (uint32_t bin = 0; bin < 16; bin++) {
             uint32_t xposition = binwidth*bin + (binwidth>>1); // emit position according to frequency band
-            uint8_t emitspeed = ((uint32_t)fftResult[bin] * (uint32_t)SEGMENT.speed) >> 9; // emit speed according to loudness of band (127 max!)
+            uint8_t emitspeed = ((uint32_t)fftResult[bin] * (uint32_t)parameters.speed) >> 9; // emit speed according to loudness of band (127 max!)
             emitparticles = 0;
 
             if (fftResult[bin] > threshold) {
@@ -73,10 +73,10 @@ public:
             while (i < PartSys.usedParticles && emitparticles > 0) { // emit particles if there are any left, low frequencies take priority
                 if (PartSys.particles[i].ttl == 0) { // find a dead particle
                     //set particle properties TODO: could also use the spray...
-                    PartSys.particles[i].ttl = 20 + map(SEGMENT.intensity, 0,255, emitspeed>>1, emitspeed + hw_random16(emitspeed)) ; // set particle alive, particle lifespan is in number of frames
+                    PartSys.particles[i].ttl = 20 + map(parameters.intensity, 0,255, emitspeed>>1, emitspeed + hw_random16(emitspeed)) ; // set particle alive, particle lifespan is in number of frames
                     PartSys.particles[i].x = xposition + hw_random16(binwidth) - (binwidth>>1); // position randomly, deviating half a bin width
                     PartSys.particles[i].y = PS_P_RADIUS; // start at the bottom (PS_P_RADIUS is minimum position a particle is fully in frame)
-                    PartSys.particles[i].vx = hw_random16(SEGMENT.custom1>>1)-(SEGMENT.custom1>>2) ; //x-speed variation: +/- custom1/4
+                    PartSys.particles[i].vx = hw_random16(parameters.custom1>>1)-(parameters.custom1>>2) ; //x-speed variation: +/- custom1/4
                     PartSys.particles[i].vy = emitspeed;
                     PartSys.particles[i].hue = (bin<<4) + hw_random16(17) - 8; // color from palette according to bin
                     emitparticles--;

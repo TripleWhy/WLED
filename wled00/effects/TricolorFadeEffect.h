@@ -20,12 +20,12 @@ public:
 
     explicit TricolorFadeEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned counter = strip.now * ((SEGMENT.speed >> 3) +1);
+        unsigned counter = strip.now * ((parameters.speed >> 3) +1);
         uint16_t prog = (counter * 768) >> 16;
 
         uint32_t color1 = 0, color2 = 0;

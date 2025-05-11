@@ -20,18 +20,18 @@ public:
 
     explicit Hiphotic2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
-        const uint32_t a = strip.now / ((SEGMENT.custom3>>1)+1);
+        const uint32_t a = strip.now / ((parameters.custom3>>1)+1);
 
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
-                buffer.setPixelColor(x, y, SEGMENT.color_from_palette(sin8_t(cos8_t(x * SEGMENT.speed/16 + a / 3) + sin8_t(y * SEGMENT.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(x, y, SEGMENT.color_from_palette(sin8_t(cos8_t(x * parameters.speed/16 + a / 3) + sin8_t(y * parameters.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
             }
         }
         return true;

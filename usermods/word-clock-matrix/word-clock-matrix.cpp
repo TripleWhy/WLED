@@ -30,14 +30,14 @@ public:
 
     //select first two segments (background color + FX settable)
     Segment &seg = strip.getSegment(0);
-    seg.colors[0] = ((0 << 24) | ((0 & 0xFF) << 16) | ((0 & 0xFF) << 8) | ((0 & 0xFF)));
+    seg.transitionableParameters.colors[0] = ((0 << 24) | ((0 & 0xFF) << 16) | ((0 & 0xFF) << 8) | ((0 & 0xFF)));
     strip.getSegment(0).setOption(0, false);
     strip.getSegment(0).setOption(2, false);
     //other segments are text
     for (int i = 1; i < 10; i++)
     {
       Segment &seg = strip.getSegment(i);
-      seg.colors[0] = ((0 << 24) | ((0 & 0xFF) << 16) | ((190 & 0xFF) << 8) | ((180 & 0xFF)));
+      seg.transitionableParameters.colors[0] = ((0 << 24) | ((0 & 0xFF) << 16) | ((190 & 0xFF) << 8) | ((180 & 0xFF)));
       strip.getSegment(i).setOption(0, true);
       strip.setBrightness(64);
     }

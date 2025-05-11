@@ -16,13 +16,13 @@ public:
 
     explicit StaticPatternEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned lit = 1 + SEGMENT.speed;
-        unsigned unlit = 1 + SEGMENT.intensity;
+        unsigned lit = 1 + parameters.speed;
+        unsigned unlit = 1 + parameters.intensity;
         bool drawingLit = true;
         unsigned cnt = 0;
 

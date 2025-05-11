@@ -18,8 +18,8 @@ public:
 
     explicit DjLightEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
                                          // Written by ??? Adapted by Will Tatam.
@@ -29,11 +29,11 @@ public:
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
-        uint8_t secondHand = micros()/(256-SEGMENT.speed)/500+1 % 64;
+        uint8_t secondHand = micros()/(256-parameters.speed)/500+1 % 64;
         if (aux0 != secondHand) {                        // Triggered millis timing.
             aux0 = secondHand;
 

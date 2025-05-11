@@ -28,7 +28,7 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         const unsigned maxWidth = strip.isMatrix ? coordinate.width : coordinate.width;
         const unsigned HALLOWEEN_EYE_SPACE = MAX(2, strip.isMatrix ? coordinate.width>>4: coordinate.width>>5);
         unsigned HALLOWEEN_EYE_WIDTH = HALLOWEEN_EYE_SPACE/2;
@@ -49,7 +49,7 @@ public:
                 color = hw_random8();
                 if (strip.isMatrix)
                     eyeY = hw_random16(coordinate.height-1);
-                duration = 128u + hw_random16(SEGMENT.intensity*64u);
+                duration = 128u + hw_random16(parameters.intensity*64u);
                 storedDuration = duration;
                 state = eyeState::on;
                 [[fallthrough]];
@@ -63,7 +63,7 @@ public:
 
                 start2ndEye = startPos + HALLOWEEN_EYE_WIDTH + HALLOWEEN_EYE_SPACE;
                 // If the user reduces the input while in this state, limit the duration.
-                duration = min(duration, (128u + (SEGMENT.intensity * 64u)));
+                duration = min(duration, (128u + (parameters.intensity * 64u)));
 
                 constexpr uint32_t minimumOnTimeBegin = 1024u;
                 constexpr uint32_t minimumOnTimeEnd = 1024u;
@@ -99,7 +99,7 @@ public:
                 // - select a duration
                 // - immediately switch to eyes-off state
 
-                const unsigned eyeOffTimeBase = SEGMENT.speed*128u;
+                const unsigned eyeOffTimeBase = parameters.speed*128u;
                 duration = eyeOffTimeBase + hw_random16(eyeOffTimeBase);
                 storedDuration = duration;
                 state = eyeState::off;
@@ -110,7 +110,7 @@ public:
                 // - not much to do here
 
                 // If the user reduces the input while in this state, limit the duration.
-                const unsigned eyeOffTimeBase = SEGMENT.speed*128u;
+                const unsigned eyeOffTimeBase = parameters.speed*128u;
                 duration = min(duration, (2u * eyeOffTimeBase));
                 break;
             }
@@ -141,7 +141,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         if (
             (state == eyeState::on)
             && (coordinate.getYAbsolute() == eyeY)
@@ -154,7 +154,7 @@ public:
         }
 
         // background
-        if (!SEGMENT.check2)
+        if (!parameters.check2)
             return SEGCOLOR(1);
         return currentColor.getColor();
     }

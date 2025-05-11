@@ -20,12 +20,12 @@ public:
 
     explicit Geq2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        const int NUM_BANDS = map(SEGMENT.custom1, 0, 255, 1, 16);
+        const int NUM_BANDS = map(parameters.custom1, 0, 255, 1, 16);
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
@@ -36,16 +36,16 @@ public:
         um_data_t *um_data = getAudioData();
         uint8_t *fftResult = (uint8_t*)um_data->u_data[2];
 
-        if (SEGENV.call == 0) for (int i=0; i<cols; i++) previousBarHeight[i] = 0;
+        if (parameters.call == 0) for (int i=0; i<cols; i++) previousBarHeight[i] = 0;
 
         bool rippleTime = false;
-        if (strip.now - step >= (256U - SEGMENT.intensity)) {
+        if (strip.now - step >= (256U - parameters.intensity)) {
             step = strip.now;
             rippleTime = true;
         }
 
-        int fadeoutDelay = (256 - SEGMENT.speed) / 64;
-        if ((fadeoutDelay <= 1 ) || ((SEGENV.call % fadeoutDelay) == 0)) buffer.fadeToBlackBy(SEGMENT.speed);
+        int fadeoutDelay = (256 - parameters.speed) / 64;
+        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fadeToBlackBy(parameters.speed);
 
         for (int x=0; x < cols; x++) {
             uint8_t  band       = map(x, 0, cols, 0, NUM_BANDS);
@@ -57,7 +57,7 @@ public:
 
             uint32_t ledColor = BLACK;
             for (int y=0; y < barHeight; y++) {
-                if (SEGMENT.check1) //color_vertical / color bars toggle
+                if (parameters.check1) //color_vertical / color bars toggle
                     colorIndex = map(y, 0, rows-1, 0, 255);
 
                 ledColor = SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0);

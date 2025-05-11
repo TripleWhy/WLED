@@ -423,7 +423,7 @@ void deEEP() {
           for (byte j = 0; j < strip.getMaxSegments(); j++)
           {
             strip.getSegment(j).opacity = 255;
-            strip.getSegment(j).setOption(SEG_OPTION_ON, true); // use transistion
+            strip.getSegment(j).setOn(true); // use transistion
           }
         }
         serializeState(pObj, true, false, true);

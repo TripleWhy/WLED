@@ -33,23 +33,23 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         uint32_t i;
 
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setWrapX(SEGMENT.check1);
-        PartSys.setBounceX(!SEGMENT.check1);
-        PartSys.setWallHardness(SEGMENT.custom1); // wall hardness
-        PartSys.enableParticleCollisions(SEGMENT.check3, SEGMENT.custom1); // enable collisions and set particle collision hardness
-        PartSys.setUsedParticles(map(SEGMENT.intensity, 0, 255, 25, 128)); // min is 10%, max is 50%
-        PartSys.setSmearBlur(SEGMENT.check2 * 15); // enable 2D blurring (smearing)
+        PartSys.setWrapX(parameters.check1);
+        PartSys.setBounceX(!parameters.check1);
+        PartSys.setWallHardness(parameters.custom1); // wall hardness
+        PartSys.enableParticleCollisions(parameters.check3, parameters.custom1); // enable collisions and set particle collision hardness
+        PartSys.setUsedParticles(map(parameters.intensity, 0, 255, 25, 128)); // min is 10%, max is 50%
+        PartSys.setSmearBlur(parameters.check2 * 15); // enable 2D blurring (smearing)
 
         // apply 'gravity' from a 2D perlin noise map
-        aux0 += 1 + (SEGMENT.speed >> 5); // noise z-position
+        aux0 += 1 + (parameters.speed >> 5); // noise z-position
         // update position in noise
         for (i = 0; i < PartSys.usedParticles; i++) {
             if (PartSys.particles[i].ttl == 0) { // revive dead particles (do not keep them alive forever, they can clump up, need to reseed)
@@ -58,19 +58,19 @@ public:
                 PartSys.particles[i].y = hw_random(PartSys.maxY);
                 PartSys.particleFlags[i].collide = true; // particle colllides
             }
-            uint32_t scale = 16 - ((31 - SEGMENT.custom3) >> 1);
+            uint32_t scale = 16 - ((31 - parameters.custom3) >> 1);
             uint16_t xnoise = PartSys.particles[i].x / scale; // position in perlin noise, scaled by slider
             uint16_t ynoise = PartSys.particles[i].y / scale;
             int16_t baseheight = perlin8(xnoise, ynoise, aux0); // noise value at particle position
             PartSys.particles[i].hue = baseheight; // color particles to perlin noise value
-            if (SEGMENT.call % 8 == 0) { // do not apply the force every frame, is too chaotic
+            if (parameters.call % 8 == 0) { // do not apply the force every frame, is too chaotic
                 int8_t xslope = (baseheight + (int16_t)perlin8(xnoise - 10, ynoise, aux0));
                 int8_t yslope = (baseheight + (int16_t)perlin8(xnoise, ynoise - 10, aux0));
                 PartSys.applyForce(i, xslope, yslope);
             }
         }
 
-        if (SEGMENT.call % (16 - (SEGMENT.custom2 >> 4)) == 0)
+        if (parameters.call % (16 - (parameters.custom2 >> 4)) == 0)
             PartSys.applyFriction(2);
 
         PartSys.update(buffer); // update and render

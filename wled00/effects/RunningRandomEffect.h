@@ -18,16 +18,16 @@ public:
 
     explicit RunningRandomEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed));
+        uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - parameters.speed));
         uint32_t it = strip.now / cycleTime;
-        if (SEGENV.call == 0) aux0 = hw_random(); // random seed for PRNG on start
+        if (parameters.call == 0) aux0 = hw_random(); // random seed for PRNG on start
 
-        unsigned zoneSize = ((255-SEGMENT.intensity) >> 4) +1;
+        unsigned zoneSize = ((255-parameters.intensity) >> 4) +1;
         uint16_t PRNG16 = aux0;
 
         unsigned z = it % zoneSize;

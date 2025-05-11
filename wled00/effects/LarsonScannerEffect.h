@@ -18,16 +18,16 @@ public:
 
     explicit LarsonScannerEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
 
-        const unsigned speed  = FRAMETIME * map(SEGMENT.speed, 0, 255, 96, 2); // map into useful range
+        const unsigned speed  = FRAMETIME * map(parameters.speed, 0, 255, 96, 2); // map into useful range
         const unsigned pixels = coordinate.width / speed; // how many pixels to advance per frame
 
-        buffer.fadeOut(255-SEGMENT.intensity);
+        buffer.fadeOut(255-parameters.intensity);
 
         if (step > strip.now) return true;  // we have a pause
 
@@ -45,20 +45,20 @@ public:
             aux0 = !aux0; // change direction
             aux1 = 0;            // reset position
             // set delay
-            if (aux0 || SEGMENT.check2) step = strip.now + SEGMENT.custom1 * 25; // multiply by 25ms
+            if (aux0 || parameters.check2) step = strip.now + parameters.custom1 * 25; // multiply by 25ms
             else step = 0;
         } else {
 
-            uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
+            uint32_t cycleTime = 10 + (255 - parameters.speed)*2;
             uint32_t it = strip.now / cycleTime;
-            const bool moving = SEGMENT.check1;
+            const bool moving = parameters.check1;
             // paint as many pixels as needed
             for (unsigned i = aux1; i < index; i++) {
                 unsigned j = (aux0) ? i : coordinate.width - 1 - i;
                 unsigned palIdx = moving ? (j+it)%coordinate.width : j;
                 uint32_t c = SEGMENT.color_from_palette(palIdx, true, moving, 0);
                 buffer.setPixelColor(j, c);
-                if (SEGMENT.check3) {
+                if (parameters.check3) {
                     buffer.setPixelColor(coordinate.width - 1 - j, SEGCOLOR(2) ? SEGCOLOR(2) : c);
                 }
             }

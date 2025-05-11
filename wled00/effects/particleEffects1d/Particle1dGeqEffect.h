@@ -25,8 +25,8 @@ public:
         return Base::init(coordinate, 16, 255, true);
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -36,17 +36,17 @@ public:
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
         numSources = PartSys.sources.size();
-        PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
+        PartSys.setMotionBlur(parameters.custom2); // anable motion blur
 
         uint32_t spacing = PartSys.maxX / numSources;
         for (i = 0; i < numSources; i++) {
             PartSys.sources[i].source.hue = i * 16; // hw_random16();   //TODO: make adjustable, maybe even colorcycle?
-            PartSys.sources[i].var = SEGMENT.speed >> 2;
-            PartSys.sources[i].minLife = 180 + (SEGMENT.intensity >> 1);
-            PartSys.sources[i].maxLife = 240 + SEGMENT.intensity;
+            PartSys.sources[i].var = parameters.speed >> 2;
+            PartSys.sources[i].minLife = 180 + (parameters.intensity >> 1);
+            PartSys.sources[i].maxLife = 240 + parameters.intensity;
             PartSys.sources[i].sat = 255;
-            PartSys.sources[i].size = SEGMENT.custom1;
-            PartSys.setParticleSize(SEGMENT.custom1);
+            PartSys.sources[i].size = parameters.custom1;
+            PartSys.setParticleSize(parameters.custom1);
             PartSys.sources[i].source.x = (spacing >> 1) + spacing * i; //distribute evenly
         }
 
@@ -61,13 +61,13 @@ public:
         //map the bands into 16 positions on x axis, emit some particles according to frequency loudness
         i = 0;
         uint32_t bin = hw_random16(numSources); //current bin , start with random one to distribute available particles fairly
-        uint32_t threshold = 300 - SEGMENT.intensity;
+        uint32_t threshold = 300 - parameters.intensity;
 
         for (i = 0; i < numSources; i++) {
             bin++;
             bin = bin % numSources;
             uint32_t emitparticle = 0;
-            // uint8_t emitspeed = ((uint32_t)fftResult[bin] * (uint32_t)SEGMENT.speed) >> 10; // emit speed according to loudness of band (127 max!)
+            // uint8_t emitspeed = ((uint32_t)fftResult[bin] * (uint32_t)parameters.speed) >> 10; // emit speed according to loudness of band (127 max!)
             if (fftResult[bin] > threshold) {
                 emitparticle = 1;
             }

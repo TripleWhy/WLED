@@ -20,14 +20,14 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         hl = coordinate.width * 10 / 13;
-        hue = strip.now / (SEGMENT.speed+1);
-        t = strip.now / (SEGMENT.intensity/8+1);
+        hue = strip.now / (parameters.speed+1);
+        t = strip.now / (parameters.intensity/8+1);
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         int c = (abs((int)i - hl) / hl) * 127;
         c = sin8_t(c);

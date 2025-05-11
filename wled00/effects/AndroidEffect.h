@@ -18,8 +18,8 @@ public:
 
     explicit AndroidEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -27,13 +27,13 @@ public:
         if (strip.now < nextExecutionTimestamp) {
             return false;
         }
-        nextExecutionTimestamp = strip.now + (3 + ((8 * (uint32_t)(255 - SEGMENT.speed)) / coordinate.width));
+        nextExecutionTimestamp = strip.now + (3 + ((8 * (uint32_t)(255 - parameters.speed)) / coordinate.width));
 
         for (unsigned i = 0; i < coordinate.width; i++) {
             buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
         }
 
-        if (aux1 > (SEGMENT.intensity*coordinate.width)/255)
+        if (aux1 > (parameters.intensity*coordinate.width)/255)
         {
             aux0 = 1;
         } else
@@ -45,12 +45,12 @@ public:
 
         if (aux0 == 0)
         {
-            if (SEGENV.call %3 == 1) {a++;}
+            if (parameters.call %3 == 1) {a++;}
             else {aux1++;}
         } else
         {
             a++;
-            if (SEGENV.call %3 != 1) aux1--;
+            if (parameters.call %3 != 1) aux1--;
         }
 
         if (a >= coordinate.width) a = 0;

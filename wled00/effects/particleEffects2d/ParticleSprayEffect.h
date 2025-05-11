@@ -37,8 +37,8 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -46,21 +46,21 @@ public:
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width, coordinate.height); // update system properties (dimensions and data pointers)
-        PartSys.setBounceX(!SEGMENT.check2);
-        PartSys.setWrapX(SEGMENT.check2);
+        PartSys.setBounceX(!parameters.check2);
+        PartSys.setWrapX(parameters.check2);
         PartSys.setWallHardness(hardness);
-        PartSys.setGravity(8 * SEGMENT.check1); // enable gravity if checked (8 is default strength)
+        PartSys.setGravity(8 * parameters.check1); // enable gravity if checked (8 is default strength)
         //numSprays = min(PartSys.sources.size(), (uint8_t)1); // number of sprays
 
-        if (SEGMENT.check3) // collisions enabled
+        if (parameters.check3) // collisions enabled
             PartSys.enableParticleCollisions(true, hardness); // enable collisions and set particle collision hardness
         else
             PartSys.enableParticleCollisions(false);
 
         //position according to sliders
-        PartSys.sources[0].source.x = map(SEGMENT.custom1, 0, 255, 0, PartSys.maxX);
-        PartSys.sources[0].source.y = map(SEGMENT.custom2, 0, 255, 0, PartSys.maxY);
-        uint16_t angle = (256 - (((int32_t)SEGMENT.custom3 + 1) << 3)) << 8;
+        PartSys.sources[0].source.x = map(parameters.custom1, 0, 255, 0, PartSys.maxX);
+        PartSys.sources[0].source.y = map(parameters.custom2, 0, 255, 0, PartSys.maxY);
+        uint16_t angle = (256 - (((int32_t)parameters.custom3 + 1) << 3)) << 8;
 
         #ifdef USERMOD_AUDIOREACTIVE
         um_data_t *um_data;
@@ -69,32 +69,32 @@ public:
             uint32_t volumeRaw    = *(int16_t*)um_data->u_data[1]; //0 to 255
             PartSys.sources[0].minLife = 30;
 
-            if (SEGMENT.call % 20 == 0 || SEGMENT.call % (11 - volumeSmth / 25) == 0) { // defines interval of particle emit
-                PartSys.sources[0].maxLife = (volumeSmth >> 1) + (SEGMENT.intensity >> 1); // lifetime in frames
-                PartSys.sources[0].var = 1 + ((volumeRaw * SEGMENT.speed)  >> 12);
-                uint32_t emitspeed = (SEGMENT.speed >> 2) + (volumeRaw >> 3);
+            if (parameters.call % 20 == 0 || parameters.call % (11 - volumeSmth / 25) == 0) { // defines interval of particle emit
+                PartSys.sources[0].maxLife = (volumeSmth >> 1) + (parameters.intensity >> 1); // lifetime in frames
+                PartSys.sources[0].var = 1 + ((volumeRaw * parameters.speed)  >> 12);
+                uint32_t emitspeed = (parameters.speed >> 2) + (volumeRaw >> 3);
                 PartSys.sources[0].source.hue += volumeSmth/30;
                 PartSys.angleEmit(PartSys.sources[0], angle, emitspeed);
             }
         }
         else { //no AR data, fall back to normal mode
             // change source properties
-            if (SEGMENT.call % (11 - (SEGMENT.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles
-                PartSys.sources[0].maxLife = 300 + SEGMENT.intensity; // lifetime in frames
-                PartSys.sources[0].minLife = 150 + SEGMENT.intensity;
+            if (parameters.call % (11 - (parameters.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles
+                PartSys.sources[0].maxLife = 300 + parameters.intensity; // lifetime in frames
+                PartSys.sources[0].minLife = 150 + parameters.intensity;
                 PartSys.sources[0].source.hue++; // = hw_random16(); //change hue of spray source
-                PartSys.angleEmit(PartSys.sources[0], angle, SEGMENT.speed >> 2);
+                PartSys.angleEmit(PartSys.sources[0], angle, parameters.speed >> 2);
             }
         }
         #else
         // change source properties
-        if (SEGMENT.call % (11 - (SEGMENT.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles
+        if (parameters.call % (11 - (parameters.intensity / 25)) == 0) { // every nth frame, cycle color and emit particles
             PartSys.sources[0].maxLife = 300; // lifetime in frames. note: could be done in init part, but AR moderequires this to be dynamic
             PartSys.sources[0].minLife = 100;
             PartSys.sources[0].source.hue++; // = hw_random16(); //change hue of spray source
-            // PartSys.sources[i].var = SEGMENT.custom3; // emiting variation = nozzle size (custom 3 goes from 0-32)
+            // PartSys.sources[i].var = parameters.custom3; // emiting variation = nozzle size (custom 3 goes from 0-32)
             // spray[j].source.hue = hw_random16(); //set random color for each particle (using palette)
-            PartSys.angleEmit(PartSys.sources[0], angle, SEGMENT.speed >> 2);
+            PartSys.angleEmit(PartSys.sources[0], angle, parameters.speed >> 2);
         }
         #endif
 

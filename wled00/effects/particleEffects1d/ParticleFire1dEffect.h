@@ -31,14 +31,14 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setMotionBlur(128 + (SEGMENT.custom2 >> 1)); // enable motion blur
+        PartSys.setMotionBlur(128 + (parameters.custom2 >> 1)); // enable motion blur
         PartSys.setColorByAge(true);
         uint32_t emitparticles = 1;
         uint32_t j = hw_random16();
@@ -51,30 +51,30 @@ public:
         for (uint i = 0; i < PartSys.sources.size(); i++) {
             j = (j + 1) % PartSys.sources.size();
             PartSys.sources[j].source.x = 0;
-            PartSys.sources[j].var = 2 + (SEGMENT.speed >> 4);
+            PartSys.sources[j].var = 2 + (parameters.speed >> 4);
             // base flames
             if (j > 2) {
-                PartSys.sources[j].minLife = 150 + SEGMENT.intensity + (j << 2); // TODO: in 2D, min life is maxlife/2 and that looks very nice
-                PartSys.sources[j].maxLife = 200 + SEGMENT.intensity + (j << 3);
-                PartSys.sources[j].v = (SEGMENT.speed >> (2 + (j << 1)));
+                PartSys.sources[j].minLife = 150 + parameters.intensity + (j << 2); // TODO: in 2D, min life is maxlife/2 and that looks very nice
+                PartSys.sources[j].maxLife = 200 + parameters.intensity + (j << 3);
+                PartSys.sources[j].v = (parameters.speed >> (2 + (j << 1)));
                 if (emitparticles) {
                     emitparticles--;
                     PartSys.sprayEmit(PartSys.sources[j]); // emit a particle
                 }
             }
             else {
-                PartSys.sources[j].minLife = PartSys.sources[j].source.ttl + SEGMENT.intensity; // TODO: in 2D, emitted particle ttl depends on source TTL, mimic here the same way? OR: change 2D to the same way it is done here and ditch special fire treatment in emit?
+                PartSys.sources[j].minLife = PartSys.sources[j].source.ttl + parameters.intensity; // TODO: in 2D, emitted particle ttl depends on source TTL, mimic here the same way? OR: change 2D to the same way it is done here and ditch special fire treatment in emit?
                 PartSys.sources[j].maxLife = PartSys.sources[j].minLife + 50;
-                PartSys.sources[j].v = SEGMENT.speed >> 2;
-                if (SEGENV.call & 0x01) // every second frame
+                PartSys.sources[j].v = parameters.speed >> 2;
+                if (parameters.call & 0x01) // every second frame
                     PartSys.sprayEmit(PartSys.sources[j]); // emit a particle
             }
         }
 
         for (uint i = 0; i < PartSys.usedParticles; i++) {
             PartSys.particles[i].x += PartSys.particles[i].ttl >> 7; // 'hot' particles are faster, apply some extra velocity
-            if (PartSys.particles[i].ttl > 3 + ((255 - SEGMENT.custom1) >> 1))
-                PartSys.particles[i].ttl -= map(SEGMENT.custom1, 0, 255, 1, 3); // age faster
+            if (PartSys.particles[i].ttl > 3 + ((255 - parameters.custom1) >> 1))
+                PartSys.particles[i].ttl -= map(parameters.custom1, 0, 255, 1, 3); // age faster
         }
 
         PartSys.update(buffer); // update and render

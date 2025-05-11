@@ -31,8 +31,8 @@ public:
 
     explicit RippleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -42,7 +42,7 @@ public:
         }
         ripples.shrink_to_fit();
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             aux0 = aux1 = hw_random8();
         }
         if (aux0 == aux1) {
@@ -52,18 +52,18 @@ public:
         } else {
             aux0--;
         }
-        if(SEGMENT.custom1 || SEGMENT.check2) // blur or overlay
+        if(parameters.custom1 || parameters.check2) // blur or overlay
                                                  buffer.fadeOut(250);
-        else buffer.fill(SEGMENT.check1 ? color_blend(SEGMENT.color_wheel(aux0),BLACK,uint8_t(235)) : SEGCOLOR(1));
+        else buffer.fill(parameters.check1 ? color_blend(SEGMENT.color_wheel(aux0),BLACK,uint8_t(235)) : SEGCOLOR(1));
 
         //draw wave
         for (unsigned i = 0; i < maxRipples; i++) {
             unsigned ripplestate = ripples[i].state;
             if (ripplestate) {
-                unsigned rippledecay = (SEGMENT.speed >> 4) +1; //faster decay if faster propagation
+                unsigned rippledecay = (parameters.speed >> 4) +1; //faster decay if faster propagation
                 unsigned rippleorigin = ripples[i].pos;
                 uint32_t col = SEGMENT.color_from_palette(ripples[i].color, false, false, 255);
-                unsigned propagation = ((ripplestate/rippledecay - 1) * (SEGMENT.speed + 1));
+                unsigned propagation = ((ripplestate/rippledecay - 1) * (parameters.speed + 1));
                 int propI = propagation >> 8;
                 unsigned propF = propagation & 0xFF;
                 unsigned amp = (ripplestate < 17) ? triwave8((ripplestate-1)*8) : map(ripplestate,17,255,255,2);
@@ -79,14 +79,14 @@ public:
                 ripples[i].state = (ripplestate > 254) ? 0 : ripplestate;
             } else {//randomly create new wave
                 constexpr uint32_t IBN = 5100;
-                if (hw_random16(IBN + 10000u) <= (SEGMENT.intensity >> (SEGMENT.is2D()*3))) {
+                if (hw_random16(IBN + 10000u) <= (parameters.intensity >> (SEGMENT.is2D()*3))) {
                     ripples[i].state = 1;
                     ripples[i].pos = SEGMENT.is2D() ? ((hw_random8(coordinate.width)<<8) | (hw_random8(coordinate.height))) : hw_random16(coordinate.width);
                     ripples[i].color = hw_random8(); //color
                 }
             }
         }
-        buffer.blur(SEGMENT.custom1>>1);
+        buffer.blur(parameters.custom1>>1);
         return true;
     }
 

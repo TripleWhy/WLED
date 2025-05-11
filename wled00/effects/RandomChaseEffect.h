@@ -23,17 +23,17 @@ public:
 
     explicit RandomChaseEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             step = RGBW32(prng.random8(), prng.random8(), prng.random8(), 0);
             aux0 = prng.random16();
         }
         unsigned prevSeed = prng.getSeed(); // save seed so we can restore it at the end of the function
-        uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed));
+        uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - parameters.speed));
         uint32_t it = strip.now / cycleTime;
         uint32_t color = step;
         prng.setSeed(aux0);

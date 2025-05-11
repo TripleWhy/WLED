@@ -16,8 +16,8 @@ public:
 
     explicit ColortwinkleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
@@ -27,8 +27,8 @@ public:
         }
 
         CRGBW col, prev;
-        uint8_t fadeUpAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-strip.getBrightness();
-        uint8_t fadeDownAmount = strip.getBrightness()>28 ? 8 + (SEGMENT.speed>>3) : 68-strip.getBrightness();
+        uint8_t fadeUpAmount = strip.getBrightness()>28 ? 8 + (parameters.speed>>2) : 68-strip.getBrightness();
+        uint8_t fadeDownAmount = strip.getBrightness()>28 ? 8 + (parameters.speed>>3) : 68-strip.getBrightness();
         for (unsigned i = 0; i < coordinate.width; i++) {
             CRGBW cur = buffer.getPixelColor(i);
             prev = cur;
@@ -57,7 +57,7 @@ public:
         }
 
         for (unsigned j = 0; j <= coordinate.width / 50; j++) {
-            if (hw_random8() <= SEGMENT.intensity) {
+            if (hw_random8() <= parameters.intensity) {
                 for (unsigned times = 0; times < 5; times++) { //attempt to spawn a new pixel 5 times
                     int i = hw_random16(coordinate.width);
                     if (buffer.getPixelColor(i) == 0) {

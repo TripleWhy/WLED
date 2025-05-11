@@ -21,19 +21,19 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        uint16_t counter = strip.now * ((SEGMENT.speed >> 2) + 1);
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        uint16_t counter = strip.now * ((parameters.speed >> 2) + 1);
         pp = (counter * coordinate.width) >> 16;
-        if (SEGENV.call == 0)
+        if (parameters.call == 0)
             pp = 0;
-        brd = 1 + loading ? SEGMENT.intensity/2 : SEGMENT.intensity/4;
+        brd = 1 + loading ? parameters.intensity/2 : parameters.intensity/4;
         //if (brd < 1) brd = 1;
         p1 = pp-coordinate.width;
         p2 = pp+coordinate.width;
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         int val; //0 = sec 1 = pri
         const int i = static_cast<int>(coordinate.getXAbsolute());
         if (loading) {

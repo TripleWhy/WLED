@@ -19,15 +19,15 @@ public:
 
     explicit HyperSparkleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
+        uint32_t cycleTime = 10 + (255 - parameters.speed)*2;
         uint32_t it = strip.now / cycleTime;
-        const bool moving = SEGMENT.check1;
-        if (!SEGMENT.check2) {
+        const bool moving = parameters.check1;
+        if (!parameters.check2) {
             for (unsigned i = 0; i < coordinate.width; i++) {
                 unsigned palIdx = moving ? (i+it)%coordinate.width : i;
                 buffer.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 0));
@@ -35,14 +35,14 @@ public:
         }
 
         if (strip.now > flashTimestamp + flashPauseDuration) {
-          if (hw_random8((255-SEGMENT.intensity) >> 4) == 0) {
+          if (hw_random8((255-parameters.intensity) >> 4) == 0) {
             int len = max(1, (int)coordinate.width/3);
             for (int i = 0; i < len; i++) {
                 buffer.setPixelColor(hw_random16(coordinate.width), SEGCOLOR(1));
             }
           }
           flashTimestamp = strip.now;
-          flashPauseDuration = 255-SEGMENT.speed;
+          flashPauseDuration = 255-parameters.speed;
         }
         return true;
     }

@@ -6,7 +6,7 @@
 
 #define SEGCOLOR(x)      Segment::getCurrentColor(x)
 #define SEGPALETTE       Segment::getCurrentPalette()
-#define SPEED_FORMULA_L  (5U + (50U*(255U - SEGMENT.speed))/coordinate.width)
+#define SPEED_FORMULA_L  (5U + (50U*(255U - parameters.speed))/coordinate.width)
 
 #define FRAMETIME        strip.getFrameTime()
 /* How much data bytes each segment should max allocate to leave enough space for other segments,
@@ -17,7 +17,7 @@
 
 // paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
 #define PALETTE_SOLID_WRAP   (strip.paletteBlend == 1 || strip.paletteBlend == 3)
-#define PALETTE_MOVING_WRAP !(strip.paletteBlend == 2 || (strip.paletteBlend == 0 && SEGMENT.speed == 0))
+#define PALETTE_MOVING_WRAP !(strip.paletteBlend == 2 || (strip.paletteBlend == 0 && parameters.speed == 0))
 
 // a few constants needed for AudioReactive effects
 // for 22Khz sampling

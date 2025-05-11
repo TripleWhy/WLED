@@ -50,12 +50,12 @@ public:
 
     explicit DancingShadowsEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        unsigned numSpotlights = map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
+        unsigned numSpotlights = map(parameters.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
         bool initialize = previousSpotlightCount != numSpotlights;
         previousSpotlightCount = numSpotlights;
 
@@ -72,7 +72,7 @@ public:
             if (!initialize) {
                 // advance the position of the spotlight
                 int delta = (float)(time - spotlights[i].lastUpdateTime) *
-                                        (spotlights[i].speed * ((1.0 + SEGMENT.speed)/100.0));
+                                        (spotlights[i].speed * ((1.0 + parameters.speed)/100.0));
 
                 if (abs(delta) >= 1) {
                     spotlights[i].position += delta;

@@ -151,7 +151,8 @@ Segment& Segment::operator= (Segment &&orig) noexcept {
 void Segment::resetIfRequired() {
   if (!reset) return;
   //DEBUG_PRINTF_P(PSTR("-- Segment reset: %p\n"), this);
-  next_time = 0; call = 0;
+  next_time = 0;
+  transitionableParameters.call = 0;
   reset = false;
   #ifdef WLED_ENABLE_GIF
   endImagePlayback(this);
@@ -170,22 +171,22 @@ CRGBPalette16 &Segment::loadPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
       targetPalette = _randomPalette; //random palette is generated at intervals in handleRandomPalette()
       break;
     case 2: {//primary color only
-      CRGB prim = gamma32(colors[0]);
+      CRGB prim = gamma32(transitionableParameters.colors[0]);
       targetPalette = CRGBPalette16(prim); break;}
     case 3: {//primary + secondary
-      CRGB prim = gamma32(colors[0]);
-      CRGB sec  = gamma32(colors[1]);
+      CRGB prim = gamma32(transitionableParameters.colors[0]);
+      CRGB sec  = gamma32(transitionableParameters.colors[1]);
       targetPalette = CRGBPalette16(prim,prim,sec,sec); break;}
     case 4: {//primary + secondary + tertiary
-      CRGB prim = gamma32(colors[0]);
-      CRGB sec  = gamma32(colors[1]);
-      CRGB ter  = gamma32(colors[2]);
+      CRGB prim = gamma32(transitionableParameters.colors[0]);
+      CRGB sec  = gamma32(transitionableParameters.colors[1]);
+      CRGB ter  = gamma32(transitionableParameters.colors[2]);
       targetPalette = CRGBPalette16(ter,sec,prim); break;}
     case 5: {//primary + secondary (+tertiary if not off), more distinct
-      CRGB prim = gamma32(colors[0]);
-      CRGB sec  = gamma32(colors[1]);
-      if (colors[2]) {
-        CRGB ter = gamma32(colors[2]);
+      CRGB prim = gamma32(transitionableParameters.colors[0]);
+      CRGB sec  = gamma32(transitionableParameters.colors[1]);
+      if (transitionableParameters.colors[2]) {
+        CRGB ter = gamma32(transitionableParameters.colors[2]);
         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
       } else {
         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
@@ -207,6 +208,8 @@ CRGBPalette16 &Segment::loadPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
 }
 
 void Segment::startTransition(uint16_t dur, SegmentAllocator<Effect>::unique_ptr&& oldEffect) {
+  //TODO
+  /*
   if (dur == 0) {
     if (isInTransition()) _t->_dur = dur; // this will stop transition in next handleTransition()
     return;
@@ -245,6 +248,7 @@ void Segment::startTransition(uint16_t dur, SegmentAllocator<Effect>::unique_ptr
 #else
   for (size_t i=0; i<NUM_COLORS; i++) _t->_colorT[i] = colors[i];
 #endif
+  */
 }
 
 void Segment::stopTransition() {
@@ -260,65 +264,12 @@ inline void Segment::updateTransitionProgress() {
   }
 }
 
-#ifndef WLED_DISABLE_MODE_BLEND
-void Segment::swapSegenv(tmpsegd_t &tmpSeg) {
-  //DEBUG_PRINTF_P(PSTR("--  Saving temp seg: %p->(%p) [%d->%p]\n"), this, &tmpSeg, _dataLen, data);
-  tmpSeg._optionsT   = options;
-  for (size_t i=0; i<NUM_COLORS; i++) tmpSeg._colorT[i] = colors[i];
-  tmpSeg._speedT     = speed;
-  tmpSeg._intensityT = intensity;
-  tmpSeg._custom1T   = custom1;
-  tmpSeg._custom2T   = custom2;
-  tmpSeg._custom3T   = custom3;
-  tmpSeg._check1T    = check1;
-  tmpSeg._check2T    = check2;
-  tmpSeg._check3T    = check3;
-  tmpSeg._callT      = call;
-  if (isInTransition() && &tmpSeg != &(_t->_segT)) {
-    // swap SEGENV with transitional data
-    options   = _t->_segT._optionsT;
-    for (size_t i=0; i<NUM_COLORS; i++) colors[i] = _t->_segT._colorT[i];
-    speed     = _t->_segT._speedT;
-    intensity = _t->_segT._intensityT;
-    custom1   = _t->_segT._custom1T;
-    custom2   = _t->_segT._custom2T;
-    custom3   = _t->_segT._custom3T;
-    check1    = _t->_segT._check1T;
-    check2    = _t->_segT._check2T;
-    check3    = _t->_segT._check3T;
-    call      = _t->_segT._callT;
-  }
-}
-
-void Segment::restoreSegenv(const tmpsegd_t &tmpSeg) {
-  //DEBUG_PRINTF_P(PSTR("--  Restoring temp seg: %p->(%p) [%d->%p]\n"), &tmpSeg, this, _dataLen, data);
-  if (isInTransition() && &(_t->_segT) != &tmpSeg) {
-    // update possibly changed variables to keep old effect running correctly
-    _t->_segT._callT = call;
-    //if (_t->_segT._dataT != data) DEBUG_PRINTF_P(PSTR("---  data re-allocated: (%p) %p -> %p\n"), this, _t->_segT._dataT, data);
-    _t->_segT._dataT = data;
-    _t->_segT._dataLenT = _dataLen;
-  }
-  options   = tmpSeg._optionsT;
-  for (size_t i=0; i<NUM_COLORS; i++) colors[i] = tmpSeg._colorT[i];
-  speed     = tmpSeg._speedT;
-  intensity = tmpSeg._intensityT;
-  custom1   = tmpSeg._custom1T;
-  custom2   = tmpSeg._custom2T;
-  custom3   = tmpSeg._custom3T;
-  check1    = tmpSeg._check1T;
-  check2    = tmpSeg._check2T;
-  check3    = tmpSeg._check3T;
-  call      = tmpSeg._callT;
-}
-#endif
-
 uint8_t Segment::currentBri(bool useCct) const {
   unsigned prog = isInTransition() ? progress() : 0xFFFFU;
-  uint32_t curBri = useCct ? cct : (on ? opacity : 0);
+  uint32_t curBri = useCct ? cct : (transitionableParameters.on ? opacity : 0);
   if (prog < 0xFFFFU) {
 #ifndef WLED_DISABLE_MODE_BLEND
-    uint8_t tmpBri = useCct ? _t->_cctT : (_t->_segT._optionsT & 0x0004 ? _t->_briT : 0);
+    uint8_t tmpBri = useCct ? _t->_cctT : (_t->_transitionableParametersT.on ? _t->_briT : 0);
     // _modeBlend==true -> old effect
     if (blendingStyle != BLEND_STYLE_FADE) return _modeBlend ? tmpBri : curBri; // not fade/blend transition, each effect uses its brightness
 #else
@@ -352,23 +303,6 @@ Effect* Segment::getCurrentEffect() const {
   return effect.get();
 }
 
-uint32_t Segment::currentColor(uint8_t slot) const {
-  if (slot >= NUM_COLORS) slot = 0;
-  unsigned prog = progress();
-  if (prog == 0xFFFFU) return colors[slot];
-#ifndef WLED_DISABLE_MODE_BLEND
-  if (blendingStyle != BLEND_STYLE_FADE) {
-    // workaround for on/off transition to respect blending style
-    uint32_t colT = (bri != briT) &&  bri ? BLACK : _t->_segT._colorT[slot];  // On/Off transition active (bri!=briT) and final bri>0 : old color is BLACK
-    uint32_t colS = (bri != briT) && !bri ? BLACK : colors[slot];             // On/Off transition active (bri!=briT) and final bri==0 : new color is BLACK
-    return _modeBlend ? colT : colS;    // _modeBlend==true -> old effect
-  }
-  return color_blend16(_t->_segT._colorT[slot], colors[slot], prog);
-#else
-  return color_blend16(_t->_colorT[slot], colors[slot], prog);
-#endif
-}
-
 // pre-calculate drawing parameters for faster access (based on the idea from @softhack007 from MM fork)
 void Segment::beginDraw() {
   _vWidth  = virtualWidth();
@@ -380,9 +314,9 @@ void Segment::beginDraw() {
   // adjust gamma for effects
   for (unsigned i = 0; i < NUM_COLORS; i++) {
     #ifndef WLED_DISABLE_MODE_BLEND
-    uint32_t col = isInTransition() ? color_blend16(_t->_segT._colorT[i], colors[i], prog) : colors[i];
+    uint32_t col = isInTransition() ? color_blend16(_t->_transitionableParametersT.colors[i], transitionableParameters.colors[i], prog) : transitionableParameters.colors[i];
     #else
-    uint32_t col = isInTransition() ? color_blend16(_t->_colorT[i], colors[i], prog) : colors[i];
+    uint32_t col = isInTransition() ? color_blend16(_t->_colorT[i], transitionableParameters.colors[i], prog) : transitionableParameters.colors[i];
     #endif
     _currentColors[i] = gamma32(col);
   }
@@ -487,14 +421,14 @@ void Segment::setGeometry(uint16_t i1, uint16_t i2, uint8_t grp, uint8_t spc, ui
 
 
 Segment &Segment::setColor(uint8_t slot, uint32_t c) {
-  if (slot >= NUM_COLORS || c == colors[slot]) return *this;
+  if (slot >= NUM_COLORS || c == transitionableParameters.colors[slot]) return *this;
   if (!_isRGB && !_hasW) {
     if (slot == 0 && c == BLACK) return *this; // on/off segment cannot have primary color black
     if (slot == 1 && c != BLACK) return *this; // on/off segment cannot have secondary color non black
   }
   //DEBUG_PRINTF_P(PSTR("- Starting color transition: %d [0x%X]\n"), slot, c);
   startTransition(strip.getTransition()); // start transition prior to change
-  colors[slot] = c;
+  transitionableParameters.colors[slot] = c;
   stateChanged = true; // send UDP/WS broadcast
   return *this;
 }
@@ -524,12 +458,19 @@ Segment &Segment::setOpacity(uint8_t o) {
   return *this;
 }
 
+void Segment::setOn(bool val) {
+  if (val == transitionableParameters.on) {
+    return;
+  }
+  startTransition(strip.getTransition()); // start transition prior to change
+  transitionableParameters.on = val;
+  stateChanged = true;
+}
+
 Segment &Segment::setOption(uint8_t n, bool val) {
-  bool prevOn = on;
-  if (n == SEG_OPTION_ON && val != prevOn) startTransition(strip.getTransition()); // start transition prior to change
   if (val) options |=   0x01 << n;
   else     options &= ~(0x01 << n);
-  if (!(n == SEG_OPTION_SELECTED || n == SEG_OPTION_RESET)) stateChanged = true; // send UDP/WS broadcast
+  if (n != SEG_OPTION_SELECTED && n != SEG_OPTION_RESET) stateChanged = true; // send UDP/WS broadcast
   return *this;
 }
 
@@ -559,14 +500,14 @@ Segment &Segment::setMode(uint8_t effectId, bool loadDefaults) {
   int sOpt;
   // load default values from effect string
   if (loadDefaults) {
-    sOpt = extractModeDefaults(metaData, "sx");  speed     = (sOpt >= 0) ? sOpt : DEFAULT_SPEED;
-    sOpt = extractModeDefaults(metaData, "ix");  intensity = (sOpt >= 0) ? sOpt : DEFAULT_INTENSITY;
-    sOpt = extractModeDefaults(metaData, "c1");  custom1   = (sOpt >= 0) ? sOpt : DEFAULT_C1;
-    sOpt = extractModeDefaults(metaData, "c2");  custom2   = (sOpt >= 0) ? sOpt : DEFAULT_C2;
-    sOpt = extractModeDefaults(metaData, "c3");  custom3   = (sOpt >= 0) ? sOpt : DEFAULT_C3;
-    sOpt = extractModeDefaults(metaData, "o1");  check1    = (sOpt >= 0) ? (bool)sOpt : false;
-    sOpt = extractModeDefaults(metaData, "o2");  check2    = (sOpt >= 0) ? (bool)sOpt : false;
-    sOpt = extractModeDefaults(metaData, "o3");  check3    = (sOpt >= 0) ? (bool)sOpt : false;
+    sOpt = extractModeDefaults(metaData, "sx");  transitionableParameters.speed     = (sOpt >= 0) ? sOpt : DEFAULT_SPEED;
+    sOpt = extractModeDefaults(metaData, "ix");  transitionableParameters.intensity = (sOpt >= 0) ? sOpt : DEFAULT_INTENSITY;
+    sOpt = extractModeDefaults(metaData, "c1");  transitionableParameters.custom1   = (sOpt >= 0) ? sOpt : DEFAULT_C1;
+    sOpt = extractModeDefaults(metaData, "c2");  transitionableParameters.custom2   = (sOpt >= 0) ? sOpt : DEFAULT_C2;
+    sOpt = extractModeDefaults(metaData, "c3");  transitionableParameters.custom3   = (sOpt >= 0) ? sOpt : DEFAULT_C3;
+    sOpt = extractModeDefaults(metaData, "o1");  transitionableParameters.check1    = (sOpt >= 0) ? (bool)sOpt : false;
+    sOpt = extractModeDefaults(metaData, "o2");  transitionableParameters.check2    = (sOpt >= 0) ? (bool)sOpt : false;
+    sOpt = extractModeDefaults(metaData, "o3");  transitionableParameters.check3    = (sOpt >= 0) ? (bool)sOpt : false;
     sOpt = extractModeDefaults(metaData, "m12"); if (sOpt >= 0) map1D2D   = constrain(sOpt, 0, 7); else map1D2D = M12_Pixels;  // reset mapping if not defined (2D FX may not work)
     sOpt = extractModeDefaults(metaData, "si");  if (sOpt >= 0) soundSim  = constrain(sOpt, 0, 3);
     sOpt = extractModeDefaults(metaData, "rev"); if (sOpt >= 0) reverse   = (bool)sOpt;
@@ -1360,18 +1301,18 @@ inline void serviceLoop(Segment &seg, Effect* const effect) {
   const unsigned h = Segment::getEffectHeight<dimensionality>();
   EffectCoordinate coordinate{w, h};
 
-  if (!effect->nextFrame(coordinate)) {
+  if (!effect->nextFrame(seg.transitionableParameters, coordinate)) {
     return;
   }
 
   for (unsigned y = 0u; y < h; y++) {
     coordinate.setYAbsolute(y);
-    effect->nextRow(coordinate);
+    effect->nextRow(seg.transitionableParameters, coordinate);
 
     for (unsigned x = 0u; x < w; x++) {
       coordinate.setXAbsolute(x);
       const LazyColor oldColor(seg, static_cast<int>(x), (dimensionality == EffectDimensionality::d1) ? -1 : static_cast<int>(y));
-      const uint32_t newColor = effect->getPixelColor(coordinate, oldColor);
+      const uint32_t newColor = effect->getPixelColor(seg.transitionableParameters, coordinate, oldColor);
 
       if constexpr (dimensionality == EffectDimensionality::d1) {
         seg.setPixelColor(x, newColor);
@@ -1388,9 +1329,9 @@ inline void serviceLoop(Segment &seg, Effect* const effect) {
 template<>
 inline void serviceLoop<EffectDimensionality::d0>(Segment &seg, Effect* const effect) {
   EffectCoordinate coordinate{1u, 1u};
-  effect->nextFrame(coordinate);
-  effect->nextRow(coordinate);
-  const uint32_t newColor = effect->getPixelColor(coordinate, LazyColor{seg, 0, 0});
+  effect->nextFrame(seg.transitionableParameters, coordinate);
+  effect->nextRow(seg.transitionableParameters, coordinate);
+  const uint32_t newColor = effect->getPixelColor(seg.transitionableParameters, coordinate, LazyColor{seg, 0, 0});
   seg.fill(newColor);
 }
 }
@@ -1555,7 +1496,7 @@ void WS2812FX::service() {
             }
           }
 
-          seg.call++;                         // increment old mode run counter
+          seg.effectParameters.call++;                         // increment old mode run counter
           seg.restoreSegenv(_tmpSegData);     // restore mode state (will also update transitional state)
           Segment::modeBlend(false);          // unset semaphore
           blendingStyle = orgBS;              // restore blending style if it was modified for single pixel segment
@@ -1578,7 +1519,8 @@ void WS2812FX::service() {
           frameDelay = 0;
         }
 
-        seg.call++;
+        seg.transitionableParameters.call++;
+        //TODO? increment transition call?
         if (seg.isInTransition() && frameDelay > FRAMETIME) frameDelay = FRAMETIME; // force faster updates during transition
         BusManager::setSegmentCCT(oldCCT); // restore old CCT for ABL adjustments
       }

@@ -16,16 +16,16 @@ public:
 
     explicit JuggleEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
-        buffer.fadeToBlackBy(192 - (3*SEGMENT.intensity/4));
+        buffer.fadeToBlackBy(192 - (3*parameters.intensity/4));
         CRGB fastled_col;
         byte dothue = 0;
         for (int i = 0; i < 8; i++) {
-            int index = 0 + beatsin88_t((16 + SEGMENT.speed)*(i + 7), 0, coordinate.width -1);
+            int index = 0 + beatsin88_t((16 + parameters.speed)*(i + 7), 0, coordinate.width -1);
             fastled_col = CRGB(buffer.getPixelColor(index));
             fastled_col |= (SEGMENT.palette==0)?CHSV(dothue, 220, 255):CRGB(ColorFromPalette(SEGPALETTE, dothue, 255));
             buffer.setPixelColor(index, RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0));

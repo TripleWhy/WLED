@@ -21,7 +21,7 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
@@ -35,29 +35,29 @@ public:
         for (int j = 0; j < rows; j++) {
             int index = j*cols;
             for (int i = 0; i < cols; i++) {
-                if (SEGMENT.check1) plasma[index+i] = (i * 4 ^ j * 4) + ms / 6;
+                if (parameters.check1) plasma[index+i] = (i * 4 ^ j * 4) + ms / 6;
                 else                plasma[index+i] = inoise8(i * 40, j * 40, ms);
             }
         }
 
         // rotozoom
-        float f       = (sin_t(a/2)+((128-SEGMENT.intensity)/128.0f)+1.1f)/1.5f;  // scale factor
+        float f       = (sin_t(a/2)+((128-parameters.intensity)/128.0f)+1.1f)/1.5f;  // scale factor
         kosinus = cos_t(a) * f;
         sinus   = sin_t(a) * f;
 
-        a -= 0.03f + float(SEGENV.speed-128)*0.0002f;  // rotation speed
+        a -= 0.03f + float(parameters.speed-128)*0.0002f;  // rotation speed
         if(a < -6283.18530718f)
             a += 6283.18530718f; // 1000*2*PI, protect sin/cos from very large input float values (will give wrong results)
         return true;
     }
 
-    void nextRowImpl(const EffectCoordinate& coordinate) {
+    void nextRowImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
         const int i = coordinate.getYAbsolute();
         u1 = i * kosinus;
         v1 = i * sinus;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const int j = coordinate.getXAbsolute();
         const int cols = coordinate.width;
         const int rows = coordinate.height;

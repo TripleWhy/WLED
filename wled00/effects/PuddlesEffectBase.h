@@ -20,13 +20,13 @@ public:
     {
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         unsigned size = 0;
-        uint8_t fadeVal = map(SEGMENT.speed, 0, 255, 224, 254);
+        uint8_t fadeVal = map(parameters.speed, 0, 255, 224, 254);
         unsigned pos = hw_random16(coordinate.width);                          // Set a random starting position.
         buffer.fadeOut(fadeVal);
 
@@ -38,16 +38,16 @@ public:
         float   volumeSmth = *(float*)  um_data->u_data[0];
 
         if(peakdetect) {                                            // puddles peak
-            *binNum = SEGMENT.custom1;                              // Select a bin.
-            *maxVol = SEGMENT.custom2 / 2;                          // Our volume comparator.
+            *binNum = parameters.custom1;                              // Select a bin.
+            *maxVol = parameters.custom2 / 2;                          // Our volume comparator.
             if (samplePeak == 1) {
-                size = volumeSmth * SEGMENT.intensity /256 /4 + 1;  // Determine size of the flash based on the volume.
+                size = volumeSmth * parameters.intensity /256 /4 + 1;  // Determine size of the flash based on the volume.
                 if (pos+size>= coordinate.width) size = coordinate.width - pos;
             }
         }
         else {                                                      // puddles
             if (volumeRaw > 1) {
-                size = volumeRaw * SEGMENT.intensity /256 /8 + 1;   // Determine size of the flash based on the volume.
+                size = volumeRaw * parameters.intensity /256 /8 + 1;   // Determine size of the flash based on the volume.
                 if (pos+size >= coordinate.width) size = coordinate.width - pos;
             }
         }

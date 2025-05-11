@@ -20,24 +20,24 @@ public:
 
     explicit Swirl2dEffect(const EffectInformation& ei) : Base{ei, false} {}
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         const int cols = coordinate.width;
         const int rows = coordinate.height;
 
-        if (SEGENV.call == 0) {
+        if (parameters.call == 0) {
             buffer.fill(BLACK);
         }
 
         const uint8_t borderWidth = 2;
 
-        buffer.blur(SEGMENT.custom1);
+        buffer.blur(parameters.custom1);
 
-        int  i = beatsin8_t( 27*SEGMENT.speed/255, borderWidth, cols - borderWidth);
-        int  j = beatsin8_t( 41*SEGMENT.speed/255, borderWidth, rows - borderWidth);
+        int  i = beatsin8_t( 27*parameters.speed/255, borderWidth, cols - borderWidth);
+        int  j = beatsin8_t( 41*parameters.speed/255, borderWidth, rows - borderWidth);
         int ni = (cols - 1) - i;
         int nj = (cols - 1) - j;
 
@@ -45,12 +45,12 @@ public:
         float volumeSmth  = *(float*)   um_data->u_data[0]; //ewowi: use instead of sampleAvg???
         int   volumeRaw   = *(int16_t*) um_data->u_data[1];
 
-        buffer.addPixelColor( i, j, ColorFromPalette(SEGPALETTE, (strip.now / 11 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 11, 200, 255);
-        buffer.addPixelColor( j, i, ColorFromPalette(SEGPALETTE, (strip.now / 13 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 13, 200, 255);
-        buffer.addPixelColor(ni,nj, ColorFromPalette(SEGPALETTE, (strip.now / 17 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 17, 200, 255);
-        buffer.addPixelColor(nj,ni, ColorFromPalette(SEGPALETTE, (strip.now / 29 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 29, 200, 255);
-        buffer.addPixelColor( i,nj, ColorFromPalette(SEGPALETTE, (strip.now / 37 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 37, 200, 255);
-        buffer.addPixelColor(ni, j, ColorFromPalette(SEGPALETTE, (strip.now / 41 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 41, 200, 255);
+        buffer.addPixelColor( i, j, ColorFromPalette(SEGPALETTE, (strip.now / 11 + volumeSmth*4), volumeRaw * parameters.intensity / 64, LINEARBLEND)); //CHSV( ms / 11, 200, 255);
+        buffer.addPixelColor( j, i, ColorFromPalette(SEGPALETTE, (strip.now / 13 + volumeSmth*4), volumeRaw * parameters.intensity / 64, LINEARBLEND)); //CHSV( ms / 13, 200, 255);
+        buffer.addPixelColor(ni,nj, ColorFromPalette(SEGPALETTE, (strip.now / 17 + volumeSmth*4), volumeRaw * parameters.intensity / 64, LINEARBLEND)); //CHSV( ms / 17, 200, 255);
+        buffer.addPixelColor(nj,ni, ColorFromPalette(SEGPALETTE, (strip.now / 29 + volumeSmth*4), volumeRaw * parameters.intensity / 64, LINEARBLEND)); //CHSV( ms / 29, 200, 255);
+        buffer.addPixelColor( i,nj, ColorFromPalette(SEGPALETTE, (strip.now / 37 + volumeSmth*4), volumeRaw * parameters.intensity / 64, LINEARBLEND)); //CHSV( ms / 37, 200, 255);
+        buffer.addPixelColor(ni, j, ColorFromPalette(SEGPALETTE, (strip.now / 41 + volumeSmth*4), volumeRaw * parameters.intensity / 64, LINEARBLEND)); //CHSV( ms / 41, 200, 255);
         return true;
     }
 

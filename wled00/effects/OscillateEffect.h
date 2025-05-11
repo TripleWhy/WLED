@@ -29,31 +29,31 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (SEGENV.call == 0)
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (parameters.call == 0)
         {
             oscillators[0] = {(uint16_t)(coordinate.width/4),   (uint8_t)(coordinate.width/8),  1, 1};
             oscillators[1] = {(uint16_t)(coordinate.width/4*3), (uint8_t)(coordinate.width/8),  1, 2};
             oscillators[2] = {(uint16_t)(coordinate.width/4*2), (uint8_t)(coordinate.width/8), -1, 1};
         }
 
-        uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - SEGMENT.speed));
+        uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - parameters.speed));
         uint32_t it = strip.now / cycleTime;
 
         for (unsigned i = 0; i < numOscillators; i++) {
             // if the counter has increased, move the oscillator by the random step
             if (it != step) oscillators[i].pos += oscillators[i].dir * oscillators[i].speed;
-            oscillators[i].size = coordinate.width/(3+SEGMENT.intensity/8);
+            oscillators[i].size = coordinate.width/(3+parameters.intensity/8);
             if((oscillators[i].dir == -1) && (oscillators[i].pos > coordinate.width << 1)) { // use integer overflow
                 oscillators[i].pos = 0;
                 oscillators[i].dir = 1;
                 // make bigger steps for faster speeds
-                oscillators[i].speed = SEGMENT.speed > 100 ? hw_random8(2, 4):hw_random8(1, 3);
+                oscillators[i].speed = parameters.speed > 100 ? hw_random8(2, 4):hw_random8(1, 3);
             }
             if((oscillators[i].dir == 1) && (oscillators[i].pos >= (coordinate.width - 1))) {
                 oscillators[i].pos = coordinate.width - 1;
                 oscillators[i].dir = -1;
-                oscillators[i].speed = SEGMENT.speed > 100 ? hw_random8(2, 4):hw_random8(1, 3);
+                oscillators[i].speed = parameters.speed > 100 ? hw_random8(2, 4):hw_random8(1, 3);
             }
         }
 
@@ -61,7 +61,7 @@ public:
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         uint32_t color = BLACK;
         for (unsigned j = 0; j < numOscillators; j++) {

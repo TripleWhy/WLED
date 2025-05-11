@@ -33,29 +33,29 @@ public:
         return true;
     }
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        if (!Base::nextFrameImpl(coordinate)) {
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        if (!Base::nextFrameImpl(parameters, coordinate)) {
             return false;
         }
 
         // Particle System settings
         PartSys.updateSystem(coordinate.width); // update system properties (dimensions and data pointers)
-        PartSys.setMotionBlur(SEGMENT.custom2); // anable motion blur
-        PartSys.setGravity(SEGMENT.check1 * 8); // enable gravity
+        PartSys.setMotionBlur(parameters.custom2); // anable motion blur
+        PartSys.setGravity(parameters.check1 * 8); // enable gravity
 
         if (PartSys.sources[0].source.ttl-- == 0) { // stanby time elapsed TODO: make it a timer?
-            uint32_t explosionsize = 4 + hw_random16(SEGMENT.intensity >> 2);
+            uint32_t explosionsize = 4 + hw_random16(parameters.intensity >> 2);
             PartSys.sources[0].source.hue = hw_random16();
             PartSys.sources[0].var = 10 + (explosionsize << 1);
             PartSys.sources[0].minLife = 250;
             PartSys.sources[0].maxLife = 300;
             PartSys.sources[0].source.x = hw_random(PartSys.maxX); //random explosion position
-            PartSys.sources[0].source.ttl = 10 + hw_random16(255 - SEGMENT.speed);
-            PartSys.sources[0].size = SEGMENT.custom1; // Fragment size
-            PartSys.setParticleSize(SEGMENT.custom1); // enable advanced size rendering
-            PartSys.sources[0].sourceFlags.collide = SEGMENT.check3;
+            PartSys.sources[0].source.ttl = 10 + hw_random16(255 - parameters.speed);
+            PartSys.sources[0].size = parameters.custom1; // Fragment size
+            PartSys.setParticleSize(parameters.custom1); // enable advanced size rendering
+            PartSys.sources[0].sourceFlags.collide = parameters.check3;
             for (uint32_t e = 0; e < explosionsize; e++) { // emit particles
-                if (SEGMENT.check2)
+                if (parameters.check2)
                     PartSys.sources[0].source.hue = hw_random16(); //random color for each particle
                 PartSys.sprayEmit(PartSys.sources[0]); //emit a particle
             }
@@ -65,10 +65,10 @@ public:
             if (PartSys.advPartProps[i].size)
                 PartSys.advPartProps[i].size--;
             if (PartSys.advPartProps[i].sat < 251)
-                PartSys.advPartProps[i].sat += 1 + (SEGMENT.custom3 >> 2); //note: it should be >> 3, the >> 2 creates overflows resulting in blinking if custom3 > 27, which is a bonus feature
+                PartSys.advPartProps[i].sat += 1 + (parameters.custom3 >> 2); //note: it should be >> 3, the >> 2 creates overflows resulting in blinking if custom3 > 27, which is a bonus feature
         }
 
-        if (SEGMENT.call % 5 == 0) {
+        if (parameters.call % 5 == 0) {
             PartSys.applyFriction(1); //slow down particles
         }
 

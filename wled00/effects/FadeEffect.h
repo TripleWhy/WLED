@@ -18,13 +18,13 @@ public:
 
     using Base::Base;
 
-    bool nextFrameImpl(const EffectCoordinate& coordinate) {
-        unsigned counter = (strip.now * ((SEGMENT.speed >> 3) +10));
+    bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
+        unsigned counter = (strip.now * ((parameters.speed >> 3) +10));
         lum = triwave16(counter) >> 8;
         return true;
     }
 
-    uint32_t getPixelColorImpl(const EffectCoordinate& coordinate, const LazyColor& currentColor) {
+    uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         return color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0), lum);
     }
 
