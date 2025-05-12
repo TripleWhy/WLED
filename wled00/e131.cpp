@@ -249,9 +249,9 @@ void handleDMXData(uint16_t uni, uint16_t dmxChannels, uint8_t* e131_data, uint8
           colors[0] = RGBW32(e131_data[dataOffset+ 6], e131_data[dataOffset+ 7], e131_data[dataOffset+ 8], whites[0]);
           colors[1] = RGBW32(e131_data[dataOffset+ 9], e131_data[dataOffset+10], e131_data[dataOffset+11], whites[1]);
           colors[2] = RGBW32(e131_data[dataOffset+12], e131_data[dataOffset+13], e131_data[dataOffset+14], whites[2]);
-          if (colors[0] != seg.transitionableParameters.colors[0]) seg.setColor(0, colors[0]);
-          if (colors[1] != seg.transitionableParameters.colors[1]) seg.setColor(1, colors[1]);
-          if (colors[2] != seg.transitionableParameters.colors[2]) seg.setColor(2, colors[2]);
+          if (colors[0] != seg.transitionableParameters.getRawColor(0)) seg.setColor(0, colors[0]);
+          if (colors[1] != seg.transitionableParameters.getRawColor(1)) seg.setColor(1, colors[1]);
+          if (colors[2] != seg.transitionableParameters.getRawColor(2)) seg.setColor(2, colors[2]);
 
           // Set segment opacity or global brightness
           if (isSegmentMode) {

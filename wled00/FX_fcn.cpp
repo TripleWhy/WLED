@@ -171,22 +171,22 @@ CRGBPalette16 &Segment::loadPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
       targetPalette = _randomPalette; //random palette is generated at intervals in handleRandomPalette()
       break;
     case 2: {//primary color only
-      CRGB prim = gamma32(transitionableParameters.colors[0]);
+      CRGB prim = transitionableParameters.getGammaCorrectedColor(0);
       targetPalette = CRGBPalette16(prim); break;}
     case 3: {//primary + secondary
-      CRGB prim = gamma32(transitionableParameters.colors[0]);
-      CRGB sec  = gamma32(transitionableParameters.colors[1]);
+      CRGB prim = transitionableParameters.getGammaCorrectedColor(0);
+      CRGB sec  = transitionableParameters.getGammaCorrectedColor(1);
       targetPalette = CRGBPalette16(prim,prim,sec,sec); break;}
     case 4: {//primary + secondary + tertiary
-      CRGB prim = gamma32(transitionableParameters.colors[0]);
-      CRGB sec  = gamma32(transitionableParameters.colors[1]);
-      CRGB ter  = gamma32(transitionableParameters.colors[2]);
+      CRGB prim = transitionableParameters.getGammaCorrectedColor(0);
+      CRGB sec  = transitionableParameters.getGammaCorrectedColor(1);
+      CRGB ter  = transitionableParameters.getGammaCorrectedColor(2);
       targetPalette = CRGBPalette16(ter,sec,prim); break;}
     case 5: {//primary + secondary (+tertiary if not off), more distinct
-      CRGB prim = gamma32(transitionableParameters.colors[0]);
-      CRGB sec  = gamma32(transitionableParameters.colors[1]);
-      if (transitionableParameters.colors[2]) {
-        CRGB ter = gamma32(transitionableParameters.colors[2]);
+      CRGB prim = transitionableParameters.getGammaCorrectedColor(0);
+      CRGB sec  = transitionableParameters.getGammaCorrectedColor(1);
+      if (transitionableParameters.getRawColor(2)) {
+        CRGB ter = transitionableParameters.getGammaCorrectedColor(2);
         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
       } else {
         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
@@ -314,9 +314,9 @@ void Segment::beginDraw() {
   // adjust gamma for effects
   for (unsigned i = 0; i < NUM_COLORS; i++) {
     #ifndef WLED_DISABLE_MODE_BLEND
-    uint32_t col = isInTransition() ? color_blend16(_t->_transitionableParametersT.colors[i], transitionableParameters.colors[i], prog) : transitionableParameters.colors[i];
+    uint32_t col = isInTransition() ? color_blend16(_t->_transitionableParametersT.colors[i], transitionableParameters.getRawColor(i), prog) : transitionableParameters.getRawColor(i);
     #else
-    uint32_t col = isInTransition() ? color_blend16(_t->_colorT[i], transitionableParameters.colors[i], prog) : transitionableParameters.colors[i];
+    uint32_t col = isInTransition() ? color_blend16(_t->_colorT[i], transitionableParameters.getRawColor(i), prog) : transitionableParameters.getRawColor(i);
     #endif
     _currentColors[i] = gamma32(col);
   }
@@ -421,14 +421,14 @@ void Segment::setGeometry(uint16_t i1, uint16_t i2, uint8_t grp, uint8_t spc, ui
 
 
 Segment &Segment::setColor(uint8_t slot, uint32_t c) {
-  if (slot >= NUM_COLORS || c == transitionableParameters.colors[slot]) return *this;
+  if (slot >= NUM_COLORS || c == transitionableParameters.getRawColor(slot)) return *this;
   if (!_isRGB && !_hasW) {
     if (slot == 0 && c == BLACK) return *this; // on/off segment cannot have primary color black
     if (slot == 1 && c != BLACK) return *this; // on/off segment cannot have secondary color non black
   }
   //DEBUG_PRINTF_P(PSTR("- Starting color transition: %d [0x%X]\n"), slot, c);
   startTransition(strip.getTransition()); // start transition prior to change
-  transitionableParameters.colors[slot] = c;
+  transitionableParameters.setRawColor(slot, c);
   stateChanged = true; // send UDP/WS broadcast
   return *this;
 }

@@ -30,7 +30,7 @@ bool differs(const Segment& segment, const std::array<std::byte, sizeof(Segment)
   //bit pattern: (msb first)
   // set:2, sound:2, mapping:3, transposed, mirrorY, reverseY, [reset,] paused, mirrored, on, reverse, [selected]
   if ((segment.options & 0b1111111111011110U) != (segmentBackup.options & 0b1111111111011110U)) return true;
-  for (unsigned i = 0; i < NUM_COLORS; i++) if (segment.transitionableParameters.colors[i] != segmentBackup.transitionableParameters.colors[i])   return true;
+  for (unsigned i = 0; i < NUM_COLORS; i++) if (segment.transitionableParameters.getRawColor(i) != segmentBackup.transitionableParameters.getRawColor(i))   return true;
 
   return false;
 }
@@ -178,10 +178,10 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
           JsonObject oCol = colarr[i];
           if (!oCol.isNull()) {
             // we have a JSON object for color {"w":123,"r":123,...}; allows individual channel control
-            rgbw[0] = oCol["r"] | R(seg.transitionableParameters.colors[i]);
-            rgbw[1] = oCol["g"] | G(seg.transitionableParameters.colors[i]);
-            rgbw[2] = oCol["b"] | B(seg.transitionableParameters.colors[i]);
-            rgbw[3] = oCol["w"] | W(seg.transitionableParameters.colors[i]);
+            rgbw[0] = oCol["r"] | R(seg.transitionableParameters.getRawColor(i));
+            rgbw[1] = oCol["g"] | G(seg.transitionableParameters.getRawColor(i));
+            rgbw[2] = oCol["b"] | B(seg.transitionableParameters.getRawColor(i));
+            rgbw[3] = oCol["w"] | W(seg.transitionableParameters.getRawColor(i));
             colValid = true;
           } else {
             byte brgbw[] = {0,0,0,0};
@@ -559,10 +559,10 @@ void serializeSegment(const JsonObject& root, const Segment& seg, byte id, bool 
   for (size_t i = 0; i < 3; i++)
   {
     byte segcol[4]; byte* c = segcol;
-    segcol[0] = R(seg.transitionableParameters.colors[i]);
-    segcol[1] = G(seg.transitionableParameters.colors[i]);
-    segcol[2] = B(seg.transitionableParameters.colors[i]);
-    segcol[3] = W(seg.transitionableParameters.colors[i]);
+    segcol[0] = R(seg.transitionableParameters.getRawColor(i));
+    segcol[1] = G(seg.transitionableParameters.getRawColor(i));
+    segcol[2] = B(seg.transitionableParameters.getRawColor(i));
+    segcol[3] = W(seg.transitionableParameters.getRawColor(i));
     char tmpcol[22];
     sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
     strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);

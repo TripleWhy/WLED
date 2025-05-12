@@ -182,22 +182,22 @@ public:
       {
         for (int i = 0; i < strip.getLengthTotal() * printPercent / 100; i++)
         {
-          strip.setPixelColor(i, strip.getSegment(0).transitionableParameters.colors[1]);
+          strip.setPixelColor(i, strip.getSegment(0).transitionableParameters.getRawColor(1));
         }
       }
       else if (direction == 1) // reversed
       {
         for (int i = 0; i < strip.getLengthTotal() * printPercent / 100; i++)
         {
-          strip.setPixelColor(strip.getLengthTotal() - i, strip.getSegment(0).transitionableParameters.colors[1]);
+          strip.setPixelColor(strip.getLengthTotal() - i, strip.getSegment(0).transitionableParameters.getRawColor(1));
         }
       }
       else if (direction == 2) // center
       {
         for (int i = 0; i < (strip.getLengthTotal() / 2) * printPercent / 100; i++)
         {
-          strip.setPixelColor((strip.getLengthTotal() / 2) + i, strip.getSegment(0).transitionableParameters.colors[1]);
-          strip.setPixelColor((strip.getLengthTotal() / 2) - i, strip.getSegment(0).transitionableParameters.colors[1]);
+          strip.setPixelColor((strip.getLengthTotal() / 2) + i, strip.getSegment(0).transitionableParameters.getRawColor(1));
+          strip.setPixelColor((strip.getLengthTotal() / 2) - i, strip.getSegment(0).transitionableParameters.getRawColor(1));
         }
       }
       else

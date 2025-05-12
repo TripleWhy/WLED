@@ -924,11 +924,11 @@ void RotaryEncoderUIUsermod::changeHue(bool increase){
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive()) continue;
-      seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+      seg.transitionableParameters.setRawColor(0, RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]));
     }
   } else {
     Segment& seg = strip.getSegment(strip.getMainSegmentId());
-    seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+    seg.transitionableParameters.setRawColor(0, RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]));
   }
   lampUdated();
 #ifdef USERMOD_FOUR_LINE_DISPLAY
@@ -953,11 +953,11 @@ void RotaryEncoderUIUsermod::changeSat(bool increase){
     for (unsigned i=0; i<strip.getSegmentsNum(); i++) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive()) continue;
-      seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+      seg.transitionableParameters.setRawColor(0, RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]));
     }
   } else {
     Segment& seg = strip.getSegment(strip.getMainSegmentId());
-    seg.transitionableParameters.colors[0] = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
+    seg.transitionableParameters.setRawColor(0, RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]));
   }
   lampUdated();
 #ifdef USERMOD_FOUR_LINE_DISPLAY

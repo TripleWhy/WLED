@@ -9,14 +9,14 @@ void setValuesFromFirstSelectedSeg() { setValuesFromSegment(strip.getFirstSelect
 void setValuesFromSegment(uint8_t s)
 {
   Segment& seg = strip.getSegment(s);
-  colPri[0] = R(seg.transitionableParameters.colors[0]);
-  colPri[1] = G(seg.transitionableParameters.colors[0]);
-  colPri[2] = B(seg.transitionableParameters.colors[0]);
-  colPri[3] = W(seg.transitionableParameters.colors[0]);
-  colSec[0] = R(seg.transitionableParameters.colors[1]);
-  colSec[1] = G(seg.transitionableParameters.colors[1]);
-  colSec[2] = B(seg.transitionableParameters.colors[1]);
-  colSec[3] = W(seg.transitionableParameters.colors[1]);
+  colPri[0] = R(seg.transitionableParameters.getRawColor(0));
+  colPri[1] = G(seg.transitionableParameters.getRawColor(0));
+  colPri[2] = B(seg.transitionableParameters.getRawColor(0));
+  colPri[3] = W(seg.transitionableParameters.getRawColor(0));
+  colSec[0] = R(seg.transitionableParameters.getRawColor(1));
+  colSec[1] = G(seg.transitionableParameters.getRawColor(1));
+  colSec[2] = B(seg.transitionableParameters.getRawColor(1));
+  colSec[3] = W(seg.transitionableParameters.getRawColor(1));
   effectCurrent   = seg.getEffectId();
   effectSpeed     = seg.transitionableParameters.speed;
   effectIntensity = seg.transitionableParameters.intensity;
@@ -41,8 +41,8 @@ void applyValuesToSelectedSegs()
     if (effectCurrent   != selsegPrev.getEffectId()) {seg.setMode(effectCurrent);}
     uint32_t col0 = RGBW32(colPri[0], colPri[1], colPri[2], colPri[3]);
     uint32_t col1 = RGBW32(colSec[0], colSec[1], colSec[2], colSec[3]);
-    if (col0 != selsegPrev.transitionableParameters.colors[0])            {seg.setColor(0, col0);}
-    if (col1 != selsegPrev.transitionableParameters.colors[1])            {seg.setColor(1, col1);}
+    if (col0 != selsegPrev.transitionableParameters.getRawColor(0))            {seg.setColor(0, col0);}
+    if (col1 != selsegPrev.transitionableParameters.getRawColor(1))            {seg.setColor(1, col1);}
   }
 }
 

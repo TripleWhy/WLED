@@ -42,7 +42,7 @@ void notify(byte callMode, bool followUp)
   udpOut[0] = 0; //0: wled notifier protocol 1: WARLS protocol
   udpOut[1] = callMode;
   udpOut[2] = bri;
-  uint32_t col = mainseg.transitionableParameters.colors[0];
+  uint32_t col = mainseg.transitionableParameters.getRawColor(0);
   udpOut[3] = R(col);
   udpOut[4] = G(col);
   udpOut[5] = B(col);
@@ -58,7 +58,7 @@ void notify(byte callMode, bool followUp)
   //9: supports sync groups, 37 byte packet 10: supports CCT, 39 byte packet 11: per segment options, variable packet length (40+MAX_NUM_SEGMENTS*3)
   //12: enhanced effect sliders, 2D & mapping options
   udpOut[11] = 12;
-  col = mainseg.transitionableParameters.colors[1];
+  col = mainseg.transitionableParameters.getRawColor(1);
   udpOut[12] = R(col);
   udpOut[13] = G(col);
   udpOut[14] = B(col);
@@ -67,7 +67,7 @@ void notify(byte callMode, bool followUp)
   udpOut[17] = (transitionDelay >> 0) & 0xFF;
   udpOut[18] = (transitionDelay >> 8) & 0xFF;
   udpOut[19] = mainseg.palette;
-  col = mainseg.transitionableParameters.colors[2];
+  col = mainseg.transitionableParameters.getRawColor(2);
   udpOut[20] = R(col);
   udpOut[21] = G(col);
   udpOut[22] = B(col);
@@ -122,18 +122,18 @@ void notify(byte callMode, bool followUp)
     udpOut[12+ofs] = selseg.transitionableParameters.speed;
     udpOut[13+ofs] = selseg.transitionableParameters.intensity;
     udpOut[14+ofs] = selseg.palette;
-    udpOut[15+ofs] = R(selseg.transitionableParameters.colors[0]);
-    udpOut[16+ofs] = G(selseg.transitionableParameters.colors[0]);
-    udpOut[17+ofs] = B(selseg.transitionableParameters.colors[0]);
-    udpOut[18+ofs] = W(selseg.transitionableParameters.colors[0]);
-    udpOut[19+ofs] = R(selseg.transitionableParameters.colors[1]);
-    udpOut[20+ofs] = G(selseg.transitionableParameters.colors[1]);
-    udpOut[21+ofs] = B(selseg.transitionableParameters.colors[1]);
-    udpOut[22+ofs] = W(selseg.transitionableParameters.colors[1]);
-    udpOut[23+ofs] = R(selseg.transitionableParameters.colors[2]);
-    udpOut[24+ofs] = G(selseg.transitionableParameters.colors[2]);
-    udpOut[25+ofs] = B(selseg.transitionableParameters.colors[2]);
-    udpOut[26+ofs] = W(selseg.transitionableParameters.colors[2]);
+    udpOut[15+ofs] = R(selseg.transitionableParameters.getRawColor(0));
+    udpOut[16+ofs] = G(selseg.transitionableParameters.getRawColor(0));
+    udpOut[17+ofs] = B(selseg.transitionableParameters.getRawColor(0));
+    udpOut[18+ofs] = W(selseg.transitionableParameters.getRawColor(0));
+    udpOut[19+ofs] = R(selseg.transitionableParameters.getRawColor(1));
+    udpOut[20+ofs] = G(selseg.transitionableParameters.getRawColor(1));
+    udpOut[21+ofs] = B(selseg.transitionableParameters.getRawColor(1));
+    udpOut[22+ofs] = W(selseg.transitionableParameters.getRawColor(1));
+    udpOut[23+ofs] = R(selseg.transitionableParameters.getRawColor(2));
+    udpOut[24+ofs] = G(selseg.transitionableParameters.getRawColor(2));
+    udpOut[25+ofs] = B(selseg.transitionableParameters.getRawColor(2));
+    udpOut[26+ofs] = W(selseg.transitionableParameters.getRawColor(2));
     udpOut[27+ofs] = selseg.cct;
     udpOut[28+ofs] = (selseg.options>>8) & 0xFF; //mirror_y, transpose, 2D mapping & sound
     udpOut[29+ofs] = selseg.transitionableParameters.custom1;

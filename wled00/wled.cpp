@@ -540,7 +540,7 @@ void WLED::beginStrip()
       // set all segments black (no transition)
       for (unsigned i = 0; i < strip.getSegmentsNum(); i++) {
         Segment &seg = strip.getSegment(i);
-        if (seg.isActive()) seg.transitionableParameters.colors[0] = BLACK;
+        if (seg.isActive()) seg.transitionableParameters.setRawColor(0, BLACK);
       }
       colPri[0] = colPri[1] = colPri[2] = colPri[3] = 0;  // needed for colorUpdated()
     }
