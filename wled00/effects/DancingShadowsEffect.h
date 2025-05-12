@@ -105,7 +105,7 @@ public:
                 spotlights[i].type = static_cast<SpotType>(hw_random8(static_cast<uint8_t>(SpotType::COUNT)));
             }
 
-            uint32_t color = SEGMENT.color_from_palette(spotlights[i].colorIdx, false, false, 255);
+            uint32_t color = parameters.color_from_palette(spotlights[i].colorIdx, false, false, 255);
             int start = spotlights[i].position;
 
             if (spotlights[i].width <= 1) {

@@ -38,10 +38,10 @@ public:
         if (aux0) pos = 255 - pos;
         for (unsigned i = 0; i < coordinate.width; i += 2)
         {
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(255 - pos, false, false, 255)); // do not use color 1 or 2, always use palette
+            buffer.setPixelColor(i, parameters.color_from_palette(255 - pos, false, false, 255)); // do not use color 1 or 2, always use palette
             if (i < coordinate.width -1)
             {
-                buffer.setPixelColor(i + 1, SEGMENT.color_from_palette(pos, false, false, 255)); // do not use color 1 or 2, always use palette
+                buffer.setPixelColor(i + 1, parameters.color_from_palette(pos, false, false, 255)); // do not use color 1 or 2, always use palette
             }
         }
         step += FRAMETIME;

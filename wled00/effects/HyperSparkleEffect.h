@@ -30,7 +30,7 @@ public:
         if (!parameters.check2) {
             for (unsigned i = 0; i < coordinate.width; i++) {
                 unsigned palIdx = moving ? (i+it)%coordinate.width : i;
-                buffer.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 0));
+                buffer.setPixelColor(i, parameters.color_from_palette(palIdx, true, moving, 0));
             }
         }
 

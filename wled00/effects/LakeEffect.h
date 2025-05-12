@@ -30,7 +30,7 @@ public:
         {
             int index = cos8_t((i*15)+ wave1)/2 + cubicwave8((i*23)+ wave2)/2;
             uint8_t lum = (index > wave3) ? index - wave3 : 0;
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, false, 0, lum));
+            buffer.setPixelColor(i, parameters.color_from_palette(index, false, false, 0, lum));
         }
         return true;
     }

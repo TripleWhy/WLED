@@ -39,7 +39,7 @@ public:
         if (aux1 > 3 && !(aux1 & 0x01)) { //flash on even number >2
             for (unsigned i = ledstart; i < ledstart + ledlen; i++)
             {
-                buffer.setPixelColor(i,SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
+                buffer.setPixelColor(i,parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
             }
             aux1--;
 

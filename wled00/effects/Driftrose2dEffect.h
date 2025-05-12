@@ -37,7 +37,7 @@ public:
             uint32_t x = (CX + (sin_t(angle) * (beatsin8_t(i, 0, L*2)-L))) * 255.f;
             uint32_t y = (CY + (cos_t(angle) * (beatsin8_t(i, 0, L*2)-L))) * 255.f;
             if(SEGMENT.palette == 0) buffer.wuPixel(coordinate, x, y, CHSV(i * 10, 255, 255));
-            else buffer.wuPixel(coordinate, x, y, ColorFromPalette(SEGPALETTE, i * 10));
+            else buffer.wuPixel(coordinate, x, y, SEGPALETTE.ColorFromPalette(i * 10));
         }
         buffer.blur(parameters.intensity >> 4, parameters.check1);
         return true;

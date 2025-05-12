@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../memory/CircularAllocator.h"
-#include "../TransitionableParameters.h"
 #include "effectUtils.h"
 
 class Effect;
-class LazyColor;
 class EffectCoordinate;
+class LazyColor;
+class TransitionableParameters;
 
 enum class EffectDimensionality : uint8_t {
     d0 = 0,

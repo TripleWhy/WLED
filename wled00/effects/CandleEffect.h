@@ -83,12 +83,12 @@ public:
             }
 
             if (i > 0) {
-                buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), uint8_t(s)));
+                buffer.setPixelColor(i, color_blend(SEGCOLOR(1), parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), uint8_t(s)));
 
                 data[d] = s; data[d+1] = s_target; data[d+2] = fadeStep;
             } else {
                 for (unsigned j = 0; j < coordinate.width; j++) {
-                    buffer.setPixelColor(j, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0), uint8_t(s)));
+                    buffer.setPixelColor(j, color_blend(SEGCOLOR(1), parameters.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0), uint8_t(s)));
                 }
 
                 aux0 = s; aux1 = s_target; step = fadeStep;

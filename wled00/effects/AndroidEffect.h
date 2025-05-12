@@ -30,7 +30,7 @@ public:
         nextExecutionTimestamp = strip.now + (3 + ((8 * (uint32_t)(255 - parameters.speed)) / coordinate.width));
 
         for (unsigned i = 0; i < coordinate.width; i++) {
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+            buffer.setPixelColor(i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
         }
 
         if (aux1 > (parameters.intensity*coordinate.width)/255)

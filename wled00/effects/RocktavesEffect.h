@@ -47,7 +47,7 @@ public:
 
         unsigned i = map(beatsin8_t(8+octCount*4, 0, 255, 0, octCount*8), 0, 255, 0, coordinate.width-1);
         i = constrain(i, 0U, coordinate.width-1U);
-        buffer.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette((uint8_t)frTemp, false, PALETTE_SOLID_WRAP, 0), volTemp));
+        buffer.addPixelColor(i, color_blend(SEGCOLOR(1), parameters.color_from_palette((uint8_t)frTemp, false, PALETTE_SOLID_WRAP, 0), volTemp));
         return true;
     }
 

@@ -42,7 +42,7 @@ public:
     }
 
     uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        uint32_t color = SEGMENT.color_wheel(colorIndexes[coordinate.getXAbsolute()]);
+        uint32_t color = parameters.color_wheel(colorIndexes[coordinate.getXAbsolute()]);
         if (parameters.check1) {
             color = color_blend(currentColor.getColor(), color, 16);
         }

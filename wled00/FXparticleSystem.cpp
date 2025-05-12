@@ -646,11 +646,11 @@ void ParticleSystem2D::ParticleSys_render(PixelBuffer<EffectDimensionality::d2>&
     if (fireIntesity) { // fire mode
       brightness = (uint32_t)particles[i].ttl * (3 + (fireIntesity >> 5)) + 20;
       brightness = min(brightness, (uint32_t)255);
-      baseRGB = ColorFromPalette(SEGPALETTE, brightness, 255);
+      baseRGB = SEGPALETTE.ColorFromPalette(brightness, 255);
     }
     else {
       brightness = min((particles[i].ttl << 1), (int)255);
-      baseRGB = ColorFromPalette(SEGPALETTE, particles[i].hue, 255);
+      baseRGB = SEGPALETTE.ColorFromPalette(particles[i].hue, 255);
       if (particles[i].sat < 255) {
         CHSV32 baseHSV = baseRGB;
         baseHSV.s = particles[i].sat; // set the saturation
@@ -1394,7 +1394,7 @@ void ParticleSystem1D::ParticleSys_render(PixelBuffer<EffectDimensionality::d1>&
 
     // generate RGB values for particle
     uint32_t brightness = min(particles[i].ttl << 1, (int)255);
-    CRGBW baseRGB = ColorFromPalette(SEGPALETTE, particles[i].hue, 255);
+    CRGBW baseRGB = SEGPALETTE.ColorFromPalette(particles[i].hue, 255);
 
     if (!advPartProps.empty()) { //saturation is advanced property in 1D system
       if (advPartProps[i].sat < 255) {

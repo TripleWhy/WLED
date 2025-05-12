@@ -63,7 +63,7 @@ private:
             PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
             diff = (PRNG16 > lastR) ? PRNG16 - lastR : lastR - PRNG16;
         }
-        return color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0), flasherBri);
+        return color_blend(SEGCOLOR(1), parameters.color_from_palette(PRNG16 >> 8, false, false, 0), flasherBri);
     }
 
 private:

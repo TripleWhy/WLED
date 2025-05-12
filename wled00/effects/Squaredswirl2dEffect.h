@@ -43,9 +43,9 @@ public:
         int n = beatsin8_t(15, kBorderWidth, rows-kBorderWidth);
         int p = beatsin8_t(20, kBorderWidth, rows-kBorderWidth);
 
-        buffer.addPixelColor(i, m, ColorFromPalette(SEGPALETTE, strip.now/29, 255, LINEARBLEND));
-        buffer.addPixelColor(j, n, ColorFromPalette(SEGPALETTE, strip.now/41, 255, LINEARBLEND));
-        buffer.addPixelColor(k, p, ColorFromPalette(SEGPALETTE, strip.now/73, 255, LINEARBLEND));
+        buffer.addPixelColor(i, m, SEGPALETTE.ColorFromPalette(strip.now/29, 255, LINEARBLEND));
+        buffer.addPixelColor(j, n, SEGPALETTE.ColorFromPalette(strip.now/41, 255, LINEARBLEND));
+        buffer.addPixelColor(k, p, SEGPALETTE.ColorFromPalette(strip.now/73, 255, LINEARBLEND));
         return true;
     }
 

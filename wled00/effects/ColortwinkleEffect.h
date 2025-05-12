@@ -64,7 +64,7 @@ public:
                         unsigned index = i >> 3;
                         unsigned  bitNum = i & 0x07;
                         bitWrite(data[index], bitNum, true);
-                        buffer.setPixelColor(i, ColorFromPalette(SEGPALETTE, hw_random8(), 64, NOBLEND));
+                        buffer.setPixelColor(i, SEGPALETTE.ColorFromPalette(hw_random8(), 64, NOBLEND));
                         break; //only spawn 1 new pixel per frame per 50 LEDs
                     }
                 }

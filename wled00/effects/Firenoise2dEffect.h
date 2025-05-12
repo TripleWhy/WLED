@@ -40,7 +40,7 @@ public:
         for (int j=0; j < cols; j++) {
             for (int i=0; i < rows; i++) {
                 indexx = perlin8(j*yscale*rows/255, i*xscale+strip.now/4);                                               // We're moving along our Perlin map.
-                buffer.setPixelColor(j, i, ColorFromPalette(pal, min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
+                buffer.setPixelColor(j, i, pal.ColorFromPalette(min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
             } // for i
         } // for j
         return true;

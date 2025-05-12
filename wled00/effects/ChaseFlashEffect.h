@@ -37,7 +37,7 @@ public:
         const bool moving = parameters.check1;
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned palIdx = moving ? (i+it)%coordinate.width : i;
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(palIdx, true, moving, 0));
+            buffer.setPixelColor(i, parameters.color_from_palette(palIdx, true, moving, 0));
         }
 
         unsigned delay = 10 + ((30 * (uint16_t)(255 - parameters.speed)) / coordinate.width);

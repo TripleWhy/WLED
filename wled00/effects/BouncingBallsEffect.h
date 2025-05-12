@@ -34,7 +34,7 @@ public:
 
         for (size_t i = 0; i < numBalls; ++i) {
             if (SEGMENT.palette) {
-                ballColors[i] = SEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
+                ballColors[i] = parameters.color_wheel(i*(256/MAX(numBalls, 8)));
             } else if (SEGCOLOR(2)) {
                 ballColors[i] = SEGCOLOR(i % NUM_COLORS);
             } else {

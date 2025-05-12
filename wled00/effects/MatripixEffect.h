@@ -38,7 +38,7 @@ public:
             for (unsigned i = 0; i < k; i++) {
                 buffer.setPixelColor(i, buffer.getPixelColor(i+1)); // shift left
             }
-            buffer.setPixelColor(k, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0), pixBri));
+            buffer.setPixelColor(k, color_blend(SEGCOLOR(1), parameters.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0), pixBri));
         }
         return true;
     }

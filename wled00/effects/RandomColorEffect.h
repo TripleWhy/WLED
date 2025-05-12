@@ -42,7 +42,7 @@ public:
             step = it;
         }
 
-        color = color_blend(SEGMENT.color_wheel(previousColorWheelIndex), SEGMENT.color_wheel(colorWheelIndex), uint8_t(fade));
+        color = color_blend(parameters.color_wheel(previousColorWheelIndex), parameters.color_wheel(colorWheelIndex), uint8_t(fade));
         return true;
     }
 

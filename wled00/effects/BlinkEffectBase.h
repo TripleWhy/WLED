@@ -46,7 +46,7 @@ public:
 
     uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         if (usePalette) {
-            return SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0);
+            return parameters.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0);
         } else {
             return color;
         }

@@ -44,11 +44,11 @@ public:
         }
         unsigned palIdx = moving ? (i+counter)%coordinate.width : i;
         uint8_t s = dual ? sin_gap(a) : sin8_t(a);
-        uint32_t ca = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(palIdx, true, moving, 0), s);
+        uint32_t ca = color_blend(SEGCOLOR(1), parameters.color_from_palette(palIdx, true, moving, 0), s);
         if (dual) {
             unsigned b = (coordinate.width-1-i)*x_scale - counter;
             uint8_t t = sin_gap(b);
-            uint32_t cb = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(palIdx, true, moving, 2), t);
+            uint32_t cb = color_blend(SEGCOLOR(1), parameters.color_from_palette(palIdx, true, moving, 2), t);
             ca = color_blend(ca, cb, uint8_t(127));
         }
         return ca;

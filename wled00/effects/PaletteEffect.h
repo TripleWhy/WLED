@@ -103,7 +103,7 @@ public:
         // Finally, shift the palette a bit.
         const int paletteOffset = (!inputAnimateShift) ? (inputShift) : (((strip.now * ((inputShift >> 3) +1)) & 0xFFFF) >> 8);
         colorIndex -= paletteOffset;
-        const uint32_t color = SEGMENT.color_wheel((uint8_t)colorIndex);
+        const uint32_t color = parameters.color_wheel((uint8_t)colorIndex);
         return color;
     }
 

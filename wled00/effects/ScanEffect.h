@@ -33,12 +33,12 @@ public:
 
         const unsigned x = coordinate.getXAbsolute();
         if (led_offset <= x && x < led_offset + size) {
-            return SEGMENT.color_from_palette(x, true, PALETTE_SOLID_WRAP, 0);
+            return parameters.color_from_palette(x, true, PALETTE_SOLID_WRAP, 0);
         }
         if (dual) {
             unsigned x2 = coordinate.width - 1 - x;
             if (led_offset <= x2 && x2 < led_offset + size) {
-                return SEGMENT.color_from_palette(x2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0);
+                return parameters.color_from_palette(x2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0);
             }
         }
         if (parameters.check2) {

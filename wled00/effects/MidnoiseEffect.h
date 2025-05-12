@@ -27,8 +27,8 @@ public:
         um_data_t *um_data = getAudioData();
         float   volumeSmth   = *(float*)  um_data->u_data[0];
 
-        buffer.fadeOut(parameters.speed);
-        buffer.fadeOut(parameters.speed);
+        buffer.fade(SEGCOLOR(1), parameters.speed);
+        buffer.fade(SEGCOLOR(1), parameters.speed);
 
         float tmpSound2 = volumeSmth * (float)parameters.intensity / 256.0;  // Too sensitive.
         tmpSound2 *= (float)parameters.intensity / 128.0;              // Reduce sensitivity/length.
@@ -38,7 +38,7 @@ public:
 
         for (unsigned i=(coordinate.width/2-maxLen); i<(coordinate.width/2+maxLen); i++) {
             uint8_t index = perlin8(i*volumeSmth+xdist, ydist+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(i, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
 
         xdist=xdist+beatsin8_t(5,0,10);

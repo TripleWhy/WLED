@@ -48,7 +48,7 @@ public:
 
         const bool moving = parameters.check1;
         const unsigned palIdx = moving ? (i+it)%coordinate.width : i;
-        return SEGMENT.color_from_palette(palIdx, true, moving, 0);
+        return parameters.color_from_palette(palIdx, true, moving, 0);
     }
 
 private:

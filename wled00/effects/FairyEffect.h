@@ -39,7 +39,7 @@ public:
         uint16_t PRNG16 = 5100 + strip.getCurrSegmentId();
         for (unsigned i = 0; i < coordinate.width; i++) {
             PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0));
+            buffer.setPixelColor(i, parameters.color_from_palette(PRNG16 >> 8, false, false, 0));
         }
 
         //amount of flasher pixels depending on intensity (0: none, 255: every LED)
@@ -97,10 +97,10 @@ public:
                 uint8_t bri = (flasherBri[f - firstFlasher] * globalPeakBri) / 255;
                 PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
                 unsigned flasherPos = f*flasherDistance;
-                buffer.setPixelColor(flasherPos, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0), bri));
+                buffer.setPixelColor(flasherPos, color_blend(SEGCOLOR(1), parameters.color_from_palette(PRNG16 >> 8, false, false, 0), bri));
                 for (unsigned i = flasherPos+1; i < flasherPos+flasherDistance && i < coordinate.width; i++) {
                     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
-                    buffer.setPixelColor(i, SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0, globalPeakBri));
+                    buffer.setPixelColor(i, parameters.color_from_palette(PRNG16 >> 8, false, false, 0, globalPeakBri));
                 }
             }
         }

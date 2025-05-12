@@ -28,7 +28,7 @@ public:
         unsigned size = 0;
         uint8_t fadeVal = map(parameters.speed, 0, 255, 224, 254);
         unsigned pos = hw_random16(coordinate.width);                          // Set a random starting position.
-        buffer.fadeOut(fadeVal);
+        buffer.fade(SEGCOLOR(1), fadeVal);
 
         um_data_t *um_data = getAudioData();
         int volumeRaw      = *(int16_t*)um_data->u_data[1];
@@ -53,7 +53,7 @@ public:
         }
 
         for (unsigned i=0; i<size; i++) {                           // Flash the LED's.
-            buffer.setPixelColor(pos+i, SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(pos+i, parameters.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
         }
         return true;
     }

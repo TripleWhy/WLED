@@ -50,7 +50,7 @@ public:
             aux1 = numSparks;
         }
 
-        buffer.fadeOut(252);
+        buffer.fade(SEGCOLOR(1), 252);
 
         Spark& flare = sparks.front(); //first spark is flare data
         float gravity = -0.0004f - (parameters.speed/800000.0f); // m/s/s
@@ -125,7 +125,7 @@ public:
                         if (!(sparks[i].posX >= 0 && sparks[i].posX < cols))
                             continue;
                         unsigned prog = sparks[i].col;
-                        uint32_t spColor = (SEGMENT.palette) ? SEGMENT.color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
+                        uint32_t spColor = (SEGMENT.palette) ? parameters.color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
                         CRGBW c = BLACK; //HeatColor(sparks[i].col);
                         if (prog > 300) { //fade from white to spark color
                             c = color_blend(spColor, WHITE, uint8_t((prog - 300)*5));

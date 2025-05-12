@@ -130,7 +130,7 @@ private:
         ci += (cs * i);
         unsigned sindex16 = sin16_t(ci) + 32768;
         unsigned sindex8 = scale16(sindex16, 240);
-        return CRGB(ColorFromPalette(p, sindex8, bri, LINEARBLEND));
+        return CRGB(p.ColorFromPalette(sindex8, bri, LINEARBLEND));
     }
 
 private:

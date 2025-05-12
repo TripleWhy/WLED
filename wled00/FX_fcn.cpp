@@ -74,9 +74,7 @@ unsigned      Segment::_vWidth            = 0;
 unsigned      Segment::_vHeight           = 0;
 unsigned      Segment::_vStripCount       = 0;
 uint8_t       Segment::_segBri            = 0;
-uint32_t      Segment::_currentColors[NUM_COLORS] = {0,0,0};
 bool          Segment::_colorScaled       = false;
-CRGBPalette16 Segment::_currentPalette    = CRGBPalette16();
 CRGBPalette16 Segment::_randomPalette     = generateRandomPalette();  // was CRGBPalette16(DEFAULT_COLOR);
 CRGBPalette16 Segment::_newRandomPalette  = generateRandomPalette();  // was CRGBPalette16(DEFAULT_COLOR);
 uint16_t      Segment::_lastPaletteChange = 0; // perhaps it should be per segment
@@ -311,22 +309,13 @@ void Segment::beginDraw() {
   _vStripCount = nrOfVStrips();
   _segBri  = currentBri();
   unsigned prog = isInTransition() ? progress() : 0xFFFFU;  // transition progress; 0xFFFFU = no transition active
-  // adjust gamma for effects
-  for (unsigned i = 0; i < NUM_COLORS; i++) {
-    #ifndef WLED_DISABLE_MODE_BLEND
-    uint32_t col = isInTransition() ? color_blend16(_t->_transitionableParametersT.colors[i], transitionableParameters.getRawColor(i), prog) : transitionableParameters.getRawColor(i);
-    #else
-    uint32_t col = isInTransition() ? color_blend16(_t->_colorT[i], transitionableParameters.getRawColor(i), prog) : transitionableParameters.getRawColor(i);
-    #endif
-    _currentColors[i] = gamma32(col);
-  }
-  // load palette into _currentPalette
-  loadPalette(_currentPalette, palette);
+
+  loadPalette(transitionableParameters.palette, palette);
   if (prog < 0xFFFFU) {
 #ifndef WLED_DISABLE_MODE_BLEND
     if (blendingStyle > BLEND_STYLE_FADE) {
-      //if (_modeBlend) loadPalette(_currentPalette, _t->_palTid); // not fade/blend transition, each effect uses its palette
-      if (_modeBlend) _currentPalette = _t->_palT; // not fade/blend transition, each effect uses its palette
+      //if (_modeBlend) loadPalette(transitionableParameters.palette, _t->_palTid); // not fade/blend transition, each effect uses its palette
+      if (_modeBlend) transitionableParameters.palette = _t->_palT; // not fade/blend transition, each effect uses its palette
     } else
 #endif
     {
@@ -334,16 +323,10 @@ void Segment::beginDraw() {
       // there are about 255 blend passes of 48 "blends" to completely blend two palettes (in _dur time)
       // minimum blend time is 100ms maximum is 65535ms
       unsigned noOfBlends = ((255U * prog) / 0xFFFFU) - _t->_prevPaletteBlends;
-      for (unsigned i = 0; i < noOfBlends; i++, _t->_prevPaletteBlends++) nblendPaletteTowardPalette(_t->_palT, _currentPalette, 48);
-      _currentPalette = _t->_palT; // copy transitioning/temporary palette
+      for (unsigned i = 0; i < noOfBlends; i++, _t->_prevPaletteBlends++) nblendPaletteTowardPalette(_t->_palT, transitionableParameters.palette, 48);
+      transitionableParameters.palette = _t->_palT; // copy transitioning/temporary palette
     }
   }
-}
-
-// loads palette of the old FX during transitions (used by particle system)
-void Segment::loadOldPalette(void) {
-  if(isInTransition())
-    loadPalette(_currentPalette, _t->_palTid);
 }
 
 // relies on WS2812FX::service() to call it for each frame
@@ -1077,59 +1060,6 @@ void Segment::fill(uint32_t c) {
     else        setPixelColor(x, c);
   }
   _colorScaled = false;
-}
-
-/*
- * Put a value 0 to 255 in to get a color value.
- * The colours are a transition r -> g -> b -> back to r
- * Inspired by the Adafruit examples.
- */
-uint32_t Segment::color_wheel(uint8_t pos) const {
-  if (palette) return color_from_palette(pos, false, true, 0); // perhaps "strip.paletteBlend < 2" should be better instead of "true"
-  uint8_t w = W(getCurrentColor(0));
-  pos = 255 - pos;
-  if (pos < 85) {
-    return RGBW32((255 - pos * 3), 0, (pos * 3), w);
-  } else if (pos < 170) {
-    pos -= 85;
-    return RGBW32(0, (pos * 3), (255 - pos * 3), w);
-  } else {
-    pos -= 170;
-    return RGBW32((pos * 3), (255 - pos * 3), 0, w);
-  }
-}
-
-/*
- * Gets a single color from the currently selected palette.
- * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
- * @param mapping if true, LED position in segment is considered for color
- * @param moving FastLED palettes will usually wrap back to the start smoothly. Set to true if effect has moving palette and you want wrap.
- * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
- * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
- * @returns Single color from palette
- */
-uint32_t Segment::color_from_palette(uint16_t i, bool mapping, bool moving, uint8_t mcol, uint8_t pbri) const {
-  uint32_t color = getCurrentColor(mcol < NUM_COLORS ? mcol : 0);
-  // default palette or no RGB support on segment
-  if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) {
-    return color_fade(color, pbri, true);
-  }
-
-  const int vL = vLength();
-  unsigned paletteIndex = i;
-  if (mapping && vL > 1) paletteIndex = (i*255)/(vL -1);
-  // paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined/no interpolation of palette entries)
-  // ColorFromPalette interpolations are: NOBLEND, LINEARBLEND, LINEARBLEND_NOWRAP
-  TBlendType blend = NOBLEND;
-  switch (strip.paletteBlend) { // NOTE: paletteBlend should be global
-    case 0: blend = moving ? LINEARBLEND : LINEARBLEND_NOWRAP; break;
-    case 1: blend = LINEARBLEND; break;
-    case 2: blend = LINEARBLEND_NOWRAP; break;
-  }
-  CRGBW palcol = ColorFromPalette(_currentPalette, paletteIndex, pbri, blend);
-  palcol.w = W(color);
-
-  return palcol.color32;
 }
 
 

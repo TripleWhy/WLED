@@ -49,7 +49,7 @@ static uint16_t running_copy(uint32_t color1, uint32_t color2, bool theatre = fa
 
   for (int i = 0; i < SEGLEN; i++) {
     uint32_t col = color2;
-    if (usePalette) color1 = SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
+    if (usePalette) color1 = parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
     if (theatre) {
       if ((i % width) == SEGENV.aux0) col = color1;
     } else {

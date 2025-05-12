@@ -33,7 +33,7 @@ public:
         unsigned flash_step = parameters.call % ((FLASH_COUNT * 2) + 1);
 
         for (int i = 0; i < aux1; i++) {
-            buffer.setPixelColor(i, SEGMENT.color_wheel(aux0));
+            buffer.setPixelColor(i, parameters.color_wheel(aux0));
         }
 
         unsigned delay = 1 + ((10 * (uint16_t)(255 - parameters.speed)) / coordinate.width);
@@ -45,7 +45,7 @@ public:
                 buffer.setPixelColor( m, SEGCOLOR(0));
                 delay = 20;
             } else {
-                buffer.setPixelColor( n, SEGMENT.color_wheel(aux0));
+                buffer.setPixelColor( n, parameters.color_wheel(aux0));
                 buffer.setPixelColor( m, SEGCOLOR(1));
                 delay = 30;
             }

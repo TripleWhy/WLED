@@ -32,7 +32,7 @@ public:
     }
 
     uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
-        return color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0), lum);
+        return color_blend(SEGCOLOR(1), parameters.color_from_palette(coordinate.getXAbsolute(), true, PALETTE_SOLID_WRAP, 0), lum);
     }
 
 private:

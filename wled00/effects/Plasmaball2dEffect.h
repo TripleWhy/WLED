@@ -46,7 +46,7 @@ public:
                                                                             (cols - cx == 0) ||
                                                                             (cols - 1 - cx == 0) ||
                                                                             ((rows - cy == 0) ||
-                                                                            (rows - 1 - cy == 0)) ? ColorFromPalette(SEGPALETTE, beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
+                                                                            (rows - 1 - cy == 0)) ? SEGPALETTE.ColorFromPalette(beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
             }
         }
         buffer.blur(parameters.custom2>>5);

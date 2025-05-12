@@ -39,7 +39,7 @@ public:
         for (int i = 0; i < 13; i++) {
             int x = sin8_t(t1 + i * parameters.intensity/8)*(cols-1)/255;  // max index now 255x15/255=15!
             int y = sin8_t(t2 + i * parameters.intensity/8)*(rows-1)/255;  // max index now 255x15/255=15!
-            buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
+            buffer.setPixelColor(x, y, SEGPALETTE.ColorFromPalette(i * 255 / 13, 255, LINEARBLEND));
         }
         buffer.blur(parameters.custom2 >> (3 + parameters.check1), parameters.check1);
         return true;

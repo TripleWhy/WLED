@@ -34,7 +34,7 @@ public:
                 if (wave > threshold) {
                     unsigned index = 0 + pos + i;
                     unsigned s = (wave - threshold)*255 / (0xFFFF - threshold);
-                    buffer.setPixelColor(index, color_blend(SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255-s)));
+                    buffer.setPixelColor(index, color_blend(parameters.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255-s)));
                 }
             }
         }

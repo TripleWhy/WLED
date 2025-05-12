@@ -62,9 +62,9 @@ public:
 
                 // map color between thresholds
                 if (color > 0 and color < 60) {
-                    buffer.setPixelColor(x, y, SEGMENT.color_from_palette(map(color * 9, 9, 531, 0, 255), false, PALETTE_SOLID_WRAP, 0));
+                    buffer.setPixelColor(x, y, parameters.color_from_palette(map(color * 9, 9, 531, 0, 255), false, PALETTE_SOLID_WRAP, 0));
                 } else {
-                    buffer.setPixelColor(x, y, SEGMENT.color_from_palette(0, false, PALETTE_SOLID_WRAP, 0));
+                    buffer.setPixelColor(x, y, parameters.color_from_palette(0, false, PALETTE_SOLID_WRAP, 0));
                 }
                 // show the 3 points, too
                 buffer.setPixelColor(x1, y1, WHITE);

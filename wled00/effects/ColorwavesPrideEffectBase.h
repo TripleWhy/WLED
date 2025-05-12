@@ -60,7 +60,7 @@ public:
                 CRGB newcolor = CHSV(hue8, sat8, bri8);
                 buffer.blendPixelColor(i, RGBW32(newcolor.r, newcolor.g, newcolor.b, 0), 64);
             } else {
-                buffer.blendPixelColor(i, SEGMENT.color_from_palette(hue8, false, PALETTE_SOLID_WRAP, 0, bri8), 128);
+                buffer.blendPixelColor(i, parameters.color_from_palette(hue8, false, PALETTE_SOLID_WRAP, 0, bri8), 128);
             }
         }
         return true;

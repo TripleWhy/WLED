@@ -114,7 +114,7 @@ public:
                 if (iter == maxIterations) {
                     buffer.setPixelColor(i, j, 0);
                 } else {
-                    buffer.setPixelColor(i, j, SEGMENT.color_from_palette(iter*255/maxIterations, false, PALETTE_SOLID_WRAP, 0));
+                    buffer.setPixelColor(i, j, parameters.color_from_palette(iter*255/maxIterations, false, PALETTE_SOLID_WRAP, 0));
                 }
                 x += dx;
             }

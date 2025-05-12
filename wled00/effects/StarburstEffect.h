@@ -76,7 +76,7 @@ public:
                 unsigned startPos = hw_random16(coordinate.width-1);
                 float multiplier = (float)(hw_random8())/255.0f * 1.0f;
 
-                stars[j].color = CRGB(SEGMENT.color_wheel(hw_random8()));
+                stars[j].color = CRGB(parameters.color_wheel(hw_random8()));
                 stars[j].pos = startPos;
                 stars[j].vel = maxSpeed * (float)(hw_random8())/255.0f * multiplier;
                 stars[j].birth = it;

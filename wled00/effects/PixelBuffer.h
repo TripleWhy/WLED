@@ -31,10 +31,6 @@ public:
         std::fill(pixels.begin(), pixels.end(), color);
     }
 
-    inline void fadeOut(uint8_t rate) {
-        fade(SEGCOLOR(1), rate);
-    }
-
     /*
      * fade out function, higher rate = quicker fade
      * fading is highly dependant on frame rate (higher frame rates, faster fading)
@@ -504,16 +500,11 @@ public:
     // inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c, CRGB c2, int8_t rotate = 0, bool usePalGrad = false) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0), RGBW32(c2.r,c2.g,c2.b,0), rotate, usePalGrad); } // automatic inline
     // draws a raster font character on canvas
     // only supports: 4x6=24, 5x8=40, 5x12=60, 6x8=48 and 7x9=63 fonts ATM
-    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2, int8_t rotate = 0, bool usePalGrad = false) {
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, int8_t rotate, const CRGBPalette16& grad) {
         if (chr < 32 || chr > 126)
             return; // only ASCII 32-126 supported
         chr -= 32; // align with font table entries
         const int font = w*h;
-
-        CRGB col = CRGB(color);
-        CRGBPalette16 grad = CRGBPalette16(col, col2 ? CRGB(col2) : col);
-        if (usePalGrad)
-            grad = SEGPALETTE; // selected palette as gradient
 
         const int width = Self::width;
         const int height = pixels.size() / Self::width;
@@ -529,7 +520,7 @@ public:
                 case 60: bits = pgm_read_byte_near(&console_font_5x12[(chr * h) + i]); break; // 5x12 font
                 default: return;
             }
-            CRGBW c = ColorFromPalette(grad, (i+1)*255/h, 255u, LINEARBLEND_NOWRAP);
+            CRGBW c = grad.ColorFromPalette((i+1)*255/h, 255u, LINEARBLEND_NOWRAP);
             for (int j = 0; j<w; j++) { // character width
                 int x0, y0;
                 switch (rotate) {

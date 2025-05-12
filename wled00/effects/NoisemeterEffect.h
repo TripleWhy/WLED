@@ -30,7 +30,7 @@ public:
 
         //uint8_t fadeRate = map(parameters.speed,0,255,224,255);
         uint8_t fadeRate = map(parameters.speed,0,255,200,254);
-        buffer.fadeOut(fadeRate);
+        buffer.fade(SEGCOLOR(1), fadeRate);
 
         float tmpSound2 = volumeRaw * 2.0 * (float)parameters.intensity / 255.0;
         unsigned maxLen = mapf(tmpSound2, 0, 255, 0, coordinate.width); // map to pixels availeable in current segment              // Still a bit too sensitive.
@@ -39,7 +39,7 @@ public:
 
         for (unsigned i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
             uint8_t index = perlin8(i*volumeSmth+aux0, aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(i, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
 
         aux0+=beatsin8_t(5,0,10);

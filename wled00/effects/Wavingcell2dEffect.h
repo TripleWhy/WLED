@@ -35,7 +35,7 @@ public:
             for (int y = 0; y < rows; y++) {
                 uint32_t wave = sin8_t((x * aX) + sin8_t((((y<<8) + t) * aY)>>8)) + cos8_t(y * aZ); // bit shifts to increase temporal resolution
                 uint8_t colorIndex = wave + (t>>(8-(parameters.check2*3)));
-                buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, colorIndex));
+                buffer.setPixelColor(x, y, SEGPALETTE.ColorFromPalette(colorIndex));
             }
         }
         buffer.blur(parameters.intensity);

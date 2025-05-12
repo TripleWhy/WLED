@@ -52,8 +52,8 @@ public:
         *binNum = parameters.custom1;                              // Select a bin.
         *maxVol = parameters.custom2 / 2;                          // Our volume comparator.
 
-        buffer.fadeOut(240);                                  // Lower frame rate means less effective fading than FastLED
-        buffer.fadeOut(240);
+        buffer.fade(SEGCOLOR(1), 240);                             // Lower frame rate means less effective fading than FastLED
+        buffer.fade(SEGCOLOR(1), 240);
 
         for (int i = 0; i < parameters.intensity/16; i++) {   // Limit the number of ripples.
             if (samplePeak) ripples[i].state = 255;
@@ -75,7 +75,7 @@ public:
                     break;
 
                 case 0:
-                    buffer.setPixelColor(ripples[i].pos, SEGMENT.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0));
+                    buffer.setPixelColor(ripples[i].pos, parameters.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0));
                     ripples[i].state++;
                     break;
 
@@ -84,8 +84,8 @@ public:
                     break;
 
                 default:                                            // Middle of the ripples.
-                    buffer.setPixelColor((ripples[i].pos + ripples[i].state + coordinate.width) % coordinate.width, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
-                    buffer.setPixelColor((ripples[i].pos - ripples[i].state + coordinate.width) % coordinate.width, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
+                    buffer.setPixelColor((ripples[i].pos + ripples[i].state + coordinate.width) % coordinate.width, color_blend(SEGCOLOR(1), parameters.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
+                    buffer.setPixelColor((ripples[i].pos - ripples[i].state + coordinate.width) % coordinate.width, color_blend(SEGCOLOR(1), parameters.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
                     ripples[i].state++;                               // Next step.
                     break;
             } // switch step

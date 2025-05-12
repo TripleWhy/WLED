@@ -30,7 +30,7 @@ public:
         unsigned shift = (strip.now * ((parameters.speed >> 3) +1)) >> 8;
 
         for (unsigned i = 0; i < pixelLen; i++) {
-            pixels[i] = color_blend(pixels[i], SEGMENT.color_from_palette(shift + quadwave8((i + 1) * 16), false, PALETTE_SOLID_WRAP, 255), blendSpeed);
+            pixels[i] = color_blend(pixels[i], parameters.color_from_palette(shift + quadwave8((i + 1) * 16), false, PALETTE_SOLID_WRAP, 255), blendSpeed);
             shift += 3;
         }
         return true;

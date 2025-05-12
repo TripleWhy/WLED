@@ -39,13 +39,13 @@ public:
         fadeRate = map(fadeRate, 0, 65535, 1, 255);
 
         int fadeoutDelay = (256 - parameters.speed) / 64;
-        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fadeOut(fadeRate);
+        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fade(SEGCOLOR(1), fadeRate);
 
         uint8_t pixCol = (log10f(FFT_MajorPeak) - 1.78f) * 255.0f/(MAX_FREQ_LOG10 - 1.78f);  // Scale log10 of frequency values to the 255 colour index.
         if (FFT_MajorPeak < 61.0f) pixCol = 0;                                               // handle underflow
         for (int i=0; i < parameters.intensity/32+1; i++) {
             unsigned locn = hw_random16(0,coordinate.width);
-            buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(parameters.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
+            buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), parameters.color_from_palette(parameters.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
         }
         return true;
     }

@@ -108,9 +108,9 @@ public:
             step = strip.now + map(parameters.speed, 0, 255, 250, 50); // shift letters every ~250ms to ~50ms
         }
 
-        if (!parameters.check2) buffer.fadeOut(255 - (parameters.custom1>>4));  // trail
+        if (!parameters.check2) buffer.fade(SEGCOLOR(1), 255 - (parameters.custom1>>4));  // trail
         bool usePaletteGradient = false;
-        uint32_t col1 = SEGMENT.color_from_palette(aux1, false, PALETTE_SOLID_WRAP, 0);
+        uint32_t col1 = parameters.color_from_palette(aux1, false, PALETTE_SOLID_WRAP, 0);
         uint32_t col2 = BLACK;
         if (parameters.check1) { // use gradient
             if(SEGMENT.palette == 0) { // use colors for gradient
@@ -123,7 +123,8 @@ public:
         for (int i = 0; i < numberOfLetters; i++) {
             int xoffset = int(cols) - int(aux0) + rotLW*i;
             if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-            buffer.drawCharacter(text[i], xoffset, yoffset, letterWidth, letterHeight, col1, col2, map(parameters.custom3, 0, 31, -2, 2), usePaletteGradient);
+
+            buffer.drawCharacter(text[i], xoffset, yoffset, letterWidth, letterHeight, map(parameters.custom3, 0, 31, -2, 2), (usePaletteGradient) ? SEGPALETTE : CRGBPalette16(CRGB(col1), col2 ? CRGB(col2) : CRGB(col1)));
         }
         return true;
     }

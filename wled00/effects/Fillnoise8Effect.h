@@ -23,7 +23,7 @@ public:
         if (parameters.call == 0) step = hw_random();
         for (unsigned i = 0; i < coordinate.width; i++) {
             unsigned index = perlin8(i * coordinate.width, step + i * coordinate.width);
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(i, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
         step += beatsin8_t(parameters.speed, 1, 6); //10,1,4
         return true;

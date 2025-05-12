@@ -24,7 +24,7 @@ public:
         }
 
         for (unsigned i=0; i < coordinate.width; i++)
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+            buffer.setPixelColor(i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
         uint32_t mdelay = 500;
         for (unsigned i = 0; i < coordinate.width-2 ; i+=3)
         {

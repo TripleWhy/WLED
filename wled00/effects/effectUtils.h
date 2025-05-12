@@ -4,8 +4,8 @@
 #include "../wled_math.h"
 #include "prng.h"
 
-#define SEGCOLOR(x)      Segment::getCurrentColor(x)
-#define SEGPALETTE       Segment::getCurrentPalette()
+#define SEGCOLOR(x)      parameters.getGammaCorrectedColor(x)
+#define SEGPALETTE       parameters.palette
 #define SPEED_FORMULA_L  (5U + (50U*(255U - parameters.speed))/coordinate.width)
 
 #define FRAMETIME        strip.getFrameTime()

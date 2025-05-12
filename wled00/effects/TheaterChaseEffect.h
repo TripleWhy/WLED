@@ -28,7 +28,7 @@ public:
 
         c2 = SEGCOLOR(1);
         if (animate) {
-            c1 = SEGMENT.color_wheel(step); // sets moving palette and rainbow for default
+            c1 = parameters.color_wheel(step); // sets moving palette and rainbow for default
         }
 
         counter = nextCounter;
@@ -43,7 +43,7 @@ public:
         const bool animate = parameters.check1;
         const bool theatre = parameters.check3;
         if (!animate) {
-            c1 = SEGMENT.color_from_palette(coordinate.getXAbsolute(), true, false, 0);
+            c1 = parameters.color_from_palette(coordinate.getXAbsolute(), true, false, 0);
         }
         if (theatre) {
             if ((coordinate.getXAbsolute() % width) == counter) {

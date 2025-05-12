@@ -33,7 +33,7 @@ public:
                 unsigned fac = 80;
                 if (SEGMENT.palette == 52) {numColors = 5; fac = 61;} //C9 2 has 5 colors
                 for (size_t i = 0; i < numColors; i++) {
-                    cols[i] = SEGMENT.color_from_palette(i*fac, false, true, 255);
+                    cols[i] = parameters.color_from_palette(i*fac, false, true, 255);
                 }
             }
         } else if (parameters.intensity < 80) //pastel (easter) colors

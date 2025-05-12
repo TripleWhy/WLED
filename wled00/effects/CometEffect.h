@@ -27,16 +27,16 @@ public:
         unsigned index = (counter * coordinate.width) >> 16;
         if (parameters.call == 0) aux0 = index;
 
-        buffer.fadeOut(parameters.intensity);
+        buffer.fade(SEGCOLOR(1), parameters.intensity);
 
-        buffer.setPixelColor( index, SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+        buffer.setPixelColor( index, parameters.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
         if (index > aux0) {
             for (unsigned i = aux0; i < index ; i++) {
-                 buffer.setPixelColor( i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+                 buffer.setPixelColor( i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
             }
         } else if (index < aux0 && index < 10) {
             for (unsigned i = 0; i < index ; i++) {
-                 buffer.setPixelColor( i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+                 buffer.setPixelColor( i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
             }
         }
         aux0 = index++;

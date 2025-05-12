@@ -53,8 +53,8 @@ public:
             aux0--;
         }
         if(parameters.custom1 || parameters.check2) // blur or overlay
-                                                 buffer.fadeOut(250);
-        else buffer.fill(parameters.check1 ? color_blend(SEGMENT.color_wheel(aux0),BLACK,uint8_t(235)) : SEGCOLOR(1));
+                                                 buffer.fade(SEGCOLOR(1), 250);
+        else buffer.fill(parameters.check1 ? color_blend(parameters.color_wheel(aux0),BLACK,uint8_t(235)) : SEGCOLOR(1));
 
         //draw wave
         for (unsigned i = 0; i < maxRipples; i++) {
@@ -62,7 +62,7 @@ public:
             if (ripplestate) {
                 unsigned rippledecay = (parameters.speed >> 4) +1; //faster decay if faster propagation
                 unsigned rippleorigin = ripples[i].pos;
-                uint32_t col = SEGMENT.color_from_palette(ripples[i].color, false, false, 255);
+                uint32_t col = parameters.color_from_palette(ripples[i].color, false, false, 255);
                 unsigned propagation = ((ripplestate/rippledecay - 1) * (parameters.speed + 1));
                 int propI = propagation >> 8;
                 unsigned propF = propagation & 0xFF;

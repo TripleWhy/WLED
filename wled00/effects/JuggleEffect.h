@@ -27,7 +27,7 @@ public:
         for (int i = 0; i < 8; i++) {
             int index = 0 + beatsin88_t((16 + parameters.speed)*(i + 7), 0, coordinate.width -1);
             fastled_col = CRGB(buffer.getPixelColor(index));
-            fastled_col |= (SEGMENT.palette==0)?CHSV(dothue, 220, 255):CRGB(ColorFromPalette(SEGPALETTE, dothue, 255));
+            fastled_col |= (SEGMENT.palette==0)?CHSV(dothue, 220, 255):CRGB(SEGPALETTE.ColorFromPalette(dothue, 255));
             buffer.setPixelColor(index, RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0));
             dothue += 32;
         }

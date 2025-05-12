@@ -27,7 +27,7 @@ public:
             unsigned ranstart = prng.random8();       // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
             unsigned pixBri = sin8_t(ranstart + 16 * strip.now/(256-parameters.speed));
             if (prng.random8() > parameters.intensity) pixBri = 0;
-            buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(prng.random8()+strip.now/100, false, PALETTE_SOLID_WRAP, 0), pixBri));
+            buffer.setPixelColor(i, color_blend(SEGCOLOR(1), parameters.color_from_palette(prng.random8()+strip.now/100, false, PALETTE_SOLID_WRAP, 0), pixBri));
         }
 
         prng.setSeed(prevSeed);                       // restore original seed so other effects can use "random" PRNG

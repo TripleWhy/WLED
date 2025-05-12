@@ -39,7 +39,7 @@ public:
             index = (255 - i*256/coordinate.width) * index/(256-parameters.intensity);                       // Now we need to scale index so that it gets blacker as we get close to one of the ends.
                                                                                                                                                                                     // This is a simple y=mx+b equation that's been scaled. index/128 is another scaling.
 
-            buffer.setPixelColor(i, ColorFromPalette(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
+            buffer.setPixelColor(i, myPal.ColorFromPalette(index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
         }
         return true;
     }

@@ -38,9 +38,9 @@ public:
             for (unsigned i = 0; i < coordinate.width; i++) {
             	if (i < aux1) {
                     if (oneColor)
-                        buffer.setPixelColor(i, SEGMENT.color_from_palette(map(percent,0,100,0,255), false, false, 0));
+                        buffer.setPixelColor(i, parameters.color_from_palette(map(percent,0,100,0,255), false, false, 0));
                     else
-                        buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+                        buffer.setPixelColor(i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
             	}
             	else {
                     buffer.setPixelColor(i, SEGCOLOR(1));
@@ -53,9 +53,9 @@ public:
             	}
             	else {
                     if (oneColor)
-                        buffer.setPixelColor(i, SEGMENT.color_from_palette(map(percent,100,200,255,0), false, false, 0));
+                        buffer.setPixelColor(i, parameters.color_from_palette(map(percent,100,200,255,0), false, false, 0));
                     else
-                        buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+                        buffer.setPixelColor(i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
             	}
             }
         }

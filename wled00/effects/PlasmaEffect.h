@@ -35,7 +35,7 @@ public:
             unsigned colorIndex = cubicwave8((i*(2+ 3*(parameters.speed >> 5))+thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
                                                                 + cos8_t((i*(1+ 2*(parameters.speed >> 5))+thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
             unsigned thisBright = qsub8(colorIndex, beatsin8_t(7,0, (128 - (parameters.intensity>>1))));
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0, thisBright));
+            buffer.setPixelColor(i, parameters.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0, thisBright));
         }
         return true;
     }

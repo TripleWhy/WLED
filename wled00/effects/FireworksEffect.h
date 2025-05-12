@@ -31,7 +31,7 @@ public:
             sparkIndex = UINT16_MAX;
             oldSparkIndex = UINT16_MAX;
         }
-        buffer.fadeOut(128);
+        buffer.fade(SEGCOLOR(1), 128);
 
         uint8_t x = sparkIndex%width, y = sparkIndex/width; // 2D coordinates stored in upper and lower byte
         if (!step) {
@@ -51,7 +51,7 @@ public:
                 uint16_t index = hw_random16(width*height);
                 x = index % width;
                 y = index / width;
-                uint32_t col = SEGMENT.color_from_palette(hw_random8(), false, false, 0);
+                uint32_t col = parameters.color_from_palette(hw_random8(), false, false, 0);
                 buffer.setPixelColor(x, y, col);
                 oldSparkIndex = sparkIndex;  // old spark
                 sparkIndex = index;        // remember where spark occurred

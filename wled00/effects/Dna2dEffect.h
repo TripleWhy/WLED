@@ -30,8 +30,8 @@ public:
 
         buffer.fadeToBlackBy(64);
         for (int i = 0; i < cols; i++) {
-            buffer.setPixelColor(i, beatsin8_t(parameters.speed/8, 0, rows-1, 0, i*4    ), ColorFromPalette(SEGPALETTE, i*5+strip.now/17, beatsin8_t(5, 55, 255, 0, i*10), LINEARBLEND));
-            buffer.setPixelColor(i, beatsin8_t(parameters.speed/8, 0, rows-1, 0, i*4+128), ColorFromPalette(SEGPALETTE, i*5+128+strip.now/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
+            buffer.setPixelColor(i, beatsin8_t(parameters.speed/8, 0, rows-1, 0, i*4    ), SEGPALETTE.ColorFromPalette(i*5+strip.now/17, beatsin8_t(5, 55, 255, 0, i*10), LINEARBLEND));
+            buffer.setPixelColor(i, beatsin8_t(parameters.speed/8, 0, rows-1, 0, i*4+128), SEGPALETTE.ColorFromPalette(i*5+128+strip.now/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
         }
         buffer.blur(parameters.intensity / (8 - (parameters.check1 * 2)), parameters.check1);
         return true;

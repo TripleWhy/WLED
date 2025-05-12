@@ -1,8 +1,8 @@
 #ifndef FASTLED_FCN_H
 #define FASTLED_FCN_H
 
-#include <stdint.h>
 #include <cstring> // for mem operations
+#include <stdint.h>
 
 // Code originally from FastLED version 3.6.0. Optimized for WLED use by @dedehai
 // Licensed unter MIT license, see LICENSE.txt for details
@@ -574,7 +574,7 @@ public:
   }
 
   // Create palette from 16 CRGB values
-  CRGBPalette16(const CRGB& c00, const CRGB& c01, const CRGB& c02, const CRGB& c03,
+  constexpr CRGBPalette16(const CRGB& c00, const CRGB& c01, const CRGB& c02, const CRGB& c03,
                 const CRGB& c04, const CRGB& c05, const CRGB& c06, const CRGB& c07,
                 const CRGB& c08, const CRGB& c09, const CRGB& c10, const CRGB& c11,
                 const CRGB& c12, const CRGB& c13, const CRGB& c14, const CRGB& c15) {
@@ -614,7 +614,7 @@ public:
   }
 
   // Copy assignment operator for PROGMEM palette
-  CRGBPalette16& operator=(const TProgmemRGBPalette16& rhs) {
+  constexpr CRGBPalette16& operator=(const TProgmemRGBPalette16& rhs) {
     for (int i = 0; i < 16; ++i) {
       entries[i] = *(const uint32_t*)(rhs + i);
     }
@@ -779,6 +779,9 @@ public:
     }
     return *this;
   }
+
+  // derived from FastLED: replacement of fastled function optimized for ESP, slightly faster, more accurate and uses less flash (~ -200bytes)
+  [[gnu::hot, gnu::pure]] uint32_t ColorFromPalette(unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND) const;
 };
 
 #endif

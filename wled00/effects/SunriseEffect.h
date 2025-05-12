@@ -56,9 +56,9 @@ public:
             wave = (wave >> 8) + ((wave * parameters.intensity) >> 15);
             uint32_t c;
             if (wave > 240) { //clipped, full white sun
-                c = SEGMENT.color_from_palette( 240, false, true, 255);
+                c = parameters.color_from_palette( 240, false, true, 255);
             } else { //transition
-                c = SEGMENT.color_from_palette(wave, false, true, 255);
+                c = parameters.color_from_palette(wave, false, true, 255);
             }
             buffer.setPixelColor(i, c);
             buffer.setPixelColor(coordinate.width - i - 1, c);

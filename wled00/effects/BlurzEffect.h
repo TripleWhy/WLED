@@ -33,12 +33,12 @@ public:
         }
 
         int fadeoutDelay = (256 - parameters.speed) / 32;
-        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fadeOut(parameters.speed);
+        if ((fadeoutDelay <= 1 ) || ((parameters.call % fadeoutDelay) == 0)) buffer.fade(SEGCOLOR(1), parameters.speed);
 
         step += FRAMETIME;
         if (step > SPEED_FORMULA_L) {
             unsigned segLoc = hw_random16(coordinate.width);
-            buffer.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(2*fftResult[aux0%16]*240/max(1, (int)coordinate.width-1), false, PALETTE_SOLID_WRAP, 0), uint8_t(2*fftResult[aux0%16])));
+            buffer.setPixelColor(segLoc, color_blend(SEGCOLOR(1), parameters.color_from_palette(2*fftResult[aux0%16]*240/max(1, (int)coordinate.width-1), false, PALETTE_SOLID_WRAP, 0), uint8_t(2*fftResult[aux0%16])));
             ++(aux0) %= 16; // make sure it doesn't cross 16
 
             step = 1;

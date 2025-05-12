@@ -37,7 +37,7 @@ public:
                 previousRandomColorIndex = randomColorIndex;
                 randomColorIndex = get_random_wheel_index(randomColorIndex);
             }
-            color1 = SEGMENT.color_wheel(randomColorIndex);
+            color1 = parameters.color_wheel(randomColorIndex);
         }
         step = a;
 
@@ -83,13 +83,13 @@ public:
         //if random, fill old background between a and end
         if (chase_random)
         {
-            color1 = SEGMENT.color_wheel(previousRandomColorIndex);
+            color1 = parameters.color_wheel(previousRandomColorIndex);
             if (i >= a)
                 return color1;
         }
         if (do_palette)
         {
-            return SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
+            return parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
         }
         return color1;
     }

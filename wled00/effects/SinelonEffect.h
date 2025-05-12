@@ -25,17 +25,17 @@ public:
 
         const bool rainbow = parameters.check1;
         const bool dual    = parameters.check2;
-        buffer.fadeOut(parameters.intensity);
+        buffer.fade(SEGCOLOR(1), parameters.intensity);
         unsigned pos = beatsin16_t(parameters.speed/10,0,coordinate.width-1);
         if (parameters.call == 0) aux0 = pos;
-        uint32_t color1 = SEGMENT.color_from_palette(pos, true, false, 0);
+        uint32_t color1 = parameters.color_from_palette(pos, true, false, 0);
         uint32_t color2 = SEGCOLOR(2);
         if (rainbow) {
-            color1 = SEGMENT.color_wheel((pos & 0x07) * 32);
+            color1 = parameters.color_wheel((pos & 0x07) * 32);
         }
         buffer.setPixelColor(pos, color1);
         if (dual) {
-            if (!color2) color2 = SEGMENT.color_from_palette(pos, true, false, 0);
+            if (!color2) color2 = parameters.color_from_palette(pos, true, false, 0);
             if (rainbow) color2 = color1; //rainbow
             buffer.setPixelColor(coordinate.width-1-pos, color2);
         }

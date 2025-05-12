@@ -79,7 +79,7 @@ private:
           drop->pos -= drop->speed;       // may add gravity as: speed += gravity
           if (int(drop->pos) < int(drop->stack)) drop->pos = drop->stack;
           for (unsigned i = unsigned(drop->pos); i < width; i++) {
-            uint32_t col = i < unsigned(drop->pos)+drop->brick ? SEGMENT.color_from_palette(drop->col, false, false, 0) : SEGCOLOR(1);
+            uint32_t col = i < unsigned(drop->pos)+drop->brick ? parameters.color_from_palette(drop->col, false, false, 0) : SEGCOLOR(1);
             buffer.setPixelColor(i, y, col);
           }
         } else {                          // we hit bottom

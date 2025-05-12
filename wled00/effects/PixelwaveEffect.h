@@ -37,7 +37,7 @@ public:
 
             uint8_t pixBri = volumeRaw * parameters.intensity / 64;
 
-            buffer.setPixelColor(coordinate.width/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0), pixBri));
+            buffer.setPixelColor(coordinate.width/2, color_blend(SEGCOLOR(1), parameters.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0), pixBri));
             for (unsigned i = coordinate.width - 1; i > coordinate.width/2; i--) buffer.setPixelColor(i, buffer.getPixelColor(i-1)); //move to the left
             for (unsigned i = 0; i < coordinate.width/2; i++)          buffer.setPixelColor(i, buffer.getPixelColor(i+1)); // move to the right
         }

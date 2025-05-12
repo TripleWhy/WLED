@@ -45,7 +45,7 @@ public:
                 uint8_t palindex = qsub8(perlin8((step%2) + x * _scale, y * 16 + step % 16, step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
                 uint8_t palbrightness = palindex;
                 if(parameters.check1) palindex = 255 - palindex; //flip palette
-                buffer.setPixelColor(x, y, SEGMENT.color_from_palette(palindex, false, false, 255, palbrightness));
+                buffer.setPixelColor(x, y, parameters.color_from_palette(palindex, false, false, 255, palbrightness));
             }
         }
         return true;

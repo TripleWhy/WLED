@@ -87,7 +87,7 @@ private:
                 }
             }
             if (popcorn[i].pos >= 0.0f) { // draw now active popcorn (either active before or just popped)
-                uint32_t col = SEGMENT.color_wheel(popcorn[i].colIndex);
+                uint32_t col = parameters.color_wheel(popcorn[i].colIndex);
                 if (!SEGMENT.palette && popcorn[i].colIndex < NUM_COLORS)
                     col = SEGCOLOR(popcorn[i].colIndex);
                 unsigned ledIndex = popcorn[i].pos;

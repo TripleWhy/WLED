@@ -42,7 +42,7 @@ public:
                 thisbright = 0;
             }
 
-            buffer.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0), thisbright));
+            buffer.addPixelColor(i, color_blend(SEGCOLOR(1), parameters.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0), thisbright));
         }
         return true;
     }

@@ -49,9 +49,9 @@ public:
         for (unsigned i = 0; i < coordinate.width; i++) {
             uint32_t color;
             if (stage == 2) {
-                color = color_blend(SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
+                color = color_blend(parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
             } else if (stage == 1) {
-                color = color_blend(color1, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), stp);
+                color = color_blend(color1, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), stp);
             } else {
                 color = color_blend(color1, color2, stp);
             }

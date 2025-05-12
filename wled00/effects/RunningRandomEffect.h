@@ -46,7 +46,7 @@ public:
                 }
                 z = 0;
             }
-            buffer.setPixelColor(i, SEGMENT.color_wheel(PRNG16 >> 8));
+            buffer.setPixelColor(i, parameters.color_wheel(PRNG16 >> 8));
             z++;
         }
 

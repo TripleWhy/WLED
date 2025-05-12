@@ -44,7 +44,7 @@ public:
             byte x2 = beatsin8_t(1 + parameters.speed/16, 0, (rows - 1));
             byte y1 = beatsin8_t(5 + parameters.speed/16, 0, (cols - 1), 0, i * 24);
             byte y2 = beatsin8_t(3 + parameters.speed/16, 0, (rows - 1), 0, i * 48 + 64);
-            uint32_t color = ColorFromPalette(SEGPALETTE, i * 255 / numLines + (aux0&0xFF), 255, LINEARBLEND);
+            uint32_t color = SEGPALETTE.ColorFromPalette(i * 255 / numLines + (aux0&0xFF), 255, LINEARBLEND);
 
             byte xsteps = abs8(x1 - y1) + 1;
             byte ysteps = abs8(x2 - y2) + 1;

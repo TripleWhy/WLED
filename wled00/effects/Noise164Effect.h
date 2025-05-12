@@ -24,7 +24,7 @@ public:
         uint32_t stp = (strip.now * parameters.speed) >> 7;
         for (unsigned i = 0; i < coordinate.width; i++) {
             int index = perlin16(uint32_t(i) << 12, stp);
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(i, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
         }
         return true;
     }

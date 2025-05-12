@@ -24,7 +24,7 @@ public:
         uint32_t stp = (strip.now / 20) & 0xFF;
         uint8_t beat = beatsin8_t(parameters.speed, 64, 255);
         for (unsigned i = 0; i < coordinate.width; i++) {
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(stp + (i * 2), false, PALETTE_SOLID_WRAP, 0, beat - stp + (i * 10)));
+            buffer.setPixelColor(i, parameters.color_from_palette(stp + (i * 2), false, PALETTE_SOLID_WRAP, 0, beat - stp + (i * 10)));
         }
         return true;
     }

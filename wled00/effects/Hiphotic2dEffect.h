@@ -31,7 +31,7 @@ public:
 
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
-                buffer.setPixelColor(x, y, SEGMENT.color_from_palette(sin8_t(cos8_t(x * parameters.speed/16 + a / 3) + sin8_t(y * parameters.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(x, y, parameters.color_from_palette(sin8_t(cos8_t(x * parameters.speed/16 + a / 3) + sin8_t(y * parameters.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
             }
         }
         return true;

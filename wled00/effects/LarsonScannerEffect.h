@@ -27,7 +27,7 @@ public:
         const unsigned speed  = FRAMETIME * map(parameters.speed, 0, 255, 96, 2); // map into useful range
         const unsigned pixels = coordinate.width / speed; // how many pixels to advance per frame
 
-        buffer.fadeOut(255-parameters.intensity);
+        buffer.fade(SEGCOLOR(1), 255-parameters.intensity);
 
         if (step > strip.now) return true;  // we have a pause
 
@@ -56,7 +56,7 @@ public:
             for (unsigned i = aux1; i < index; i++) {
                 unsigned j = (aux0) ? i : coordinate.width - 1 - i;
                 unsigned palIdx = moving ? (j+it)%coordinate.width : j;
-                uint32_t c = SEGMENT.color_from_palette(palIdx, true, moving, 0);
+                uint32_t c = parameters.color_from_palette(palIdx, true, moving, 0);
                 buffer.setPixelColor(j, c);
                 if (parameters.check3) {
                     buffer.setPixelColor(coordinate.width - 1 - j, SEGCOLOR(2) ? SEGCOLOR(2) : c);

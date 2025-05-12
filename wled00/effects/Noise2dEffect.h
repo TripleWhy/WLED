@@ -33,7 +33,7 @@ public:
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
                 uint8_t pixelHue8 = perlin8(x * scale, y * scale, strip.now / (16 - parameters.speed/16));
-                buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, pixelHue8));
+                buffer.setPixelColor(x, y, SEGPALETTE.ColorFromPalette(pixelHue8));
             }
         }
         return true;

@@ -42,7 +42,7 @@ public:
             val = min(abs(pp-i),min(abs(p1-i),abs(p2-i)));
         }
         val = (brd > val) ? (val * 255) / brd : 255;
-        return color_blend(SEGCOLOR(0), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), uint8_t(val));
+        return color_blend(SEGCOLOR(0), parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), uint8_t(val));
     }
 
 private:

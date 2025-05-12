@@ -44,7 +44,7 @@ public:
         for (size_t i = 0; i < 8; i++) {
             int x = beatsin8_t(12 + i, 2, cols - 3);
             int y = beatsin8_t(15 + i, 2, rows - 3);
-            uint32_t color = ColorFromPalette(SEGPALETTE, beatsin8_t(12 + i, 0, 255), 255);
+            uint32_t color = SEGPALETTE.ColorFromPalette(beatsin8_t(12 + i, 0, 255), 255);
             buffer.addPixelColor(x, y, color);
             if (cols > 24 || rows > 24) {
                 buffer.addPixelColor(x+1, y, color);

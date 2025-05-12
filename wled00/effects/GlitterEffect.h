@@ -30,7 +30,7 @@ public:
             }
             for (unsigned i = 0; i < coordinate.width; i++) {
                 unsigned colorIndex = (i * 255 / coordinate.width) - counter;
-                buffer.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, true, 255));
+                buffer.setPixelColor(i, parameters.color_from_palette(colorIndex, false, true, 255));
             }
         }
         if (parameters.intensity > hw_random8()) buffer.setPixelColor(hw_random16(coordinate.width), SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);

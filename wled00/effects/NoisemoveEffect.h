@@ -34,7 +34,7 @@ public:
             unsigned locn = inoise16(strip.now*parameters.speed+i*50000, strip.now*parameters.speed);   // Get a new pixel location from moving noise.
             // if coordinate.width equals 1 locn will be always 0, hence we set the first pixel only
             locn = map(locn, 7500, 58000, 0, coordinate.width-1);           // Map that to the length of the strand, and ensure we don't go over.
-            buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i*64, false, PALETTE_SOLID_WRAP, 0), uint8_t(fftResult[i % 16]*4)));
+            buffer.setPixelColor(locn, color_blend(SEGCOLOR(1), parameters.color_from_palette(i*64, false, PALETTE_SOLID_WRAP, 0), uint8_t(fftResult[i % 16]*4)));
         }
         return true;
     }

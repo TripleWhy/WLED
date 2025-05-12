@@ -122,7 +122,7 @@ private:
         unsigned hue = slowcycle8 - salt;
         CRGBW c;
         if (bright > 0) {
-            c = ColorFromPalette(SEGPALETTE, hue, bright, NOBLEND);
+            c = SEGPALETTE.ColorFromPalette(hue, bright, NOBLEND);
             if (!parameters.check1) {
                 // This code takes a pixel, and if its in the 'fading down'
                 // part of the cycle, it adjusts the color a little bit like the

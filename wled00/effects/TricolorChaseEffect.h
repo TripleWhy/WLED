@@ -32,7 +32,7 @@ public:
             if (index > (width*3)-1) index = 0;
 
             uint32_t color = SEGCOLOR(2);
-            if (index > (width<<1)-1) color = SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
+            if (index > (width<<1)-1) color = parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
             else if (index > width-1) color = SEGCOLOR(0);
 
             buffer.setPixelColor(coordinate.width - i -1, color);

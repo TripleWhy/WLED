@@ -39,8 +39,8 @@ public:
             float angle = radians(t * (maxDim - i));
             int mySin = sin_t(angle) * i;
             int myCos = cos_t(angle) * i;
-            buffer.setPixelColor(colsCenter + mySin, rowsCenter + myCos, ColorFromPalette(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
-            if (parameters.check1) buffer.setPixelColor(colsCenter + myCos, rowsCenter + mySin, ColorFromPalette(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
+            buffer.setPixelColor(colsCenter + mySin, rowsCenter + myCos, SEGPALETTE.ColorFromPalette((i * 20) + t_20, 255, LINEARBLEND));
+            if (parameters.check1) buffer.setPixelColor(colsCenter + myCos, rowsCenter + mySin, SEGPALETTE.ColorFromPalette((i * 20) + t_20, 255, LINEARBLEND));
         }
         buffer.blur(parameters.intensity>>(3 - parameters.check2), parameters.check2);
         return true;

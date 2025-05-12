@@ -54,8 +54,8 @@ public:
                 step = 0;
             }
 
-            col[0] = SEGMENT.color_wheel(colorIndex[0]);
-            col[1] = SEGMENT.color_wheel(colorIndex[1]);
+            col[0] = parameters.color_wheel(colorIndex[0]);
+            col[1] = parameters.color_wheel(colorIndex[1]);
         } else {
             col[1] = SEGCOLOR(1);
         }
@@ -70,7 +70,7 @@ public:
     uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         if (!useRandomColors) {
-            col[0] = SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
+            col[0] = parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
         }
 
         // Some magic to determine which color to show. I didn't arrive at this expression by logical deduction,

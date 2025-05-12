@@ -29,10 +29,10 @@ public:
         um_data_t *um_data = getAudioData();
         float   volumeSmth  = *(float*)  um_data->u_data[0];
 
-        if(mode == 1) buffer.fadeOut(253);  // //Gravcentric
-        else if(mode == 2) buffer.fadeOut(249);  // Gravimeter
-        else if(mode == 3) buffer.fadeOut(250);  // Gravfreq
-        else buffer.fadeOut(251);  // Gravcenter
+        if(mode == 1) buffer.fade(SEGCOLOR(1), 253);  // //Gravcentric
+        else if(mode == 2) buffer.fade(SEGCOLOR(1), 249);  // Gravimeter
+        else if(mode == 3) buffer.fade(SEGCOLOR(1), 250);  // Gravfreq
+        else buffer.fade(SEGCOLOR(1), 251);  // Gravcenter
 
         float mySampleAvg;
         int tempsamp;
@@ -58,8 +58,8 @@ public:
         if(mode == 1) {  //Gravcentric
             for (int i=0; i<tempsamp; i++) {
                 uint8_t index = segmentSampleAvg*24+strip.now/200;
-                buffer.setPixelColor(i+coordinate.width/2, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
-                buffer.setPixelColor(coordinate.width/2-1-i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(i+coordinate.width/2, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(coordinate.width/2-1-i, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
             }
             if (topLED >= 0) {
                 buffer.setPixelColor(topLED+coordinate.width/2, CRGB::Gray);
@@ -69,10 +69,10 @@ public:
         else if(mode == 2) { //Gravimeter
             for (int i=0; i<tempsamp; i++) {
                 uint8_t index = perlin8(i*segmentSampleAvg+strip.now, 5000+i*segmentSampleAvg);
-                buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
+                buffer.setPixelColor(i, color_blend(SEGCOLOR(1), parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
             }
             if (topLED > 0) {
-                buffer.setPixelColor(topLED, SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(topLED, parameters.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
             }
         }
         else if(mode == 3) { //Gravfreq
@@ -80,8 +80,8 @@ public:
                 float   FFT_MajorPeak = *(float*)um_data->u_data[4]; // used in mode 3: Gravfreq
                 if (FFT_MajorPeak < 1) FFT_MajorPeak = 1;
                 uint8_t index = (log10f(FFT_MajorPeak) - (MAX_FREQ_LOG10 - 1.78f)) * 255;
-                buffer.setPixelColor(i+coordinate.width/2, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
-                buffer.setPixelColor(coordinate.width/2-i-1, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(i+coordinate.width/2, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(coordinate.width/2-i-1, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
             }
             if (topLED >= 0) {
                 buffer.setPixelColor(topLED+coordinate.width/2, CRGB::Gray);
@@ -91,12 +91,12 @@ public:
         else { //Gravcenter
             for (int i=0; i<tempsamp; i++) {
                 uint8_t index = perlin8(i*segmentSampleAvg+strip.now, 5000+i*segmentSampleAvg);
-                buffer.setPixelColor(i+coordinate.width/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
-                buffer.setPixelColor(coordinate.width/2-i-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
+                buffer.setPixelColor(i+coordinate.width/2, color_blend(SEGCOLOR(1), parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
+                buffer.setPixelColor(coordinate.width/2-i-1, color_blend(SEGCOLOR(1), parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
             }
             if (topLED >= 0) {
-                buffer.setPixelColor(topLED+coordinate.width/2, SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
-                buffer.setPixelColor(coordinate.width/2-1-topLED, SEGMENT.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(topLED+coordinate.width/2, parameters.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
+                buffer.setPixelColor(coordinate.width/2-1-topLED, parameters.color_from_palette(strip.now, false, PALETTE_SOLID_WRAP, 0));
             }
         }
         gravityCounter = (gravityCounter + 1) % gravity;

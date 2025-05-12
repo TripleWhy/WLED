@@ -67,7 +67,7 @@ public:
         //CRGB c = CHSV(step / 2 - radius, 255, sin8_t(sin8_t((angle * 4 - radius) / 4 + step) + radius - step * 2 + angle * (parameters.custom3/3+1)));
         unsigned intensity = sin8_t(sin8_t((angle * 4 - radius) / 4 + step/2) + radius - step + angle * (parameters.custom3/4+1));
         intensity = map((intensity*intensity) & 0xFFFF, 0, 65535, 0, 255); // add a bit of non-linearity for cleaner display
-        return ColorFromPalette(SEGPALETTE, step / 2 - radius, intensity);
+        return SEGPALETTE.ColorFromPalette(step / 2 - radius, intensity);
     }
 
 private:

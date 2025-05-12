@@ -257,3 +257,35 @@ uint8_t quadwave8(uint8_t in) {
 uint8_t cubicwave8(uint8_t in) {
   return ease8InOutCubic(triwave8(in));
 }
+
+
+uint32_t CRGBPalette16::ColorFromPalette(unsigned index, uint8_t brightness, TBlendType blendType) const
+{
+  if (blendType == LINEARBLEND_NOWRAP) {
+    index = (index * 0xF0) >> 8; // Blend range is affected by lo4 blend of values, remap to avoid wrapping
+  }
+  unsigned hi4 = uint8_t(index) >> 4;
+  unsigned lo4 = (index & 0x0F);
+  const CRGB* entry = (CRGB*)&(entries[0]) + hi4;
+  unsigned red1   = entry->r;
+  unsigned green1 = entry->g;
+  unsigned blue1  = entry->b;
+  if (lo4 && blendType != NOBLEND) {
+    if (hi4 == 15) entry = &(entries[0]);
+    else ++entry;
+    unsigned f2 = (lo4 << 4);
+    unsigned f1 = 256 - f2;
+    red1   = (red1 * f1 + (unsigned)entry->r * f2) >> 8; // note: using color_blend() is 20% slower
+    green1 = (green1 * f1 + (unsigned)entry->g * f2) >> 8;
+    blue1  = (blue1 * f1 + (unsigned)entry->b * f2) >> 8;
+  }
+  if (brightness < 255) { // note: zero checking could be done to return black but that is hardly ever used so it is omitted
+    // actually color_fade(c1, brightness)
+    uint32_t scale = brightness + 1; // adjust for rounding (bitshift)
+    red1   = (red1 * scale) >> 8; // note: using color_fade() is 30% slower
+    green1 = (green1 * scale) >> 8;
+    blue1  = (blue1 * scale) >> 8;
+  }
+  // RGBW32 isn't available here...
+  return uint32_t((uint8_t(0) << 24) | (uint8_t(red1) << 16) | (uint8_t(green1) << 8) | (uint8_t(blue1)));
+}

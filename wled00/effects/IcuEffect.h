@@ -34,7 +34,7 @@ public:
         if (!parameters.check2) buffer.fill(SEGCOLOR(1));
 
         byte pindex = map(dest, 0, coordinate.width-coordinate.width/space, 0, 255);
-        uint32_t col = SEGMENT.color_from_palette(pindex, false, false, 0);
+        uint32_t col = parameters.color_from_palette(pindex, false, false, 0);
 
         buffer.setPixelColor(dest, col);
         buffer.setPixelColor(dest + coordinate.width/space, col);

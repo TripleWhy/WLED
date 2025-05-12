@@ -39,7 +39,7 @@ public:
             uint_fast8_t ylocn = cos8_t(phase/2 + i*2);
             xlocn = (cols < 2) ? 1 : (map(2*xlocn, 0,511, 0,2*(cols-1)) +1) /2;    // softhack007: "(2* ..... +1) /2" for proper rounding
             ylocn = (rows < 2) ? 1 : (map(2*ylocn, 0,511, 0,2*(rows-1)) +1) /2;    // "rows > 1" is needed to avoid div/0 in map()
-            buffer.setPixelColor((uint8_t)xlocn, (uint8_t)ylocn, SEGMENT.color_from_palette(strip.now/100+i, false, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor((uint8_t)xlocn, (uint8_t)ylocn, parameters.color_from_palette(strip.now/100+i, false, PALETTE_SOLID_WRAP, 0));
         }
         buffer.blur(parameters.custom1 >> (1 + parameters.check1 * 3), parameters.check1);
         return true;

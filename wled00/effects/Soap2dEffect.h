@@ -61,7 +61,7 @@ public:
             aux1 = rows;
             for (int i = 0; i < cols; i++) {
                 for (int j = 0; j < rows; j++) {
-                    buffer.setPixelColor(i, j, ColorFromPalette(SEGPALETTE,~noisePixels[XY(coordinate,i,j)].noise3d*3));
+                    buffer.setPixelColor(i, j, SEGPALETTE.ColorFromPalette(~noisePixels[XY(coordinate,i,j)].noise3d*3));
                 }
             }
         }
@@ -112,9 +112,9 @@ private:
                 CRGB PixelA;
                 CRGB PixelB;
                 if ((zD >= 0) && (zD < tCR)) PixelA = noisePixels[indxA].pixel;
-                else                         PixelA = ColorFromPalette(SEGPALETTE, ~noisePixels[indxA].noise3d*3);
+                else                         PixelA = SEGPALETTE.ColorFromPalette(~noisePixels[indxA].noise3d*3);
                 if ((zF >= 0) && (zF < tCR)) PixelB = noisePixels[indxB].pixel;
-                else                         PixelB = ColorFromPalette(SEGPALETTE, ~noisePixels[indxB].noise3d*3);
+                else                         PixelB = SEGPALETTE.ColorFromPalette(~noisePixels[indxB].noise3d*3);
                 ledsbuff[j] = (PixelA.nscale8(ease8InOutCubic(255 - fraction))) + (PixelB.nscale8(ease8InOutCubic(fraction)));
             }
             for (int j = 0; j < tCR; j++) {

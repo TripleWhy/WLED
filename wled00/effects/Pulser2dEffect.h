@@ -32,7 +32,7 @@ public:
         uint32_t a = strip.now / (18 - parameters.speed / 16);
         int x = (a / 14) % cols;
         int y = map((sin8_t(a * 5) + sin8_t(a * 4) + sin8_t(a * 2)), 0, 765, rows-1, 0);
-        buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
+        buffer.setPixelColor(x, y, SEGPALETTE.ColorFromPalette(map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
 
         buffer.blur(parameters.intensity>>4);
         return true;

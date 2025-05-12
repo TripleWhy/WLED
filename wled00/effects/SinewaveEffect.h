@@ -32,7 +32,7 @@ public:
         for (unsigned i = 0; i < coordinate.width; i++) {                 // For each of the LED's in the strand, set a brightness based on a wave as follows:
             uint8_t pixBri = cubicwave8((i*freq)+step);//qsuba(cubicwave8((i*freq)+step), (255-parameters.intensity)); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
             //setPixCol(i, i*colorIndex/255, pixBri);
-            buffer.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
+            buffer.setPixelColor(i, color_blend(SEGCOLOR(1), parameters.color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
         }
         return true;
     }

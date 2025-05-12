@@ -24,7 +24,7 @@ public:
             return false;
         }
 
-        buffer.fadeOut(254); // add a bit of trail
+        buffer.fade(SEGCOLOR(1), 254); // add a bit of trail
         unsigned counter = strip.now * (6 + (parameters.speed >> 4));
         unsigned numBirds = 2 + (coordinate.width >> 3);  // 2 + 1/8 of a segment
         unsigned span = (parameters.intensity << 8) / numBirds;
@@ -35,7 +35,7 @@ public:
             unsigned megumin = sin16_t(counter) + 0x8000;
             unsigned bird = uint32_t(megumin * coordinate.width) >> 16;
             bird = constrain(bird, 0U, coordinate.width-1U);
-            buffer.setPixelColor(bird, SEGMENT.color_from_palette((i * 255)/ numBirds, false, false, 0)); // no palette wrapping
+            buffer.setPixelColor(bird, parameters.color_from_palette((i * 255)/ numBirds, false, false, 0)); // no palette wrapping
         }
         return true;
     }

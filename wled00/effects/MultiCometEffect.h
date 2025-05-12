@@ -32,17 +32,17 @@ public:
         if (step == it)
             return true;
 
-        buffer.fadeOut(parameters.intensity/2 + 128);
+        buffer.fade(SEGCOLOR(1), parameters.intensity/2 + 128);
 
         for (unsigned i=0; i < MAX_COMETS; i++) {
             if(comets[i] < coordinate.width) {
                 unsigned index = comets[i];
                 if (SEGCOLOR(2) != 0)
                 {
-                    buffer.setPixelColor(index, i % 2 ? SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
+                    buffer.setPixelColor(index, i % 2 ? parameters.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
                 } else
                 {
-                    buffer.setPixelColor(index, SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+                    buffer.setPixelColor(index, parameters.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
                 }
                 comets[i]++;
             } else {

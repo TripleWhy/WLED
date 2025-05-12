@@ -52,8 +52,8 @@ public:
                     unsigned rate = k * 255 / steps;
                     //unsigned dx = lerp8by8(x, x1, rate);
                     unsigned dx = positive? (x + k-1) : (x - k+1);   // behaves the same as "lerp8by8" but does not create holes
-                    //buffer.setPixelColor(dx, i, ColorFromPalette(SEGPALETTE, hue, 255, LINEARBLEND).nscale8_video(rate));
-                    buffer.addPixelColor(dx, i, ColorFromPalette(SEGPALETTE, hue, 255, LINEARBLEND)); // use setPixelColorXY for different look
+                    //buffer.setPixelColor(dx, i, SEGPALETTE.ColorFromPalette(hue, 255, LINEARBLEND).nscale8_video(rate));
+                    buffer.addPixelColor(dx, i, SEGPALETTE.ColorFromPalette(hue, 255, LINEARBLEND)); // use setPixelColorXY for different look
                     buffer.fadePixelColor(dx, i, rate);
                 }
                 buffer.setPixelColor(x, i, DARKSLATEGRAY);

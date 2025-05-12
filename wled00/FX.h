@@ -23,6 +23,7 @@
 #include "colors.h"
 #include "effects/Effect.h"
 #include "memory/CircularAllocator.h"
+#include "TransitionableParameters.h"
 
 #define DEFAULT_BRIGHTNESS (uint8_t)127
 #define DEFAULT_MODE       (uint8_t)0
@@ -387,9 +388,7 @@ typedef struct Segment {
     static unsigned _vLength;                 // 1D dimension used for current effect
     static unsigned _vWidth, _vHeight;        // 2D dimensions used for current effect
     static unsigned _vStripCount;             // map1D2D dimension used for current effect
-    static uint32_t _currentColors[NUM_COLORS]; // colors used for current effect
     static bool     _colorScaled;             // color has been scaled prior to setPixelColor() call
-    static CRGBPalette16 _currentPalette;     // palette used for current effect (includes transition, used in color_from_palette())
     static CRGBPalette16 _randomPalette;      // actual random palette
     static CRGBPalette16 _newRandomPalette;   // target random palette
     static uint16_t _lastPaletteChange;       // last random palette change time in millis()/1000
@@ -516,8 +515,6 @@ typedef struct Segment {
     inline static unsigned vWidth()                        { return Segment::_vWidth; }
     inline static unsigned vHeight()                       { return Segment::_vHeight; }
     inline static unsigned vStripCount()                   { return Segment::_vStripCount; }
-    inline static uint32_t getCurrentColor(unsigned i)     { return Segment::_currentColors[i]; } // { return i < 3 ? Segment::_currentColors[i] : 0; }
-    inline static const CRGBPalette16 &getCurrentPalette() { return Segment::_currentPalette; }
     static void handleRandomPalette();
 
     template<EffectDimensionality dimensionality>
@@ -579,7 +576,6 @@ typedef struct Segment {
     Effect* getTransitionEffect() const;                         // while in transition: Old mode, nullptr otherwise
     Effect* getCurrentEffect() const;                            // Currently active effect/mode. While in transition: New mode.
     CRGBPalette16 &loadPalette(CRGBPalette16 &tgt, uint8_t pal);
-    void     loadOldPalette(); // loads old FX palette into _currentPalette
 
     // 1D strip
     [[gnu::hot]] uint16_t virtualLength() const;
@@ -599,8 +595,6 @@ typedef struct Segment {
     [[gnu::hot]] uint32_t getPixelColor(int i) const;
     void clear();
     void fill(uint32_t c);
-    [[gnu::hot]] uint32_t color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) const;
-    [[gnu::hot]] uint32_t color_wheel(uint8_t pos) const;
 
     // 2D matrix
     [[gnu::hot]] unsigned virtualWidth()  const; // segment width in virtual pixels (accounts for groupping and spacing)

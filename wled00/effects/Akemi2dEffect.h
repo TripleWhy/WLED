@@ -79,7 +79,7 @@ public:
         for (int y=0; y < rows; y++) for (int x=0; x < cols; x++) {
             CRGB color;
             CRGB soundColor = CRGB::Orange;
-            CRGB faceColor  = CRGB(SEGMENT.color_wheel(counter));
+            CRGB faceColor  = CRGB(parameters.color_wheel(counter));
             CRGB armsAndLegsColor = CRGB(SEGCOLOR(1) > 0 ? SEGCOLOR(1) : 0xFFE0A0); //default warmish white 0xABA8FF; //0xFF52e5;//
             uint8_t ak = pgm_read_byte_near(akemi + ((y * 32)/rows) * 32 + (x * 32)/cols); // akemi[(y * 32)/rows][(x * 32)/cols]
             switch (ak) {
@@ -108,7 +108,7 @@ public:
                 unsigned band = map(x, 0, max(xMax,4), 0, 15);  // map 0..cols/8 to 16 GEQ bands
                 band = constrain(band, 0, 15);
                 int barHeight = map(fftResult[band], 0, 255, 0, 17*rows/32);
-                uint32_t color = SEGMENT.color_from_palette((band * 35), false, PALETTE_SOLID_WRAP, 0);
+                uint32_t color = parameters.color_from_palette((band * 35), false, PALETTE_SOLID_WRAP, 0);
 
                 for (int y=0; y < barHeight; y++) {
                     buffer.setPixelColor(x, rows/2-y, color);

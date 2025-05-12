@@ -38,7 +38,7 @@ public:
             if (SEGMENT.palette == 0) {
                 buffer.setPixelColor(i, RGBW32(MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0)));
             } else {
-                buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
+                buffer.setPixelColor(i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
             }
         }
 

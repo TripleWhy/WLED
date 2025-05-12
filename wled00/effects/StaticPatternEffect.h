@@ -27,7 +27,7 @@ public:
         unsigned cnt = 0;
 
         for (unsigned i = 0; i < coordinate.width; i++) {
-            buffer.setPixelColor(i, (drawingLit) ? SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(1));
+            buffer.setPixelColor(i, (drawingLit) ? parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(1));
             cnt++;
             if (cnt >= ((drawingLit) ? lit : unlit)) {
                 cnt = 0;

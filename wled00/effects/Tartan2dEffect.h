@@ -44,12 +44,12 @@ public:
                 intensity = bri = sin8_t(x * parameters.speed/2 + offsetX);
                 for (int i=0; i<sharpness; i++) intensity *= bri;
                 intensity >>= 8*sharpness;
-                buffer.setPixelColor(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
+                buffer.setPixelColor(x, y, SEGPALETTE.ColorFromPalette(hue, intensity, LINEARBLEND));
                 hue = y * 3 + offsetX;
                 intensity = bri = sin8_t(y * parameters.intensity/2 + offsetY);
                 for (int i=0; i<sharpness; i++) intensity *= bri;
                 intensity >>= 8*sharpness;
-                buffer.addPixelColor(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
+                buffer.addPixelColor(x, y, SEGPALETTE.ColorFromPalette(hue, intensity, LINEARBLEND));
             }
         }
         return true;

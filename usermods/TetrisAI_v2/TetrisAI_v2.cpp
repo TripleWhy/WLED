@@ -50,7 +50,7 @@ void drawGrid(TetrisAIGame* tetris, TetrisAI_data* tetrisai_data)
         //spread the color over the whole palette
         uint8_t colorIndex = *tetris->grid.getPixel(index_x, index_y) * 32;
         colorIndex += tetrisai_data->colorOffset;
-        color = ColorFromPalette(SEGPALETTE, colorIndex, 255, NOBLEND);
+        color = SEGPALETTE.ColorFromPalette(colorIndex, 255, NOBLEND);
       }
 
       SEGMENT.setPixelColorXY(tetrisai_data->segOffsetX + index_x, tetrisai_data->segOffsetY + index_y - 4, color);
@@ -87,7 +87,7 @@ void drawGrid(TetrisAIGame* tetris, TetrisAI_data* tetrisai_data)
           if (piece.getPixel(pieceX, pieceY))
           {
             uint8_t colIdx = ((piece.pieceData->colorIndex * 32) + tetrisai_data->colorOffset);
-            SEGMENT.setPixelColorXY(tetrisai_data->segOffsetX + piecesOffsetX + pieceX, tetrisai_data->segOffsetY + piecesOffsetY + pieceNbrOffsetY + pieceY, ColorFromPalette(SEGPALETTE, colIdx, 255, NOBLEND));
+            SEGMENT.setPixelColorXY(tetrisai_data->segOffsetX + piecesOffsetX + pieceX, tetrisai_data->segOffsetY + piecesOffsetY + pieceNbrOffsetY + pieceY, SEGPALETTE.ColorFromPalette(colIdx, 255, NOBLEND));
           }
         }
       }

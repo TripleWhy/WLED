@@ -31,7 +31,7 @@ public:
 
         for (unsigned i = 0; i < coordinate.width; i++)
         {
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
+            buffer.setPixelColor(i, parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
         }
 
         if(ledIndex < coordinate.width) { //wipe from 0 to 1

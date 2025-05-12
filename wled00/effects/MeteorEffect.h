@@ -46,7 +46,7 @@ public:
                         int change = trail[i] + 4 - hw_random8(24); //change each time between -20 and +4
                         trail[i] = constrain(change, 0, max);
                     }
-                    col = parameters.check1 ? SEGMENT.color_from_palette(i, true, false, 0, trail[i]) : SEGMENT.color_from_palette(trail[i], false, true, 255);
+                    col = parameters.check1 ? parameters.color_from_palette(i, true, false, 0, trail[i]) : parameters.color_from_palette(trail[i], false, true, 255);
                 }
                 else {
                     trail[i] = scale8(trail[i], 128 + hw_random8(127));
@@ -58,7 +58,7 @@ public:
                         index = map(i,0,coordinate.width,0,max);
                         bri = trail[i];
                     }
-                    col = SEGMENT.color_from_palette(index, false, false, idx, bri);  // full brightness for Fire
+                    col = parameters.color_from_palette(index, false, false, idx, bri);  // full brightness for Fire
                 }
                 buffer.setPixelColor(i, col);
             }
@@ -69,7 +69,7 @@ public:
             unsigned index = (meteorstart + j) % coordinate.width;
             if(meteorSmooth) {
                     trail[index] = max;
-                    uint32_t col = parameters.check1 ? SEGMENT.color_from_palette(index, true, false, 0, trail[index]) : SEGMENT.color_from_palette(trail[index], false, true, 255);
+                    uint32_t col = parameters.check1 ? parameters.color_from_palette(index, true, false, 0, trail[index]) : parameters.color_from_palette(trail[index], false, true, 255);
                     buffer.setPixelColor(index, col);
             }
             else{
@@ -79,7 +79,7 @@ public:
                     i = map(index,0,coordinate.width,0,max);
                     idx = 0;
                 }
-                uint32_t col = SEGMENT.color_from_palette(i, false, false, idx, 255); // full brightness
+                uint32_t col = parameters.color_from_palette(i, false, false, idx, 255); // full brightness
                 buffer.setPixelColor(index, col);
             }
         }

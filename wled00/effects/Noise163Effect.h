@@ -32,7 +32,7 @@ public:
             unsigned noise = perlin16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
             unsigned index = sin8_t(noise * 3);                         // map led color based on noise data
 
-            buffer.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, noise));
+            buffer.setPixelColor(i, parameters.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, noise));
         }
         return true;
     }

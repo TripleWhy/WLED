@@ -75,7 +75,7 @@ public:
             buffer.fadeToBlackBy(32 + ((parameters.check1*parameters.intensity) / 25));
             buffer.blur(parameters.intensity / (2 + parameters.check1 * 9), parameters.check1);
             for (size_t i = 0; i < n; i++) {
-                uint32_t flowerCcolor = SEGMENT.color_from_palette(bee[i].hue, false, true, 255);
+                uint32_t flowerCcolor = parameters.color_from_palette(bee[i].hue, false, true, 255);
                 buffer.addPixelColor(bee[i].aimX + 1, bee[i].aimY, flowerCcolor);
                 buffer.addPixelColor(bee[i].aimX, bee[i].aimY + 1, flowerCcolor);
                 buffer.addPixelColor(bee[i].aimX - 1, bee[i].aimY, flowerCcolor);

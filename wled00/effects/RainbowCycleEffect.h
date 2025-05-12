@@ -28,7 +28,7 @@ public:
     uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         //intensity/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
         uint8_t index = (coordinate.getXAbsolute() * multiplier / coordinate.width) + counter;
-        return SEGMENT.color_wheel(index);
+        return parameters.color_wheel(index);
     }
 
 private:

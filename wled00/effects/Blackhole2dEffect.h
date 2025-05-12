@@ -34,13 +34,13 @@ public:
         for (size_t i = 0; i < 8; i++) {
             x = beatsin8_t(parameters.custom1>>3,   0, cols - 1, 0, ((i % 2) ? 128 : 0) + t * i);
             y = beatsin8_t(parameters.intensity>>3, 0, rows - 1, 0, ((i % 2) ? 192 : 64) + t * i);
-            buffer.addPixelColor(x, y, SEGMENT.color_from_palette(i*32, false, PALETTE_SOLID_WRAP, oneColor?0:255));
+            buffer.addPixelColor(x, y, parameters.color_from_palette(i*32, false, PALETTE_SOLID_WRAP, oneColor?0:255));
         }
         // inner stars
         for (size_t i = 0; i < 4; i++) {
             x = beatsin8_t(parameters.custom2>>3, cols/4, cols - 1 - cols/4, 0, ((i % 2) ? 128 : 0) + t * i);
             y = beatsin8_t(parameters.custom3   , rows/4, rows - 1 - rows/4, 0, ((i % 2) ? 192 : 64) + t * i);
-            buffer.addPixelColor(x, y, SEGMENT.color_from_palette(255-i*64, false, PALETTE_SOLID_WRAP, oneColor?0:255));
+            buffer.addPixelColor(x, y, parameters.color_from_palette(255-i*64, false, PALETTE_SOLID_WRAP, oneColor?0:255));
         }
         // central white dot
         buffer.setPixelColor(cols/2, rows/2, WHITE);

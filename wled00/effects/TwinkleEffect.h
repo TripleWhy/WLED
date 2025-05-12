@@ -25,7 +25,7 @@ public:
             return false;
         }
 
-        buffer.fadeOut(224);
+        buffer.fade(SEGCOLOR(1), 224);
 
         uint32_t cycleTime = 20 + (255 - parameters.speed)*5;
         uint32_t it = strip.now / cycleTime;
@@ -46,7 +46,7 @@ public:
             PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
             uint32_t p = (uint32_t)coordinate.width * (uint32_t)PRNG16;
             unsigned j = p >> 16;
-            buffer.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+            buffer.setPixelColor(j, parameters.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
         }
         return true;
     }

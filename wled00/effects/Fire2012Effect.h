@@ -99,7 +99,7 @@ private:
 
         // Step 4.  Map from heat cells to LED colors
         for (unsigned j = 0; j < coordinate.width; j++) {
-            buffer.setPixelColor(j, stripNr, ColorFromPalette(SEGPALETTE, heat[j], 255, LINEARBLEND_NOWRAP));
+            buffer.setPixelColor(j, stripNr, SEGPALETTE.ColorFromPalette(heat[j], 255, LINEARBLEND_NOWRAP));
         }
     }
 

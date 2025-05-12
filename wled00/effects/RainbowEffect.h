@@ -23,9 +23,9 @@ public:
         counter = counter >> 8;
 
         if (parameters.intensity < 128){
-          color = color_blend(SEGMENT.color_wheel(counter),WHITE,uint8_t(128-parameters.intensity));
+          color = color_blend(parameters.color_wheel(counter),WHITE,uint8_t(128-parameters.intensity));
         } else {
-          color = SEGMENT.color_wheel(counter);
+          color = parameters.color_wheel(counter);
         }
         return true;
     }

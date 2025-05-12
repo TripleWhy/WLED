@@ -133,7 +133,7 @@ public:
             }
 
             for (int i = 0; i < wavecount; i++) {
-                waves[i].init(coordinate.width, CRGB(SEGMENT.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
+                waves[i].init(coordinate.width, CRGB(parameters.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
             }
         }
 
@@ -143,7 +143,7 @@ public:
 
             if(!(waves[i].stillAlive())) {
                 //If a wave dies, reinitialize it starts over.
-                waves[i].init(coordinate.width, CRGB(SEGMENT.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
+                waves[i].init(coordinate.width, CRGB(parameters.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
             }
         }
 

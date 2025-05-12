@@ -33,7 +33,7 @@ public:
         for (size_t i = 8; i > 0; i--) {
             buffer.addPixelColor(beatsin8_t(parameters.speed/8 + i, 0, cols - 1),
                                                             beatsin8_t(parameters.intensity/8 - i, 0, rows - 1),
-                                                            ColorFromPalette(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
+                                                            SEGPALETTE.ColorFromPalette(beatsin8_t(12, 0, 255), 255, LINEARBLEND));
         }
         buffer.blur(parameters.custom1 >> (3 + parameters.check1), parameters.check1);
         return true;

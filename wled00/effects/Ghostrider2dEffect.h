@@ -81,7 +81,7 @@ public:
                     lightersPosX[i] += -7 * sin_t(radians(Angle[i]));
                     lightersPosY[i] += -7 * cos_t(radians(Angle[i]));
                 }
-                buffer.wuPixel(coordinate, lightersPosX[i] * 256 / 10, lightersPosY[i] * 256 / 10, ColorFromPalette(SEGPALETTE, (256 - time[i])));
+                buffer.wuPixel(coordinate, lightersPosX[i] * 256 / 10, lightersPosY[i] * 256 / 10, SEGPALETTE.ColorFromPalette((256 - time[i])));
             }
             buffer.blur(parameters.intensity>>3);
         }

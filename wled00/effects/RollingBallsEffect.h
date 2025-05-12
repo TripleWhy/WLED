@@ -54,7 +54,7 @@ public:
 
         float cfac = float(scale8(8, 255-parameters.speed) +1)*20000.0f; // this uses the Aircoookie conversion factor for scaling time using speed slider
 
-        if (parameters.check3) buffer.fadeOut(250); // 2-8 pixel trails (optional)
+        if (parameters.check3) buffer.fade(SEGCOLOR(1), 250); // 2-8 pixel trails (optional)
         else {
         	if (!parameters.check2) buffer.fill(hasCol2 ? BLACK : SEGCOLOR(1)); // don't fill with background color if user wants to see trails
         }
@@ -97,8 +97,8 @@ public:
 
             uint32_t color = SEGCOLOR(0);
             if (SEGMENT.palette) {
-                //color = SEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
-                color = SEGMENT.color_from_palette(i*255/numBalls, false, PALETTE_SOLID_WRAP, 0);
+                //color = parameters.color_wheel(i*(256/MAX(numBalls, 8)));
+                color = parameters.color_from_palette(i*255/numBalls, false, PALETTE_SOLID_WRAP, 0);
             } else if (hasCol2) {
                 color = SEGCOLOR(i % NUM_COLORS);
             }

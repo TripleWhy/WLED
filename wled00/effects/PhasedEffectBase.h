@@ -41,7 +41,7 @@ public:
         val += phase * (i % modVal +1) /2;                           // This sets the varying phase change of the waves. By Andrew Tuline.
         unsigned b = cubicwave8(val);                                // Now we make an 8 bit sinewave.
         b = (b > cutOff) ? (b - cutOff) : 0;                         // A ternary operator to cutoff the light.
-        const uint32_t color = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, false, 0), uint8_t(b));
+        const uint32_t color = color_blend(SEGCOLOR(1), parameters.color_from_palette(index, false, false, 0), uint8_t(b));
         index += 256 / coordinate.width;
         if (coordinate.width > 256)
             index ++;                                                // Correction for segments longer than 256 LEDs

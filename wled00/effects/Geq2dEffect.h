@@ -60,7 +60,7 @@ public:
                 if (parameters.check1) //color_vertical / color bars toggle
                     colorIndex = map(y, 0, rows-1, 0, 255);
 
-                ledColor = SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0);
+                ledColor = parameters.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0);
                 buffer.setPixelColor(x, rows-1 - y, ledColor);
             }
             if (previousBarHeight[x] > 0)

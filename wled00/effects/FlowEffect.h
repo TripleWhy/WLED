@@ -37,7 +37,7 @@ public:
         unsigned zoneLen = coordinate.width / zones;
         unsigned offset = (coordinate.width - zones * zoneLen) >> 1;
 
-        buffer.fill(SEGMENT.color_from_palette(-counter, false, true, 255));
+        buffer.fill(parameters.color_from_palette(-counter, false, true, 255));
 
         for (unsigned z = 0; z < zones; z++)
         {
@@ -47,7 +47,7 @@ public:
                 unsigned colorIndex = (i * 255 / zoneLen) - counter;
                 unsigned led = (z & 0x01) ? i : (zoneLen -1) -i;
                 if (SEGMENT.reverse) led = (zoneLen -1) -led;
-                buffer.setPixelColor(pos + led, SEGMENT.color_from_palette(colorIndex, false, true, 255));
+                buffer.setPixelColor(pos + led, parameters.color_from_palette(colorIndex, false, true, 255));
             }
         }
         return true;

@@ -28,7 +28,7 @@ public:
     uint32_t getPixelColorImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate, const LazyColor& currentColor) {
         const unsigned i = coordinate.getXAbsolute();
         uint8_t col = sin8_t(((parameters.intensity / 25 + 1) * 255 * i / coordinate.width) + (step >> 7));
-        return SEGMENT.color_from_palette(col, false, PALETTE_SOLID_WRAP, 3);
+        return parameters.color_from_palette(col, false, PALETTE_SOLID_WRAP, 3);
     }
 
 private:

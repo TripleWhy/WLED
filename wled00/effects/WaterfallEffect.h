@@ -56,7 +56,7 @@ public:
             if (samplePeak) {
                 buffer.setPixelColor(k, (uint32_t)CRGB(CHSV(92,92,92)));
             } else {
-                buffer.setPixelColor(k, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(pixCol+parameters.intensity, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
+                buffer.setPixelColor(k, color_blend(SEGCOLOR(1), parameters.color_from_palette(pixCol+parameters.intensity, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
             }
             // loop will not execute if coordinate.width equals 1
             for (unsigned i = 0; i < k; i++) {

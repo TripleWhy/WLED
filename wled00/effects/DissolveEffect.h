@@ -24,7 +24,7 @@ public:
             return false;
         }
 
-        const uint32_t color = parameters.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0);
+        const uint32_t color = parameters.check1 ? parameters.color_wheel(hw_random8()) : SEGCOLOR(0);
 
         if (parameters.call == 0) {
             buffer.fill(SEGCOLOR(1));
@@ -37,7 +37,7 @@ public:
                     unsigned i = hw_random16(coordinate.width);
                     if (dissolveToPrimary) { //dissolve to primary/palette
                         if (buffer.getPixelColor(i) == SEGCOLOR(1)) {
-                            buffer.setPixelColor(i, color == SEGCOLOR(0) ? SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : color);
+                            buffer.setPixelColor(i, color == SEGCOLOR(0) ? parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : color);
                             break; //only spawn 1 new pixel per frame per 50 LEDs
                         }
                     } else { //dissolve to secondary

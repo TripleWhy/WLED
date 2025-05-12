@@ -68,7 +68,7 @@ public:
                     grow[i] = true;
                 }
             }
-            uint32_t c = SEGMENT.color_from_palette(color[i], false, false, 0);
+            uint32_t c = parameters.color_from_palette(color[i], false, false, 0);
             if (r[i] > 1.f) buffer.fillCircle(roundf(x[i]), roundf(y[i]), roundf(r[i]), c);
             else            buffer.setPixelColor((int)roundf(x[i]), (int)roundf(y[i]), c);
             // move x

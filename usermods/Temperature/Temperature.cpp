@@ -361,7 +361,7 @@ static uint16_t mode_temperature() {
   float high = roundf(mapf((float)SEGMENT.transitionableParameters.intensity, 0.f, 255.f, 300.f, 600.f));  // default: 30°C, range 30°C to 60°C
   float temp = constrain(UsermodTemperature::getInstance()->getTemperatureC()*10.f, low, high);   // get a little better resolution (*10)
   unsigned i = map(roundf(temp), (unsigned)low, (unsigned)high, 0, 248);
-  SEGMENT.fill(SEGMENT.color_from_palette(i, false, false, 255));
+  SEGMENT.fill(parameters.color_from_palette(i, false, false, 255));
   return FRAMETIME;
 }
 

@@ -64,7 +64,7 @@ public:
 
         byte u = abs8(u1 - j * sinus) % cols;
         byte v = abs8(v1 + j * kosinus) % rows;
-        return SEGMENT.color_from_palette(plasma[v*cols+u], false, PALETTE_SOLID_WRAP, 255);
+        return parameters.color_from_palette(plasma[v*cols+u], false, PALETTE_SOLID_WRAP, 255);
     }
 
 private:

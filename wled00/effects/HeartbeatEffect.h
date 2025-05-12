@@ -44,7 +44,7 @@ public:
         }
 
         for (unsigned i = 0; i < coordinate.width; i++) {
-            buffer.setPixelColor(i, color_blend(SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255 - (aux1 >> 8))));
+            buffer.setPixelColor(i, color_blend(parameters.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255 - (aux1 >> 8))));
         }
         return true;
     }

@@ -33,11 +33,11 @@ public:
 
         myVals[strip.now%32] = volumeSmth;    // filling values semi randomly
 
-        buffer.fadeOut(64+(parameters.speed>>1));
+        buffer.fade(SEGCOLOR(1), 64+(parameters.speed>>1));
 
         for (int i=0; i <parameters.intensity/8; i++) {
             unsigned segLoc = hw_random16(coordinate.width);                    // 16 bit for larger strands of LED's.
-            buffer.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(myVals[i%32]+i*4, false, PALETTE_SOLID_WRAP, 0), uint8_t(volumeSmth)));
+            buffer.setPixelColor(segLoc, color_blend(SEGCOLOR(1), parameters.color_from_palette(myVals[i%32]+i*4, false, PALETTE_SOLID_WRAP, 0), uint8_t(volumeSmth)));
         }
         return true;
     }

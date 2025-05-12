@@ -52,7 +52,7 @@ public:
                 if (state == 0)
                     buffer.setPixelColor(x,y, RGBW32(backgroundColor.r, backgroundColor.g, backgroundColor.b, 0));
                 else
-                    buffer.setPixelColor(x,y, SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
+                    buffer.setPixelColor(x,y, parameters.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
             }
 
             std::fill(prevLeds.begin(), prevLeds.end(), CRGB::Black);
@@ -125,7 +125,7 @@ public:
                     if (dominantColorCount.count > 0 && hw_random8(128))
                         buffer.setPixelColor(x,y, RGBW32(dominantColorCount.color.r, dominantColorCount.color.g, dominantColorCount.color.b, 0));
                 } else if ((col == bgc) && (neighbors == 2) && !hw_random8(128)) {               // Mutation
-                    buffer.setPixelColor(x,y, SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
+                    buffer.setPixelColor(x,y, parameters.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
                 }
                 // else do nothing!
             } // y

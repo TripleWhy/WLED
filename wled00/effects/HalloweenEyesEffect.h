@@ -69,7 +69,7 @@ public:
                 constexpr uint32_t minimumOnTimeEnd = 1024u;
                 const uint32_t fadeInAnimationState = elapsedTime * uint32_t{256u * 8u} / duration;
                 const uint32_t backgroundColor = SEGCOLOR(1);
-                eyeColor = SEGMENT.color_from_palette(color, false, false, 0);
+                eyeColor = parameters.color_from_palette(color, false, false, 0);
                 if (fadeInAnimationState < 256u) {
                     eyeColor = color_blend(backgroundColor, eyeColor, uint8_t(fadeInAnimationState));
                 } else if (elapsedTime > minimumOnTimeBegin) {
