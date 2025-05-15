@@ -76,7 +76,7 @@ public:
                 PartSys.sprayEmit(PartSys.sources[i]); //emit a particle
         }
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
 
         for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
             if (PartSys.particles[i].ttl > (64 - (parameters.intensity >> 2))) PartSys.particles[i].ttl -= (64 - (parameters.intensity >> 2)); //ttl is linked to brightness, this allows to use higher brightness but still a short spark lifespan

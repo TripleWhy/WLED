@@ -85,7 +85,7 @@ public:
 
             j = (j + 1) % numSprays;
         }
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

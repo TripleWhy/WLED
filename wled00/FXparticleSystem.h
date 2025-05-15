@@ -157,8 +157,8 @@ public:
   bool init(const uint32_t width, const uint32_t height, const uint32_t requestedsources, const bool advanced, const bool sizecontrol);
   bool isInitialized() const;
   // note: memory is allcated in the FX function, no deconstructor needed
-  void update(PixelBuffer<EffectDimensionality::d2>& framebuffer); //update the particles according to set options and render to the matrix
-  void updateFire(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint8_t intensity, const bool renderonly); // update function for fire, if renderonly is set, particles are not updated (required to fix transitions with frameskips)
+  void update(PixelBuffer<EffectDimensionality::d2>& framebuffer, const TransitionableParameters& parameters); //update the particles according to set options and render to the matrix
+  void updateFire(PixelBuffer<EffectDimensionality::d2>& framebuffer, const TransitionableParameters& parameters, const bool renderonly); // update function for fire, if renderonly is set, particles are not updated (required to fix transitions with frameskips)
   void updateSystem(unsigned width, unsigned height); // call at the beginning of every FX, updates pointers and dimensions
   void particleMoveUpdate(PSparticle &part, PSparticleFlags &partFlags, PSsettings2D *options = NULL, PSadvancedParticle *advancedproperties = NULL); // move function
   // particle emitters
@@ -198,12 +198,12 @@ public:
 
 private:
   //rendering functions
-  void ParticleSys_render(PixelBuffer<EffectDimensionality::d2>& framebuffer);
+  void ParticleSys_render(PixelBuffer<EffectDimensionality::d2>& framebuffer, const TransitionableParameters& parameters);
   [[gnu::hot]] void renderParticle(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint32_t particleindex, const uint8_t brightness, const uint32_t color, const bool wrapX, const bool wrapY);
   //paricle physics applied by system if flags are set
   void applyGravity(); // applies gravity to all particles
-  void handleCollisions();
-  [[gnu::hot]] void collideParticles(PSparticle &particle1, PSparticle &particle2, const int32_t dx, const int32_t dy, const int32_t collDistSq);
+  void handleCollisions(const TransitionableParameters& parameters);
+  [[gnu::hot]] void collideParticles(const TransitionableParameters& parameters, PSparticle &particle1, PSparticle &particle2, const int32_t dx, const int32_t dy, const int32_t collDistSq);
   void fireParticleupdate();
   //utility functions
   bool updateSize(PSadvancedParticle *advprops, PSsizeControl *advsize); // advanced size control
@@ -343,7 +343,7 @@ public:
   ~ParticleSystem1D() = default;
   bool init(const uint32_t length, const uint32_t requestedsources, const uint8_t fractionofparticles, const bool advanced);
   bool isInitialized() const;
-  void update(PixelBuffer<EffectDimensionality::d1>& framebuffer); //update the particles according to set options and render to the matrix
+  void update(PixelBuffer<EffectDimensionality::d1>& framebuffer, const TransitionableParameters& parameters); //update the particles according to set options and render to the matrix
   void updateSystem(size_t length); // call at the beginning of every FX, updates pointers and dimensions
   // particle emitters
   int32_t sprayEmit(const PSsource1D &emitter);
@@ -372,13 +372,13 @@ public:
 
 private:
   //rendering functions
-  void ParticleSys_render(PixelBuffer<EffectDimensionality::d1>& framebuffer);
+  void ParticleSys_render(PixelBuffer<EffectDimensionality::d1>& framebuffer, const TransitionableParameters& parameters);
   [[gnu::hot]] void renderParticle(PixelBuffer<EffectDimensionality::d1>& framebuffer, const uint32_t particleindex, const uint8_t brightness, const uint32_t color, const bool wrap);
 
   //paricle physics applied by system if flags are set
   void applyGravity(); // applies gravity to all particles
-  void handleCollisions();
-  [[gnu::hot]] void collideParticles(PSparticle1D &particle1, const PSparticleFlags1D &particle1flags, PSparticle1D &particle2, const PSparticleFlags1D &particle2flags, const int32_t dx, const uint32_t dx_abs, const int32_t collisiondistance);
+  void handleCollisions(const TransitionableParameters& parameters);
+  [[gnu::hot]] void collideParticles(const TransitionableParameters& parameters, PSparticle1D &particle1, const PSparticleFlags1D &particle1flags, PSparticle1D &particle2, const PSparticleFlags1D &particle2flags, const int32_t dx, const uint32_t dx_abs, const int32_t collisiondistance);
 
   [[gnu::hot]] void bounce(int8_t &incomingspeed, int8_t &parallelspeed, int32_t &position, const uint32_t maxposition); // bounce on a wall
 

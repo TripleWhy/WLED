@@ -83,7 +83,7 @@ public:
         }
         //TODO: add color control?
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

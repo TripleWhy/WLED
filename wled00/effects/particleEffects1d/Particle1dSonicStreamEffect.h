@@ -92,7 +92,7 @@ public:
         }
         else loudness = 0; // required for push mode
 
-        PartSys.update(buffer); // update and render (needs to be done before manipulation for initial particle spacing to be right)
+        PartSys.update(buffer, parameters); // update and render (needs to be done before manipulation for initial particle spacing to be right)
 
         if (parameters.check3) { // push mode
             PartSys.sources[0].sourceFlags.perpetual = true; // emitted particles dont age

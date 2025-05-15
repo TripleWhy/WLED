@@ -117,7 +117,7 @@ public:
             PartSys.particleMoveUpdate(PartSys.particles[i], PartSys.particleFlags[i]); // double the speed
         }
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

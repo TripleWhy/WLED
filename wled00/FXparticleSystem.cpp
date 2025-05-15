@@ -73,7 +73,7 @@ bool ParticleSystem2D::isInitialized() const {
 }
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
-void ParticleSystem2D::update(PixelBuffer<EffectDimensionality::d2>& framebuffer) {
+void ParticleSystem2D::update(PixelBuffer<EffectDimensionality::d2>& framebuffer, const TransitionableParameters& parameters) {
   //apply gravity globally if enabled
   if (particlesettings.useGravity)
     applyGravity();
@@ -89,22 +89,22 @@ void ParticleSystem2D::update(PixelBuffer<EffectDimensionality::d2>& framebuffer
 
   // handle collisions (can push particles, must be done before updating particles or they can render out of bounds, causing a crash if using local buffer for speed)
   if (particlesettings.useCollisions)
-    handleCollisions();
+    handleCollisions(parameters);
 
   //move all particles
   for (uint32_t i = 0; i < usedParticles; i++) {
     particleMoveUpdate(particles[i], particleFlags[i], nullptr, !advPartProps.empty() ? &advPartProps[i] : nullptr); // note: splitting this into two loops is slower and uses more flash
   }
 
-  ParticleSys_render(framebuffer);
+  ParticleSys_render(framebuffer, parameters);
 }
 
 // update function for fire animation
-void ParticleSystem2D::updateFire(PixelBuffer<EffectDimensionality::d2>& framebuffer, const uint8_t intensity,const bool renderonly) {
+void ParticleSystem2D::updateFire(PixelBuffer<EffectDimensionality::d2>& framebuffer, const TransitionableParameters& parameters, const bool renderonly) {
   if (!renderonly)
     fireParticleupdate();
-  fireIntesity = intensity > 0 ? intensity : 1; // minimum of 1, zero checking is used in render function
-  ParticleSys_render(framebuffer);
+  fireIntesity = parameters.intensity > 0 ? parameters.intensity : 1; // minimum of 1, zero checking is used in render function
+  ParticleSys_render(framebuffer, parameters);
 }
 
 // set percentage of used particles as uint8_t i.e 127 means 50% for example
@@ -581,7 +581,7 @@ void ParticleSystem2D::pointAttractor(const uint32_t particleindex, PSparticle &
 // if wrap is set, particles half out of bounds are rendered to the other side of the matrix
 // warning: do not render out of bounds particles or system will crash! rendering does not check if particle is out of bounds
 // firemode is only used for PS Fire FX
-void ParticleSystem2D::ParticleSys_render(PixelBuffer<EffectDimensionality::d2>& framebuffer) {
+void ParticleSystem2D::ParticleSys_render(PixelBuffer<EffectDimensionality::d2>& framebuffer, const TransitionableParameters& parameters) {
   if (blendingStyle == BLEND_STYLE_FADE && SEGMENT.isInTransition() && lastRender + (strip.getFrameTime() >> 1) > strip.now) // fixes speedup during transitions TODO: find a better solution
     return;
   lastRender = strip.now;
@@ -836,7 +836,7 @@ void ParticleSystem2D::renderParticle(PixelBuffer<EffectDimensionality::d2>& fra
 // uses binning by dividing the frame into slices in x direction which is efficient if using gravity in y direction (but less efficient for FX that use forces in x direction)
 // for code simplicity, no y slicing is done, making very tall matrix configurations less efficient
 // note: also tested adding y slicing, it gives diminishing returns, some FX even get slower. FX not using gravity would benefit with a 10% FPS improvement
-void ParticleSystem2D::handleCollisions() {
+void ParticleSystem2D::handleCollisions(const TransitionableParameters& parameters) {
   int32_t collDistSq = particleHardRadius << 1; // distance is double the radius note: particleHardRadius is updated when setting global particle size
   collDistSq = collDistSq * collDistSq; // square it for faster comparison (square is one operation)
   // note: partices are binned in x-axis, assumption is that no more than half of the particles are in the same bin
@@ -886,7 +886,7 @@ void ParticleSystem2D::handleCollisions() {
         if (dx * dx < collDistSq) { // check x direction, if close, check y direction (squaring is faster than abs() or dual compare)
           int32_t dy = (particles[idx_j].y + particles[idx_j].vy)  - (particles[idx_i].y + particles[idx_i].vy); // distance with lookahead
           if (dy * dy < collDistSq) // particles are close
-            collideParticles(particles[idx_i], particles[idx_j], dx, dy, collDistSq);
+            collideParticles(parameters, particles[idx_i], particles[idx_j], dx, dy, collDistSq);
         }
       }
     }
@@ -896,7 +896,7 @@ void ParticleSystem2D::handleCollisions() {
 
 // handle a collision if close proximity is detected, i.e. dx and/or dy smaller than 2*PS_P_RADIUS
 // takes two pointers to the particles to collide and the particle hardness (softer means more energy lost in collision, 255 means full hard)
-void ParticleSystem2D::collideParticles(PSparticle &particle1, PSparticle &particle2, int32_t dx, int32_t dy, const int32_t collDistSq) {
+void ParticleSystem2D::collideParticles(const TransitionableParameters& parameters, PSparticle &particle1, PSparticle &particle2, int32_t dx, int32_t dy, const int32_t collDistSq) {
   int32_t distanceSquared = dx * dx + dy * dy;
   // Calculate relative velocity note: could zero check but that does not improve overall speed but deminish it as that is rarely the case and pushing is still required
   int32_t relativeVx = (int32_t)particle2.vx - (int32_t)particle1.vx;
@@ -943,7 +943,7 @@ void ParticleSystem2D::collideParticles(PSparticle &particle1, PSparticle &parti
     particle2.vx += ximpulse;
     particle2.vy += yimpulse;
 
-    if (collisionHardness < PS_P_MINSURFACEHARDNESS && (SEGMENT.call & 0x07) == 0) { // if particles are soft, they become 'sticky' i.e. apply some friction (they do pile more nicely and stop sloshing around)
+    if (collisionHardness < PS_P_MINSURFACEHARDNESS && (parameters.call & 0x07) == 0) { // if particles are soft, they become 'sticky' i.e. apply some friction (they do pile more nicely and stop sloshing around)
       const uint32_t coeff = collisionHardness + (255 - PS_P_MINSURFACEHARDNESS);
       // Note: could call applyFriction, but this is faster and speed is key here
       #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(ESP8266) // use bitshifts with rounding instead of division (2x faster)
@@ -1099,14 +1099,14 @@ bool ParticleSystem1D::isInitialized() const {
 }
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
-void ParticleSystem1D::update(PixelBuffer<EffectDimensionality::d1>& framebuffer) {
+void ParticleSystem1D::update(PixelBuffer<EffectDimensionality::d1>& framebuffer, const TransitionableParameters& parameters) {
   //apply gravity globally if enabled
   if (particlesettings.useGravity) //note: in 1D system, applying gravity after collisions also works but may be worse
     applyGravity();
 
   // handle collisions (can push particles, must be done before updating particles or they can render out of bounds, causing a crash if using local buffer for speed)
   if (particlesettings.useCollisions)
-    handleCollisions();
+    handleCollisions(parameters);
 
   //move all particles
   for (uint32_t i = 0; i < usedParticles; i++) {
@@ -1120,7 +1120,7 @@ void ParticleSystem1D::update(PixelBuffer<EffectDimensionality::d1>& framebuffer
     }
   }
 
-  ParticleSys_render(framebuffer);
+  ParticleSys_render(framebuffer, parameters);
 }
 
 // set percentage of used particles as uint8_t i.e 127 means 50% for example
@@ -1355,7 +1355,7 @@ void ParticleSystem1D::applyFriction(int32_t coefficient) {
 // render particles to the LED buffer (uses palette to render the 8bit particle color value)
 // if wrap is set, particles half out of bounds are rendered to the other side of the matrix
 // warning: do not render out of bounds particles or system will crash! rendering does not check if particle is out of bounds
-void ParticleSystem1D::ParticleSys_render(PixelBuffer<EffectDimensionality::d1>& framebuffer) {
+void ParticleSystem1D::ParticleSys_render(PixelBuffer<EffectDimensionality::d1>& framebuffer, const TransitionableParameters& parameters) {
   if (blendingStyle == BLEND_STYLE_FADE && SEGMENT.isInTransition() && lastRender + (strip.getFrameTime() >> 1) > strip.now) // fixes speedup during transitions TODO: find a better solution
     return;
   lastRender = strip.now;
@@ -1517,7 +1517,7 @@ void ParticleSystem1D::renderParticle(PixelBuffer<EffectDimensionality::d1>& fra
 }
 
 // detect collisions in an array of particles and handle them
-void ParticleSystem1D::handleCollisions() {
+void ParticleSystem1D::handleCollisions(const TransitionableParameters& parameters) {
   int32_t collisiondistance = particleHardRadius << 1;
   // note: partices are binned by position, assumption is that no more than half of the particles are in the same bin
   // if they are, collisionStartIdx is increased so each particle collides at least every second frame (which still gives decent collisions)
@@ -1561,7 +1561,7 @@ void ParticleSystem1D::handleCollisions() {
         int32_t dx = (particles[idx_j].x + particles[idx_j].vx) - (particles[idx_i].x + particles[idx_i].vx); // distance between particles with lookahead
         uint32_t dx_abs = abs(dx);
         if (dx_abs <= collisiondistance) { // collide if close
-          collideParticles(particles[idx_i], particleFlags[idx_i], particles[idx_j], particleFlags[idx_j], dx, dx_abs, collisiondistance);
+          collideParticles(parameters, particles[idx_i], particleFlags[idx_i], particles[idx_j], particleFlags[idx_j], dx, dx_abs, collisiondistance);
         }
       }
     }
@@ -1570,7 +1570,7 @@ void ParticleSystem1D::handleCollisions() {
 }
 // handle a collision if close proximity is detected, i.e. dx and/or dy smaller than 2*PS_P_RADIUS
 // takes two pointers to the particles to collide and the particle hardness (softer means more energy lost in collision, 255 means full hard)
-void ParticleSystem1D::collideParticles(PSparticle1D &particle1, const PSparticleFlags1D &particle1flags, PSparticle1D &particle2, const PSparticleFlags1D &particle2flags, const int32_t dx, const uint32_t dx_abs, const int32_t collisiondistance) {
+void ParticleSystem1D::collideParticles(const TransitionableParameters& parameters, PSparticle1D &particle1, const PSparticleFlags1D &particle1flags, PSparticle1D &particle2, const PSparticleFlags1D &particle2flags, const int32_t dx, const uint32_t dx_abs, const int32_t collisiondistance) {
   int32_t dv = particle2.vx - particle1.vx;
   int32_t dotProduct = (dx * dv); // is always negative if moving towards each other
 
@@ -1591,7 +1591,7 @@ void ParticleSystem1D::collideParticles(PSparticle1D &particle1, const PSparticl
     else if (particle2flags.fixed)
       particle1.vx = -particle2.vx;
 
-    if (collisionHardness < PS_P_MINSURFACEHARDNESS_1D && (SEGMENT.call & 0x07) == 0) { // if particles are soft, they become 'sticky' i.e. apply some friction
+    if (collisionHardness < PS_P_MINSURFACEHARDNESS_1D && (parameters.call & 0x07) == 0) { // if particles are soft, they become 'sticky' i.e. apply some friction
       const uint32_t coeff = collisionHardness + (250 - PS_P_MINSURFACEHARDNESS_1D);
       #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(ESP8266) // use bitshifts with rounding instead of division (2x faster)
       particle1.vx = ((int32_t)particle1.vx * coeff + (((int32_t)particle1.vx >> 31) & 0xFF)) >> 8; // note: (v>>31) & 0xFF)) extracts the sign and adds 255 if negative for correct rounding using shifts

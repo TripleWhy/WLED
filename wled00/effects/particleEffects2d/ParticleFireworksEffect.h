@@ -155,7 +155,7 @@ public:
                 PartSys.particleMoveUpdate(PartSys.particles[i], PartSys.particleFlags[i], nullptr, nullptr);
             }
         }
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

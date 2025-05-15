@@ -73,7 +73,7 @@ public:
         if (parameters.call % (16 - (parameters.custom2 >> 4)) == 0)
             PartSys.applyFriction(2);
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

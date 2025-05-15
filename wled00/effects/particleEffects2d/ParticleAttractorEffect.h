@@ -108,7 +108,7 @@ public:
         if (parameters.call % (33 - parameters.custom3) == 0)
             PartSys.applyFriction(2);
         PartSys.particleMoveUpdate(PartSys.sources[0].source, PartSys.sources[0].sourceFlags, &sourcesettings); // move the source
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

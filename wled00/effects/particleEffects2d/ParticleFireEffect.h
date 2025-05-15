@@ -44,7 +44,7 @@ public:
             if (period < (uint32_t)map(parameters.speed, 0, 99, 50, 10)) { // limit to 90FPS - 20FPS
                 parameters.call--; //skipping a frame, decrement the counter (on call0, this is never executed as lastcall is 0, so its fine to not check if >0)
                 //still need to render the frame or flickering will occur in transitions
-                PartSys.updateFire(buffer, parameters.intensity, true); // render the fire without updating particles (render only)
+                PartSys.updateFire(buffer, parameters, true); // render the fire without updating particles (render only)
                 return false; //do not update this frame
             }
             lastcall = strip.now;
@@ -97,7 +97,7 @@ public:
             PartSys.flameEmit(PartSys.sources[j]);
         }
 
-        PartSys.updateFire(buffer, parameters.intensity, false); // update and render the fire
+        PartSys.updateFire(buffer, parameters, false); // update and render the fire
         return true;
     }
 

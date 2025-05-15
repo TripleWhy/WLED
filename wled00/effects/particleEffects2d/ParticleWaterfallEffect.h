@@ -85,7 +85,7 @@ public:
         if (parameters.call % 20 == 0)
             PartSys.applyFriction(1); // add just a tiny amount of friction to help smooth things
 
-        PartSys.update(buffer);   // update and render
+        PartSys.update(buffer, parameters);   // update and render
         return true;
     }
 

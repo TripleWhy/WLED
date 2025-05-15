@@ -92,7 +92,7 @@ public:
         if (parameters.custom2 > 190) //fast color change
             PartSys.sources[0].source.hue += (parameters.custom2 - 190) >> 2;
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

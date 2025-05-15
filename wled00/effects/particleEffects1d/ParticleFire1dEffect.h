@@ -77,7 +77,7 @@ public:
                 PartSys.particles[i].ttl -= map(parameters.custom1, 0, 255, 1, 3); // age faster
         }
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

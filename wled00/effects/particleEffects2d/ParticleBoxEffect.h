@@ -92,7 +92,7 @@ public:
         if ((parameters.call & 0x0F) == 0) // every 16th frame
             PartSys.applyFriction(1);
 
-        PartSys.update(buffer);   // update and render
+        PartSys.update(buffer, parameters);   // update and render
         return true;
     }
 

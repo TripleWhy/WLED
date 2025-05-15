@@ -115,7 +115,7 @@ public:
         if ((parameters.call & 0x03) == 0) // every fourth frame
             PartSys.applyFriction(1); // apply friction to all particles
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
 
         for (uint32_t i = 0; i < PartSys.usedParticles; i++) {
             if (PartSys.particles[i].ttl > 10) PartSys.particles[i].ttl -= 10; //ttl is linked to brightness, this allows to use higher brightness but still a short spark lifespan

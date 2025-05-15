@@ -126,7 +126,7 @@ public:
                 j = (j + 1) % spraycount;
             }
         }
-        PartSys.update(buffer); //update all particles and render to frame
+        PartSys.update(buffer, parameters); //update all particles and render to frame
         return true;
     }
 

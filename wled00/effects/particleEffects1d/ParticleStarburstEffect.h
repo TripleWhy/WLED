@@ -72,7 +72,7 @@ public:
             PartSys.applyFriction(1); //slow down particles
         }
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

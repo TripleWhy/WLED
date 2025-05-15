@@ -95,7 +95,7 @@ public:
                     PartSys.particles[i].hue = (1024 * i) / PartSys.usedParticles; // color by particle index
             }
         }
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

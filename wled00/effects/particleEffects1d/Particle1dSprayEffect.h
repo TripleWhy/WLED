@@ -63,7 +63,7 @@ public:
         for (uint i = 0; i < PartSys.usedParticles; i++) {
             PartSys.particleFlags[i].reversegrav = PartSys.sources[0].sourceFlags.reversegrav; // update gravity direction
         }
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

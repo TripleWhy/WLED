@@ -100,7 +100,7 @@ public:
         }
 
         PartSys.setParticleSize(parameters.custom1); // if custom1 == 0 this sets rendering size to one pixel
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

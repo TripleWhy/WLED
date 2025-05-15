@@ -103,7 +103,7 @@ public:
         else
             aux1 = 0; // reset edge detection
 
-        PartSys.update(buffer); // update and render (needs to be done before manipulation for initial particle spacing to be right)
+        PartSys.update(buffer, parameters); // update and render (needs to be done before manipulation for initial particle spacing to be right)
         return true;
     }
 

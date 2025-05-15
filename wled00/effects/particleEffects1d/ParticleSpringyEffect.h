@@ -177,7 +177,7 @@ public:
                 PartSys.particles[i].hue = 127 + deviation; // map density to hue
             }
         }
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

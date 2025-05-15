@@ -134,7 +134,7 @@ public:
         else if (parameters.check2) // auto reset
             aux1--; // countdown
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 

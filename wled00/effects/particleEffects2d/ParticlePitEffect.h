@@ -84,7 +84,7 @@ public:
         if (parameters.call % 6 == 0)// (3 + max(3, (parameters.speed >> 2))) == 0) // note: if friction is too low, hard particles uncontrollably 'wander' left and right if wrapX is enabled
             PartSys.applyFriction(frictioncoefficient);
 
-        PartSys.update(buffer); // update and render
+        PartSys.update(buffer, parameters); // update and render
         return true;
     }
 
