@@ -394,32 +394,21 @@ typedef struct Segment {
     static uint16_t _lastPaletteChange;       // last random palette change time in millis()/1000
     static uint16_t _lastPaletteBlend;        // blend palette according to set Transition Delay in millis()%0xFFFF
     static uint16_t _transitionprogress;      // current transition progress 0 - 0xFFFF
-    #ifndef WLED_DISABLE_MODE_BLEND
-    static bool          _modeBlend;          // mode/effect blending semaphore
-    // clipping
-    static uint16_t _clipStart, _clipStop;
-    static uint8_t  _clipStartY, _clipStopY;
-    #endif
 
     // transition data, valid only if transitional==true, holds values during transition (72 bytes)
     struct Transition {
       #ifndef WLED_DISABLE_MODE_BLEND
       TransitionableParameters _transitionableParametersT;           // previous segment environment
       SegmentAllocator<Effect>::unique_ptr _effectT; // previous mode/effect
-      #else
-      uint32_t      _colorT[NUM_COLORS];
       #endif
-      uint8_t       _palTid;      // previous palette
       uint8_t       _briT;        // temporary brightness
       uint8_t       _cctT;        // temporary CCT
-      CRGBPalette16 _palT;        // temporary palette
       uint8_t       _prevPaletteBlends; // number of previous palette blends (there are max 255 blends possible)
       unsigned long _start;       // must accommodate millis()
       uint16_t      _dur;
       // -> here is one byte of padding
       Transition(uint16_t dur=750)
-        : _palT(CRGBPalette16())
-        , _prevPaletteBlends(0)
+        : _prevPaletteBlends(0)
         , _start(millis())
         , _dur(dur)
       {}
@@ -507,10 +496,6 @@ typedef struct Segment {
     inline Segment &clearName()                { if (name) free(name); name = nullptr; return *this; }
     inline Segment &setName(const String &name) { return setName(name.c_str()); }
 
-    #ifndef WLED_DISABLE_MODE_BLEND
-    inline static void     modeBlend(bool blend)           { _modeBlend = blend; }
-    inline static bool     getmodeBlend(void)              { return _modeBlend; }
-    #endif
     inline static unsigned vLength()                       { return Segment::_vLength; }
     inline static unsigned vWidth()                        { return Segment::_vWidth; }
     inline static unsigned vHeight()                       { return Segment::_vHeight; }
@@ -588,9 +573,6 @@ typedef struct Segment {
     inline void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) const { setPixelColor(i, RGBW32(r,g,b,w), aa); }
     inline void setPixelColor(float i, CRGB c, bool aa = true) const                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
     #endif
-    #ifndef WLED_DISABLE_MODE_BLEND
-    static inline void setClippingRect(int startX, int stopX, int startY = 0, int stopY = 1) { _clipStart = startX; _clipStop = stopX; _clipStartY = startY; _clipStopY = stopY; };
-    #endif
     bool isPixelClipped(int i) const;
     [[gnu::hot]] uint32_t getPixelColor(int i) const;
     void clear();
@@ -618,7 +600,6 @@ typedef struct Segment {
     inline void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) const { setPixelColorXY(x, y, RGBW32(r,g,b,w), aa); }
     inline void setPixelColorXY(float x, float y, CRGB c, bool aa = true) const                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), aa); }
     #endif
-    [[gnu::hot]] bool isPixelXYClipped(int x, int y) const;
     [[gnu::hot]] uint32_t getPixelColorXY(int x, int y) const;
   #else
     inline bool is2D() const                                                      { return false; }
@@ -632,7 +613,6 @@ typedef struct Segment {
     inline void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColor(x, RGBW32(r,g,b,w), aa); }
     inline void setPixelColorXY(float x, float y, CRGB c, bool aa = true)         { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), aa); }
     #endif
-    inline bool isPixelXYClipped(int x, int y)                                    { return isPixelClipped(x); }
     inline uint32_t getPixelColorXY(int x, int y)                                 { return getPixelColor(x); }
   #endif
 } segment;
