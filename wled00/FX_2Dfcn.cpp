@@ -162,7 +162,7 @@ void IRAM_ATTR_YN Segment::_setPixelColorXY_raw(const int& x, const int& y, uint
   }
 }
 
-void IRAM_ATTR_YN Segment::setPixelColorXY(int x, int y, uint32_t col) const
+void IRAM_ATTR_YN Segment::setPixelColorXY(int x, int y, uint32_t col, bool colorScaled) const
 {
   if (!isActive()) return; // not active
 
@@ -172,7 +172,9 @@ void IRAM_ATTR_YN Segment::setPixelColorXY(int x, int y, uint32_t col) const
   if (x >= vW || y >= vH || x < 0 || y < 0) return;  // if pixel would fall out of virtual segment just exit
 
   // if color is unscaled
-  if (!_colorScaled) col = color_fade(col, _segBri);
+  if (!colorScaled) {
+    col = color_fade(col, _segBri);
+  }
 
   if (reverse  ) x = vW - x - 1;
   if (reverse_y) y = vH - y - 1;
@@ -198,7 +200,7 @@ void IRAM_ATTR_YN Segment::setPixelColorXY(int x, int y, uint32_t col) const
 
 #ifdef WLED_USE_AA_PIXELS
 // anti-aliased version of setPixelColorXY()
-void Segment::setPixelColorXY(float x, float y, uint32_t col, bool aa) const
+void Segment::setPixelColorXY(float x, float y, uint32_t col, bool colorScaled, bool aa) const
 {
   if (!isActive()) return; // not active
   if (x<0.0f || x>1.0f || y<0.0f || y>1.0f) return; // not normalized
@@ -220,21 +222,21 @@ void Segment::setPixelColorXY(float x, float y, uint32_t col, bool aa) const
     uint32_t cXRYB = getPixelColorXY(xR, yB);
 
     if (xL!=xR && yT!=yB) {
-      setPixelColorXY(xL, yT, color_blend(col, cXLYT, uint8_t(sqrtf(dL*dT)*255.0f))); // blend TL pixel
-      setPixelColorXY(xR, yT, color_blend(col, cXRYT, uint8_t(sqrtf(dR*dT)*255.0f))); // blend TR pixel
-      setPixelColorXY(xL, yB, color_blend(col, cXLYB, uint8_t(sqrtf(dL*dB)*255.0f))); // blend BL pixel
-      setPixelColorXY(xR, yB, color_blend(col, cXRYB, uint8_t(sqrtf(dR*dB)*255.0f))); // blend BR pixel
+      setPixelColorXY(xL, yT, color_blend(col, cXLYT, uint8_t(sqrtf(dL*dT)*255.0f)), colorScaled); // blend TL pixel
+      setPixelColorXY(xR, yT, color_blend(col, cXRYT, uint8_t(sqrtf(dR*dT)*255.0f)), colorScaled); // blend TR pixel
+      setPixelColorXY(xL, yB, color_blend(col, cXLYB, uint8_t(sqrtf(dL*dB)*255.0f)), colorScaled); // blend BL pixel
+      setPixelColorXY(xR, yB, color_blend(col, cXRYB, uint8_t(sqrtf(dR*dB)*255.0f)), colorScaled); // blend BR pixel
     } else if (xR!=xL && yT==yB) {
-      setPixelColorXY(xR, yT, color_blend(col, cXLYT, uint8_t(dL*255.0f))); // blend L pixel
-      setPixelColorXY(xR, yT, color_blend(col, cXRYT, uint8_t(dR*255.0f))); // blend R pixel
+      setPixelColorXY(xR, yT, color_blend(col, cXLYT, uint8_t(dL*255.0f)), colorScaled); // blend L pixel
+      setPixelColorXY(xR, yT, color_blend(col, cXRYT, uint8_t(dR*255.0f)), colorScaled); // blend R pixel
     } else if (xR==xL && yT!=yB) {
-      setPixelColorXY(xR, yT, color_blend(col, cXLYT, uint8_t(dT*255.0f))); // blend T pixel
-      setPixelColorXY(xL, yB, color_blend(col, cXLYB, uint8_t(dB*255.0f))); // blend B pixel
+      setPixelColorXY(xR, yT, color_blend(col, cXLYT, uint8_t(dT*255.0f)), colorScaled); // blend T pixel
+      setPixelColorXY(xL, yB, color_blend(col, cXLYB, uint8_t(dB*255.0f)), colorScaled); // blend B pixel
     } else {
-      setPixelColorXY(xL, yT, col); // exact match (x & y land on a pixel)
+      setPixelColorXY(xL, yT, col, colorScaled); // exact match (x & y land on a pixel)
     }
   } else {
-    setPixelColorXY(uint16_t(roundf(fX)), uint16_t(roundf(fY)), col);
+    setPixelColorXY(uint16_t(roundf(fX)), uint16_t(roundf(fY)), col, colorScaled);
   }
 }
 #endif

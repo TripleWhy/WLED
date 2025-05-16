@@ -74,7 +74,6 @@ unsigned      Segment::_vWidth            = 0;
 unsigned      Segment::_vHeight           = 0;
 unsigned      Segment::_vStripCount       = 0;
 uint8_t       Segment::_segBri            = 0;
-bool          Segment::_colorScaled       = false;
 CRGBPalette16 Segment::_randomPalette     = generateRandomPalette();  // was CRGBPalette16(DEFAULT_COLOR);
 CRGBPalette16 Segment::_newRandomPalette  = generateRandomPalette();  // was CRGBPalette16(DEFAULT_COLOR);
 uint16_t      Segment::_lastPaletteChange = 0; // perhaps it should be per segment
@@ -582,7 +581,7 @@ bool IRAM_ATTR_YN Segment::isPixelClipped(int i) const {
   return false;
 }
 
-void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
+void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col, bool colorScaled) const
 {
   if (!isActive() || i < 0) return; // not active or invalid index
 #ifndef WLED_DISABLE_2D
@@ -607,22 +606,23 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
     const int vW = vWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
     const int vH = vHeight();  // segment height in logical pixels (is always >= 1)
     // pre-scale color for all pixels
-    col = color_fade(col, _segBri);
-    _colorScaled = true;
+    if (!colorScaled) {
+      col = color_fade(col, _segBri);
+    }
     switch (map1D2D) {
       case M12_Pixels:
         // use all available pixels as a long strip
-        setPixelColorXY(i % vW, i / vW, col);
+        setPixelColorXY(i % vW, i / vW, col, true);
         break;
       case M12_pBar:
         // expand 1D effect vertically or have it play on virtual strips
-        if (vStrip > 0) setPixelColorXY(vStrip - 1, vH - i - 1, col);
-        else for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - i - 1, col);
+        if (vStrip > 0) setPixelColorXY(vStrip - 1, vH - i - 1, col, true);
+        else for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - i - 1, col, true);
         break;
       case M12_pArc:
         // expand in circular fashion from center
         if (i == 0)
-          setPixelColorXY(0, 0, col);
+          setPixelColorXY(0, 0, col, true);
         else {
           float r = i;
           float step = HALF_PI / (2.8284f * r + 4); // we only need (PI/4)/(r/sqrt(2)+1) steps
@@ -630,8 +630,8 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
             int x = roundf(sin_t(rad) * r);
             int y = roundf(cos_t(rad) * r);
             // exploit symmetry
-            setPixelColorXY(x, y, col);
-            setPixelColorXY(y, x, col);
+            setPixelColorXY(x, y, col, true);
+            setPixelColorXY(y, x, col, true);
           }
           // Bresenham’s Algorithm (may not fill every pixel)
           //int d = 3 - (2*i);
@@ -650,8 +650,8 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
         }
         break;
       case M12_pCorner:
-        for (int x = 0; x <= i; x++) setPixelColorXY(x, i, col);
-        for (int y = 0; y <  i; y++) setPixelColorXY(i, y, col);
+        for (int x = 0; x <= i; x++) setPixelColorXY(x, i, col, true);
+        for (int y = 0; y <  i; y++) setPixelColorXY(i, y, col, true);
         break;
         case M12_sPinwheel: {
           // Uses Bresenham's algorithm to place coordinates of two lines in arrays then draws between them
@@ -739,7 +739,7 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
                     (!onLine1 && (!onLine2 || drawLast))  || // Middle pixels and line2 if drawLast
                     (!onLine2 && (!onLine1 || drawFirst))    // Middle pixels and line1 if drawFirst
                   ) {
-                  setPixelColorXY(x, y, col);
+                  setPixelColorXY(x, y, col, true);
                 }
               }
             }
@@ -756,7 +756,7 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
       int x = 0, y = 0;
       if (vHeight() > 1) y = i;
       if (vWidth()  > 1) x = i;
-      setPixelColorXY(x, y, col);
+      setPixelColorXY(x, y, col, true);
       return;
     }
   }
@@ -766,7 +766,9 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
 
   unsigned len = length();
   // if color is unscaled
-  if (!_colorScaled) col = color_fade(col, _segBri);
+  if (!colorScaled) {
+    col = color_fade(col, _segBri);
+  }
 
   // expand pixel (taking into account start, grouping, spacing [and offset])
   i = i * groupLength();
@@ -799,7 +801,7 @@ void IRAM_ATTR_YN Segment::setPixelColor(int i, uint32_t col) const
 
 #ifdef WLED_USE_AA_PIXELS
 // anti-aliased normalized version of setPixelColor()
-void Segment::setPixelColor(float i, uint32_t col, bool aa) const
+void Segment::setPixelColor(float i, uint32_t col, bool colorScaled, bool aa) const
 {
   if (!isActive()) return; // not active
   int vStrip = int(i/10.0f); // hack to allow running on virtual strips (2D segment columns/rows)
@@ -818,16 +820,16 @@ void Segment::setPixelColor(float i, uint32_t col, bool aa) const
     if (iR!=iL) {
       // blend L pixel
       cIL = color_blend(col, cIL, uint8_t(dL*255.0f));
-      setPixelColor(iL | (vStrip<<16), cIL);
+      setPixelColor(iL | (vStrip<<16), cIL, colorScaled);
       // blend R pixel
-      cIR = color_blend(col, cIR, uint8_t(dR*255.0f));
-      setPixelColor(iR | (vStrip<<16), cIR);
+      cIR = color_blend(col, cIR, uint8_t(dR*255.0f), colorScaled);
+      setPixelColor(iR | (vStrip<<16), cIR, colorScaled);
     } else {
       // exact match (x & y land on a pixel)
-      setPixelColor(iL | (vStrip<<16), col);
+      setPixelColor(iL | (vStrip<<16), col, colorScaled;
     }
   } else {
-    setPixelColor(int(roundf(fC)) | (vStrip<<16), col);
+    setPixelColor(int(roundf(fC)) | (vStrip<<16), col, colorScaled);
   }
 }
 #endif
@@ -969,12 +971,11 @@ void Segment::fill(uint32_t c) {
   const int rows = vHeight(); // will be 1 for 1D
   // pre-scale color for all pixels
   c = color_fade(c, _segBri);
-  _colorScaled = true;
+  constexpr bool colorScaled = true;
   for (int y = 0; y < rows; y++) for (int x = 0; x < cols; x++) {
-    if (is2D()) setPixelColorXY(x, y, c);
-    else        setPixelColor(x, c);
+    if (is2D()) setPixelColorXY(x, y, c, colorScaled);
+    else        setPixelColor(x, c, colorScaled);
   }
-  _colorScaled = false;
 }
 
 
@@ -1140,7 +1141,6 @@ void WS2812FX::finalizeInit() {
 #pragma GCC optimize ("O3")
 
 //TODO use _colorScaled in serviceLoop
-//TODO make the use of _colorScaled recursion safe
 //TODO update 1d loop
 namespace {
 template<EffectDimensionality dimensionality>

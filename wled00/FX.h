@@ -388,7 +388,6 @@ typedef struct Segment {
     static unsigned _vLength;                 // 1D dimension used for current effect
     static unsigned _vWidth, _vHeight;        // 2D dimensions used for current effect
     static unsigned _vStripCount;             // map1D2D dimension used for current effect
-    static bool     _colorScaled;             // color has been scaled prior to setPixelColor() call
     static CRGBPalette16 _randomPalette;      // actual random palette
     static CRGBPalette16 _newRandomPalette;   // target random palette
     static uint16_t _lastPaletteChange;       // last random palette change time in millis()/1000
@@ -564,14 +563,13 @@ typedef struct Segment {
 
     // 1D strip
     [[gnu::hot]] uint16_t virtualLength() const;
-    [[gnu::hot]] void setPixelColor(int i, uint32_t c) const; // set relative pixel within segment with color
-    inline void setPixelColor(unsigned n, uint32_t c) const                    { setPixelColor(int(n), c); }
-    inline void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) const { setPixelColor(n, RGBW32(r,g,b,w)); }
-    inline void setPixelColor(int n, CRGB c) const                             { setPixelColor(n, RGBW32(c.r,c.g,c.b,0)); }
+    [[gnu::hot]] void setPixelColor(int i, uint32_t c, bool colorScaled = false) const; // set relative pixel within segment with color
+    inline void setPixelColor(unsigned n, uint32_t c, bool colorScaled = false) const { setPixelColor(int(n), c, colorScaled); }
+    inline void setPixelColor(int n, CRGB c, bool colorScaled = false) const          { setPixelColor(n, RGBW32(c.r,c.g,c.b,0), colorScaled); }
     #ifdef WLED_USE_AA_PIXELS
-    void setPixelColor(float i, uint32_t c, bool aa = true) const;
-    inline void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) const { setPixelColor(i, RGBW32(r,g,b,w), aa); }
-    inline void setPixelColor(float i, CRGB c, bool aa = true) const                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
+    void setPixelColor(float i, uint32_t c, bool colorScaled = false, bool aa = true) const;
+    inline void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool colorScaled = false, bool aa = true) const { setPixelColor(i, RGBW32(r,g,b,w), colorScaled, aa); }
+    inline void setPixelColor(float i, CRGB c, bool colorScaled = false, bool aa = true) const                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), colorScaled, aa); }
     #endif
     bool isPixelClipped(int i) const;
     [[gnu::hot]] uint32_t getPixelColor(int i) const;
@@ -590,28 +588,24 @@ typedef struct Segment {
     }
   #ifndef WLED_DISABLE_2D
     inline bool is2D() const                                                            { return (width()>1 && height()>1); }
-    [[gnu::hot]] void setPixelColorXY(int x, int y, uint32_t c) const; // set relative pixel within segment with color
-    inline void setPixelColorXY(unsigned x, unsigned y, uint32_t c) const               { setPixelColorXY(int(x), int(y), c); }
-    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) const { setPixelColorXY(x, y, RGBW32(r,g,b,w)); }
-    inline void setPixelColorXY(int x, int y, CRGB c) const                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
-    inline void setPixelColorXY(unsigned x, unsigned y, CRGB c) const                   { setPixelColorXY(int(x), int(y), RGBW32(c.r,c.g,c.b,0)); }
+    [[gnu::hot]] void setPixelColorXY(int x, int y, uint32_t c, bool colorScaled = false) const; // set relative pixel within segment with color
+    inline void setPixelColorXY(unsigned x, unsigned y, uint32_t c, bool colorScaled = false) const { setPixelColorXY(int(x), int(y), c, colorScaled); }
+    inline void setPixelColorXY(int x, int y, CRGB c, bool colorScaled = false) const               { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), colorScaled); }
+    inline void setPixelColorXY(unsigned x, unsigned y, CRGB c, bool colorScaled = false) const     { setPixelColorXY(int(x), int(y), RGBW32(c.r,c.g,c.b,0), colorScaled); }
     #ifdef WLED_USE_AA_PIXELS
     void setPixelColorXY(float x, float y, uint32_t c, bool aa = true) const;
-    inline void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) const { setPixelColorXY(x, y, RGBW32(r,g,b,w), aa); }
-    inline void setPixelColorXY(float x, float y, CRGB c, bool aa = true) const                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), aa); }
+    inline void setPixelColorXY(float x, float y, CRGB c, bool colorScaled = false, bool aa = true) const { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), colorScaled, aa); }
     #endif
     [[gnu::hot]] uint32_t getPixelColorXY(int x, int y) const;
   #else
     inline bool is2D() const                                                      { return false; }
-    inline void setPixelColorXY(int x, int y, uint32_t c)                         { setPixelColor(x, c); }
-    inline void setPixelColorXY(unsigned x, unsigned y, uint32_t c)               { setPixelColor(int(x), c); }
-    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColor(x, RGBW32(r,g,b,w)); }
-    inline void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColor(x, RGBW32(c.r,c.g,c.b,0)); }
-    inline void setPixelColorXY(unsigned x, unsigned y, CRGB c)                   { setPixelColor(int(x), RGBW32(c.r,c.g,c.b,0)); }
+    inline void setPixelColorXY(int x, int y, uint32_t c, bool colorScaled = false)                     { setPixelColor(x, c, colorScaled); }
+    inline void setPixelColorXY(unsigned x, unsigned y, uint32_t c, bool colorScaled = false)           { setPixelColor(int(x), c, colorScaled); }
+    inline void setPixelColorXY(int x, int y, CRGB c, bool colorScaled = false)                         { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), colorScaled); }
+    inline void setPixelColorXY(unsigned x, unsigned y, CRGB c, bool colorScaled = false)               { setPixelColor(int(x), RGBW32(c.r,c.g,c.b,0), colorScaled); }
     #ifdef WLED_USE_AA_PIXELS
-    inline void setPixelColorXY(float x, float y, uint32_t c, bool aa = true)     { setPixelColor(x, c, aa); }
-    inline void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColor(x, RGBW32(r,g,b,w), aa); }
-    inline void setPixelColorXY(float x, float y, CRGB c, bool aa = true)         { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), aa); }
+    inline void setPixelColorXY(float x, float y, uint32_t c, bool colorScaled = false, bool aa = true) { setPixelColor(x, c, colorScaled, aa); }
+    inline void setPixelColorXY(float x, float y, CRGB c, bool colorScaled = false, bool aa = true)     { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), colorScaled, aa); }
     #endif
     inline uint32_t getPixelColorXY(int x, int y)                                 { return getPixelColor(x); }
   #endif
