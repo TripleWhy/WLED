@@ -40,9 +40,8 @@ public:
     using Base::Base;
 
     bool nextFrameImpl(TransitionableParameters& parameters, const EffectCoordinate& coordinate) {
-        const bool isMatrix = strip.isMatrix;
         const int cols = coordinate.width;
-        const int rows = isMatrix ? coordinate.width : strip.getActiveSegmentsNum();
+        const int rows = coordinate.height;
 
         const int  inputRotation        = parameters.custom1;
         const bool inputAnimateRotation = parameters.check2;
